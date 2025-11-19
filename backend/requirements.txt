@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+aiogram
+sqlmodel
+asyncpg
+python-dotenv
+pydantic-settings
+passlib[bcrypt]
+bcrypt == 4.3.0
+python-jose[cryptography]
+aiosqlite
