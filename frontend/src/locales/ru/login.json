@@ -1,0 +1,8 @@
+{
+    "login": "Войти",
+    "username": "Имя пользователя",
+    "password": "Пароль",
+    "loggingIn": "Вход...",
+    "usernameRequired": "Требуется имя пользователя",
+    "passwordRequired": "Требуется пароль"
+}

@@ -1,0 +1,13 @@
+{
+    "register": "Регистрация",
+    "username": "Имя пользователя",
+    "password": "Пароль",
+    "registering": "Регистрация...",
+    "usernameRequired": "Имя пользователя обязательно",
+    "passwordRequired": "Пароль обязателен",
+    "usernameMinLength": "Имя пользователя должно быть не менее 3 символов",
+    "passwordMinLength": "Пароль должен быть не менее 6 символов",
+    "passwordsDoNotMatch": "Пароли не совпадают",
+    "confirmPassword": "Подтвердите пароль",
+    "confirmPasswordRequired": "Подтверждение пароля обязательно"
+}

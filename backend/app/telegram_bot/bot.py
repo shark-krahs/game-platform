@@ -1,12 +1,15 @@
 import os
+import logging
 from aiogram import Bot, Dispatcher, types
 from aiogram.utils import executor
+
+logger = logging.getLogger(__name__)
 
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 
 if not TOKEN:
     # Для dev можно поставить переменную в .env
-    print("Warning: TELEGRAM_BOT_TOKEN not set")
+    logger.warning("TELEGRAM_BOT_TOKEN not set")
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()

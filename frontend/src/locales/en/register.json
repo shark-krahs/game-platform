@@ -1,0 +1,13 @@
+{
+    "register": "Register",
+    "username": "Username",
+    "password": "Password",
+    "registering": "Registering...",
+    "usernameRequired": "Username is required",
+    "passwordRequired": "Password is required",
+    "usernameMinLength": "Username must be at least 3 characters",
+    "passwordMinLength": "Password must be at least 6 characters",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "confirmPassword": "Confirm Password",
+    "confirmPasswordRequired": "Confirm Password is required"
+}

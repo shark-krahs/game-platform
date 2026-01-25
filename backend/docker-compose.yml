@@ -1,12 +1,20 @@
+version: "3.8"
+
 services:
   backend:
     image: python:3.13-slim
     working_dir: /app
     env_file:
-      - ../.env
+      - ./.env
     volumes:
       - ./:/app
     ports:
-      - "${VITE_BACKEND_HOST:-0.0.0.0}:${VTIE_BACKEND_PORT:-8000}:8000"
+      - "${VITE_BACKEND_HOST:-0.0.0.0}:${VITE_BACKEND_PORT:-8000}:8000"
     restart: unless-stopped
-    command: sh -c "apt-get update && apt-get install -y build-essential gcc libpq-dev && python -m pip install --upgrade pip pip && pip install --no-cache-dir -r requirements.txt && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    command: >
+      sh -c "
+        apt-get update &&
+        apt-get install -y build-essential gcc libpq-dev &&
+        python -m pip install --upgrade pip &&
+        pip install --no-cache-dir -r requirements.txt &&
+        uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
