@@ -9,18 +9,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api import games
 from app.api import auth
 from app.db.database import init_db
+from app.matchmaking import matchmaking_loop
+from app.db import database
+from app.core.config import setup_logging
 
 # Make sure backend package is importable when running from project root
 BASE_DIR = Path(__file__).resolve().parent.parent
 if str(BASE_DIR) not in sys.path:
     sys.path.insert(0, str(BASE_DIR))
 
-try:
-    # load .env from backend folder if present (optional; requires python-dotenv)
-    from dotenv import load_dotenv
-    load_dotenv(BASE_DIR / '../.env')
-except Exception:
-    pass
+# Setup logging
+logger = setup_logging()
 
 
 @asynccontextmanager
@@ -28,7 +27,21 @@ async def lifespan(app: FastAPI):
     # startup
     try:
         await init_db()
-    except Exception:
+        
+        # Register game types
+        from app.games.base import GameFactory
+        from app.games.pentago.logic import PentagoGame
+        from app.games.tetris.logic import TetrisGame
+        
+        GameFactory.register_game('pentago', PentagoGame)
+        GameFactory.register_game('tetris', TetrisGame)
+        
+        logger.info(f"Registered games: {GameFactory.get_available_games()}")
+        
+        import asyncio
+        asyncio.create_task(matchmaking_loop())
+    except Exception as e:
+        logger.error(f"Startup error: {e}")
         # fail silently; DB may be managed externally
         pass
     yield
@@ -36,12 +49,11 @@ async def lifespan(app: FastAPI):
     # await db.close()
 
 
-app = FastAPI(title="TG Game Bot - Backend", lifespan=lifespan)
+app = FastAPI(title="Game Platform", lifespan=lifespan)
 
 # Настройка CORS
-origins = [
-    "http://localhost:5173",  # твой фронт
-]
+allowed_origins_str = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://192.168.31.224:5173")
+origins = [o.strip() for o in allowed_origins_str.split(",") if o.strip()]
 
 app.add_middleware(
     CORSMiddleware,
@@ -52,5 +64,5 @@ app.add_middleware(
 )
 
 # Роутеры
-app.include_router(games.router)
-app.include_router(auth.router)
+app.include_router(games.router, prefix="/api")
+app.include_router(auth.router, prefix="/api")

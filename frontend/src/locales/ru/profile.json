@@ -1,0 +1,19 @@
+{
+    "userProfile": "Профиль пользователя",
+    "username": "Имя пользователя",
+    "stars": "Звёзды",
+    "changePassword": "Изменить пароль",
+    "oldPassword": "Старый пароль",
+    "newPassword": "Новый пароль",
+    "confirmNewPassword": "Подтвердите новый пароль",
+    "preferredColor": "Предпочитаемый цвет",
+    "language": "Язык",
+    "saveChanges": "Сохранить изменения",
+    "saving": "Сохранение...",
+    "profileUpdated": "Профиль успешно обновлён",
+    "updateFailed": "Не удалось обновить профиль",
+    "passwordsDoNotMatch": "Новые пароли не совпадают",
+    "enterOldPassword": "Для изменения пароля требуется старый пароль",
+    "english": "Английский",
+    "russian": "Русский"
+}

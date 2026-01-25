@@ -1,0 +1,19 @@
+{
+    "userProfile": "User profile",
+    "username": "Username",
+    "stars": "Stars",
+    "changePassword": "Change password",
+    "oldPassword": "Old password",
+    "newPassword": "New password",
+    "confirmNewPassword": "Confirm new password",
+    "preferredColor": "Preferred color",
+    "language": "Language",
+    "saveChanges": "Save changes",
+    "saving": "Saving...",
+    "profileUpdated": "Profile updated successfully",
+    "updateFailed": "Profile update failed",
+    "passwordsDoNotMatch": "New passwords do not match",
+    "enterOldPassword": "Old password is required to change password",
+    "english": "English",
+    "russian": "Russian"
+}
