@@ -112,6 +112,11 @@ async def broadcast_state(game_id: str, game_state: GameState):
         state['first_move_timer'] = game_state.first_move_timer or 0
         state['first_move_player'] = game_state.first_move_player or 0
 
+    # Handle disconnection timer (only for non-Tetris games)
+    if game_state.status == 'disconnect_wait' and game_state.game_type != 'tetris':
+        state['disconnect_timer'] = game_state.disconnect_timer or 0
+        state['disconnected_player'] = game_state.disconnected_player
+
     await broadcast_to_game(game_id, state)
 
 

@@ -84,7 +84,9 @@ const Quadrant: React.FC<QuadrantProps> = ({
 
       const canClick =
         board[y]![x] === null &&
-        (status === GAME_STATUS.PLAYING || status === GAME_STATUS.FIRST_MOVE);
+        (status === GAME_STATUS.PLAYING ||
+          status === GAME_STATUS.FIRST_MOVE ||
+          status === GAME_STATUS.DISCONNECT_WAIT);
 
       quadrantCells.push(
         <QuadrantCell

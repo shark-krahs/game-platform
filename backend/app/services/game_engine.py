@@ -345,15 +345,19 @@ class GameEngine:
                 await broadcast_state(game_id, game_state)
 
             # Handle playing mode games (Pentago timer)
-            elif game_state.status == 'playing' and game_state.game_type != 'tetris':
+            elif game_state.status in ['playing', 'disconnect_wait'] and game_state.game_type != 'tetris':
                 # Only for non-Tetris games
-                logger.info(f"Game {game_id} ENTERING PENTAGO TIMER BLOCK - status: {game_state.status}, game_type: {game_state.game_type}, current_player: {game_state.current_player}")
+                logger.info(
+                    f"Game {game_id} ENTERING PENTAGO TIMER BLOCK - status: {game_state.status}, game_type: {game_state.game_type}, current_player: {game_state.current_player}"
+                )
 
                 if game_state.current_player < len(game_state.time_remaining):
                     old_time = game_state.time_remaining[game_state.current_player]
                     game_state.time_remaining[game_state.current_player] -= 1
                     new_time = game_state.time_remaining[game_state.current_player]
-                    logger.info(f"Game {game_id} PENTAGO TIMER: player {game_state.current_player} time {old_time} -> {new_time}")
+                    logger.info(
+                        f"Game {game_id} PENTAGO TIMER: player {game_state.current_player} time {old_time} -> {new_time}"
+                    )
 
                     # Broadcast updated state so frontend sees timer changes
                     await broadcast_state(game_id, game_state)
@@ -363,12 +367,16 @@ class GameEngine:
                         opponent = (game_state.current_player + 1) % len(game_state.players)
                         game_state.winner = game_state.players[opponent]['name']
                         game_state.status = 'finished'
-                        logger.info(f"Game {game_id} PENTAGO TIMEOUT - player {game_state.current_player} loses")
+                        logger.info(
+                            f"Game {game_id} PENTAGO TIMEOUT - player {game_state.current_player} loses"
+                        )
                         await broadcast_state(game_id, game_state)
                         await self._cleanup_finished_game(game_id, game_state)
                         break
                 else:
-                    logger.error(f"Game {game_id} PENTAGO TIMER ERROR - invalid current_player {game_state.current_player}, time_remaining length: {len(game_state.time_remaining)}")
+                    logger.error(
+                        f"Game {game_id} PENTAGO TIMER ERROR - invalid current_player {game_state.current_player}, time_remaining length: {len(game_state.time_remaining)}"
+                    )
 
             # Handle Tetris falling piece
             elif game_state.game_type == 'tetris' and game_state.status == 'playing':
@@ -419,32 +427,23 @@ class GameEngine:
                     logger.info(f"Game {game_id} timeout, player {game_state.current_player} loses")
 
             # Handle disconnection timer (only for non-Tetris games)
-            if hasattr(game_state, 'disconnect_timer') and game_state.disconnect_timer and game_state.disconnect_timer > 0 and game_state.game_type != 'tetris':
+            if (
+                game_state.status != 'finished'
+                and hasattr(game_state, 'disconnect_timer')
+                and game_state.disconnect_timer
+                and game_state.disconnect_timer > 0
+                and game_state.game_type != 'tetris'
+            ):
                 game_state.disconnect_timer -= 1
-
-                # Also decrease the disconnected player's timer during disconnection
-                if game_state.disconnected_player is not None:
-                    disconnected_player_time = game_state.time_remaining[game_state.disconnected_player]
-                    if disconnected_player_time > 0:
-                        game_state.time_remaining[game_state.disconnected_player] -= 1
-                        if game_state.time_remaining[game_state.disconnected_player] <= 0:
-                            # Disconnected player's time ran out during disconnection
-                            winner_index = (game_state.disconnected_player + 1) % len(game_state.players)
-                            game_state.winner = game_state.players[winner_index]['name']
-                            game_state.status = 'finished'
-                            logger.info(f"Game {game_id} disconnected player {game_state.disconnected_player} time ran out during disconnection")
-                            # Clear disconnection fields
-                            game_state.disconnect_timer = None
-                            game_state.disconnected_player = None
-                            await broadcast_state(game_id, game_state)
-                            break
 
                 if game_state.disconnect_timer <= 0:
                     # Disconnection timeout - disconnected player loses
                     winner_index = (game_state.disconnected_player + 1) % len(game_state.players)
                     game_state.winner = game_state.players[winner_index]['name']
                     game_state.status = 'finished'
-                    logger.info(f"Game {game_id} disconnection timeout, player {game_state.disconnected_player} loses")
+                    logger.info(
+                        f"Game {game_id} disconnection timeout, player {game_state.disconnected_player} loses"
+                    )
                     # Clear disconnection fields
                     game_state.disconnect_timer = None
                     game_state.disconnected_player = None

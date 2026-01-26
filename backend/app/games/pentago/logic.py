@@ -80,7 +80,9 @@ class PentagoGame(AbstractGameLogic):
             created_at=game_state.created_at,
             config=game_state.config,
             time_control=game_state.time_control,
-            time_control_str=getattr(game_state, 'time_control_str', None)
+            time_control_str=getattr(game_state, 'time_control_str', None),
+            disconnect_timer=game_state.disconnect_timer,
+            disconnected_player=game_state.disconnected_player
         )
 
         # Check if it's the player's turn
