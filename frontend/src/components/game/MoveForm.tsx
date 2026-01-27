@@ -53,7 +53,7 @@ const MoveForm: React.FC<MoveFormProps> = ({
             selected={selectedQuadrant === quadrant}
             onClick={() => handleQuadrantSelect(quadrant)}
           >
-            {getQuadrantName(quadrant)}
+            {String(t(getQuadrantName(quadrant) as any))}
           </QuadrantButton>
         ))}
       </QuadrantButtonsContainer>

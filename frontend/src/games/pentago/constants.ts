@@ -17,10 +17,10 @@ export const MOVE_TYPES = {
 
 // Quadrant names and colors
 export const QUADRANT_INFO = {
-  0: { name: 'Red', color: '#ff0000' },
-  1: { name: 'Blue', color: '#0000ff' },
-  2: { name: 'Green', color: '#00ff00' },
-  3: { name: 'Yellow', color: '#ffff00' }
+  0: { name: 'quadrantRed', color: '#ff0000' },
+  1: { name: 'quadrantBlue', color: '#0000ff' },
+  2: { name: 'quadrantGreen', color: '#00ff00' },
+  3: { name: 'quadrantYellow', color: '#ffff00' }
 } as const;
 
 // Rotation directions

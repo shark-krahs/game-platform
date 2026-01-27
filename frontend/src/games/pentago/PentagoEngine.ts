@@ -87,7 +87,7 @@ export class PentagoEngine implements GameEngine {
       handleDirectionSelect: onDirectionSelect,
       sendMove: onMoveSubmit,
       cancelMove: onMoveCancel,
-      getQuadrantName: (quadrant: number) => QUADRANT_INFO[quadrant as keyof typeof QUADRANT_INFO]?.name || 'Unknown',
+      getQuadrantName: (quadrant: number) => QUADRANT_INFO[quadrant as keyof typeof QUADRANT_INFO]?.name || 'unknownQuadrant',
     };
   }
 }
