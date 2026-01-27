@@ -67,11 +67,16 @@ const ConfirmEmailChange: React.FC = () => {
         setStep(1);
       })
       .catch((err: any) => {
-        if (err?.message?.includes('new email required')) {
+        const errorCode = err?.data?.detail?.code || err?.data?.code;
+        if (errorCode === 'auth.new_email_required') {
           setNeedsEmailInput(true);
+          setMessage(err?.message || t('emailChangeConfirmationFailed' as any));
+          setMessageType('info');
           setStep(0);
           return;
         }
+        setMessage(err?.message || t('emailChangeConfirmationFailed' as any));
+        setMessageType('info');
       });
   }, [confirmEmailChange, searchParams, t]);
 
@@ -90,7 +95,8 @@ const ConfirmEmailChange: React.FC = () => {
       setStep(1);
     } catch (err) {
       console.error('Email change confirm failed:', err);
-      setMessage(t('emailChangeConfirmationFailed' as any));
+      const messageText = (err as any)?.message || t('emailChangeConfirmationFailed' as any);
+      setMessage(messageText);
       setMessageType('info');
     }
   };

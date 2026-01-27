@@ -86,12 +86,6 @@ export function useWebSocket(
         setConnected(true);
         setStatus('playing');
         setError(null);
-        socket.send(
-          JSON.stringify({
-            type: 'join',
-            name: user?.username || 'Guest',
-          })
-        );
         setMessages((m) => [...m, t('connected')]);
       };
 

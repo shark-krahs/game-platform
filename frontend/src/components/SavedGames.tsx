@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../AuthContext';
 import { useTranslation } from 'react-i18next';
 import {
+  App,
   Card,
   Typography,
   Space,
@@ -9,7 +10,6 @@ import {
   Row,
   Col,
   Button,
-  message,
   Spin,
 } from 'antd';
 import {
@@ -27,17 +27,33 @@ interface GameStats {
   blitz: number;
   rapid: number;
   classical: number;
-  custom: number;
   total: number;
 }
 
 const SavedGames: React.FC = () => {
+  const { message } = App.useApp();
   const { user } = useAuth();
   const { t } = useTranslation('lobby');
   const navigate = useNavigate();
 
   const [savedGames, setSavedGames] = useState<SavedGame[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const getTimeControlValues = (timeControl: SavedGame['time_control']) => {
+    if (!timeControl) {
+      return { initialMinutes: 0, increment: 0 };
+    }
+
+    const initialSeconds =
+      typeof timeControl.initial_time === 'number'
+        ? timeControl.initial_time
+        : timeControl.initial ?? 0;
+
+    const initialMinutes = Math.round(initialSeconds / 60);
+    const increment = timeControl.increment ?? 0;
+
+    return { initialMinutes, increment };
+  };
 
   useEffect(() => {
     loadSavedGames();
@@ -60,8 +76,8 @@ const SavedGames: React.FC = () => {
 
   const gameStats = useMemo(() => {
     const stats: Record<string, GameStats> = {
-      pentago: { bullet: 0, blitz: 0, rapid: 0, classical: 0, custom: 0, total: 0 },
-      tetris: { bullet: 0, blitz: 0, rapid: 0, classical: 0, custom: 0, total: 0 },
+      pentago: { bullet: 0, blitz: 0, rapid: 0, classical: 0, total: 0 },
+      tetris: { bullet: 0, blitz: 0, rapid: 0, classical: 0, total: 0 },
     };
 
     savedGames.forEach(game => {
@@ -70,24 +86,27 @@ const SavedGames: React.FC = () => {
 
       stats[gameType].total++;
 
-      // Categorize by time control
+      const category = game.category;
+      if (category && stats[gameType][category] !== undefined) {
+        stats[gameType][category] += 1;
+        return;
+      }
+
+      // Fallback to local categorization if category is missing
       const timeControl = game.time_control;
       if (timeControl) {
-        const initial = timeControl.initial || 0;
-        const increment = timeControl.increment || 0;
+        const { initialMinutes, increment } = getTimeControlValues(timeControl);
 
         if (gameType === 'pentago') {
-          if (initial === 2 && increment === 0) stats[gameType].bullet++;
-          else if (initial === 5 && increment === 3) stats[gameType].blitz++;
-          else if (initial === 10 && increment === 5) stats[gameType].rapid++;
-          else if (initial === 20 && increment === 10) stats[gameType].classical++;
-          else stats[gameType].custom++;
+          if (initialMinutes === 2 && increment === 0) stats[gameType].bullet++;
+          else if (initialMinutes === 5 && increment === 3) stats[gameType].blitz++;
+          else if (initialMinutes === 10 && increment === 5) stats[gameType].rapid++;
+          else stats[gameType].classical++;
         } else if (gameType === 'tetris') {
           if (increment === 5) stats[gameType].bullet++;
           else if (increment === 8) stats[gameType].blitz++;
           else if (increment === 11) stats[gameType].rapid++;
-          else if (increment === 12) stats[gameType].classical++;
-          else stats[gameType].custom++;
+          else stats[gameType].classical++;
         }
       }
     });
@@ -99,33 +118,40 @@ const SavedGames: React.FC = () => {
     return savedGames.filter(game => {
       if (game.game_type !== gameType) return false;
 
+      if (game.category) {
+        return game.category === timeCategory;
+      }
+
       const timeControl = game.time_control;
       if (!timeControl) return false;
 
-      const initial = timeControl.initial || 0;
-      const increment = timeControl.increment || 0;
+      const { initialMinutes, increment } = getTimeControlValues(timeControl);
 
       if (gameType === 'pentago') {
         switch (timeCategory) {
-          case 'bullet': return initial === 2 && increment === 0;
-          case 'blitz': return initial === 5 && increment === 3;
-          case 'rapid': return initial === 10 && increment === 5;
-          case 'classical': return initial === 20 && increment === 10;
-          case 'custom': return !(initial === 2 && increment === 0) &&
-                               !(initial === 5 && increment === 3) &&
-                               !(initial === 10 && increment === 5) &&
-                               !(initial === 20 && increment === 10);
-          default: return false;
+          case 'bullet':
+            return initialMinutes === 2 && increment === 0;
+          case 'blitz':
+            return initialMinutes === 5 && increment === 3;
+          case 'rapid':
+            return initialMinutes === 10 && increment === 5;
+          case 'classical':
+            return initialMinutes === 20 && increment === 10;
+          default:
+            return false;
         }
       } else if (gameType === 'tetris') {
         switch (timeCategory) {
-          case 'bullet': return increment === 5;
-          case 'blitz': return increment === 8;
-          case 'rapid': return increment === 11;
-          case 'classical': return increment === 12;
-          case 'custom': return increment !== 5 && increment !== 8 &&
-                               increment !== 11 && increment !== 12;
-          default: return false;
+          case 'bullet':
+            return increment === 5;
+          case 'blitz':
+            return increment === 8;
+          case 'rapid':
+            return increment === 11;
+          case 'classical':
+            return increment === 12;
+          default:
+            return false;
         }
       }
       return false;
@@ -160,7 +186,7 @@ const SavedGames: React.FC = () => {
   const renderGamePanel = (gameType: string, gameName: string) => {
     const rating = user?.ratings?.[gameType];
     const ratingText = rating ? `${rating.rating} (${rating.games_played} ${t('games')})` : t('unrated');
-    const stats = gameStats[gameType] || { bullet: 0, blitz: 0, rapid: 0, classical: 0, custom: 0, total: 0 };
+    const stats = gameStats[gameType] || { bullet: 0, blitz: 0, rapid: 0, classical: 0, total: 0 };
 
     return (
       <Panel
@@ -229,19 +255,6 @@ const SavedGames: React.FC = () => {
                   onClick={() => handleViewGames(gameType, 'classical')}
                 >
                   {t('classical')} - {stats.classical} {t('games')}
-                </Button>
-              </Col>
-            )}
-            {stats.custom > 0 && (
-              <Col xs={24}>
-                <Button
-                  block
-                  size="large"
-                  type="default"
-                  icon={<HistoryOutlined />}
-                  onClick={() => handleViewGames(gameType, 'custom')}
-                >
-                  {t('customTimeControl')} - {stats.custom} {t('games')}
                 </Button>
               </Col>
             )}

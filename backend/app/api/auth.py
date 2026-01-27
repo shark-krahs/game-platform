@@ -439,6 +439,17 @@ async def confirm_email_change(payload: EmailChangeConfirmRequest):
             detail={"code": "auth.token_expired", "message": "token expired"},
         )
     if not user.pending_email_confirmed:
+        if user.pending_email:
+            # If the new email is already stored, treat this as the final confirmation step
+            user.email = user.pending_email
+            user.pending_email = None
+            user.pending_email_token = None
+            user.pending_email_expires_at = None
+            user.pending_email_confirmed = False
+            user.email_verified = True
+            await user_repo.update(user)
+            return {"message": "email updated"}
+
         if not payload.new_email:
             raise HTTPException(
                 status_code=400,

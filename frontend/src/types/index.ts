@@ -70,6 +70,7 @@ export type GameStatus =
 export interface TimeControl {
   initial: number // initial time in seconds
   increment: number // increment per move in seconds
+  initial_time?: number
 }
 
 // Saved Game types
@@ -88,6 +89,7 @@ export interface SavedGame {
   updated_at: string
   moves_count: number
   time_control?: TimeControl
+  category?: 'bullet' | 'blitz' | 'rapid' | 'classical'
 }
 
 export interface SavedGameDetail extends SavedGame {
@@ -96,7 +98,7 @@ export interface SavedGameDetail extends SavedGame {
   moves_history: any[]
   time_control: TimeControl
   moves: GameHistoryMove[]
-  chat_history?: ChatMessage[]
+  chat_history?: ChatMessage[] | string
 }
 
 export interface GameHistoryMove {

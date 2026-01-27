@@ -59,6 +59,7 @@ const Register: React.FC = () => {
       setLocalMessage(t('checkEmail' as any));
       setLocalMessageType('info');
       setResendAvailable(true);
+      setCooldown(60);
     } catch (err) {
       // Ошибка уже отображена через error из контекста
       console.error('Registration failed:', err);

@@ -309,6 +309,7 @@ const GameClient: React.FC = () => {
             chatMessages={chatMessages}
             onSendChat={sendChatMessage}
             disabled={status === 'finished'}
+            showSystemMessages={messages.length > 0}
           />
         </Col>
       </Row>

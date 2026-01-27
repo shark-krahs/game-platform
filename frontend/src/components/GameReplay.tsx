@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Row, Col, Button, Slider, message, Spin } from 'antd';
+import { App, Row, Col, Button, Slider, Spin } from 'antd';
 import { LeftOutlined, RightOutlined, PlayCircleOutlined, PauseCircleOutlined } from '@ant-design/icons';
 import GameBoard from './game/GameBoard';
 import GameTimers from './game/GameTimers';
 import { getGameEngine } from '../games/registry';
 import savedGamesApi from '../services/savedGamesApi';
-import { SavedGameDetail, GameState, GameStatus, Player } from '../types';
+import { ChatMessage, SavedGameDetail, GameState, GameStatus, Player } from '../types';
 import MessageLog from './MessageLog';
 
 const GameReplay: React.FC = () => {
+  const { message } = App.useApp();
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
   const { t } = useTranslation('gameClient');
@@ -20,6 +21,7 @@ const GameReplay: React.FC = () => {
   const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playInterval, setPlayInterval] = useState<NodeJS.Timeout | null>(null);
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
 
   useEffect(() => {
     loadSavedGame();
@@ -59,6 +61,7 @@ const GameReplay: React.FC = () => {
       setLoading(true);
       const game = await savedGamesApi.getSavedGame(gameId);
       setSavedGame(game);
+      setChatHistory(parseChatHistory(game.chat_history));
     } catch (error) {
       console.error('Failed to load saved game:', error);
       message.error(t('gamesLoadFailed' as any));
@@ -146,7 +149,7 @@ const GameReplay: React.FC = () => {
     // Return initial board state for the game type
     if (gameType === 'pentago') {
       return {
-        'grid': Array(6).fill(null).map(() => Array(6).fill(0)),
+        'grid': Array(8).fill(null).map(() => Array(8).fill(null)),
         'last_move': null,
         'move_count': 0
       };
@@ -161,6 +164,27 @@ const GameReplay: React.FC = () => {
       };
     }
     return {};
+  };
+
+  const parseChatHistory = (history: SavedGameDetail['chat_history']): ChatMessage[] => {
+    if (!history) {
+      return [];
+    }
+
+    if (Array.isArray(history)) {
+      return history as ChatMessage[];
+    }
+
+    if (typeof history === 'string') {
+      try {
+        const parsed = JSON.parse(history);
+        return Array.isArray(parsed) ? (parsed as ChatMessage[]) : [];
+      } catch (error) {
+        console.warn('Failed to parse chat history:', error);
+      }
+    }
+
+    return [];
   };
 
   const handleMoveChange = (value: number) => {
@@ -316,7 +340,7 @@ const GameReplay: React.FC = () => {
             )}
           </div>
 
-          <MessageLog messages={[]} chatMessages={savedGame.chat_history || []} disabled />
+          <MessageLog messages={[]} chatMessages={chatHistory} disabled />
         </Col>
       </Row>
 

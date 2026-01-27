@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
+  App,
   Card,
   Form,
   Input,
@@ -9,7 +10,6 @@ import {
   Typography,
   Alert,
   Steps,
-  notification,
   type FormProps,
 } from 'antd';
 import {
@@ -33,6 +33,7 @@ type ProfileFormValues = {
 };
 
 const Profile: React.FC = () => {
+  const { notification } = App.useApp();
   const { user, updateProfile, requestEmailChange, error, loading } = useAuth();
   const { t, i18n } = useTranslation('profile');
   const navigate = useNavigate();

@@ -9,6 +9,7 @@ interface MessageLogProps {
   chatMessages?: ChatMessage[];
   onSendChat?: (message: string) => void;
   disabled?: boolean;
+  showSystemMessages?: boolean;
 }
 
 const MessageLog: React.FC<MessageLogProps> = ({
@@ -16,6 +17,7 @@ const MessageLog: React.FC<MessageLogProps> = ({
   chatMessages = [],
   onSendChat,
   disabled = false,
+  showSystemMessages = true,
 }) => {
   const { t } = useTranslation('gameClient');
   const { isDark } = useTheme();
@@ -106,25 +108,27 @@ const MessageLog: React.FC<MessageLogProps> = ({
         )}
       </div>
 
-      <div>
-        <b>{t('messages')}</b>
-        <div
-          style={{
-            whiteSpace: 'pre-wrap',
-            background: theme.colors.backgroundElevated,
-            border: `1px solid ${theme.colors.border}`,
-            color: theme.colors.text,
-            padding: 10,
-            borderRadius: 6,
-            maxHeight: 140,
-            overflowY: 'auto',
-            fontFamily: 'monospace',
-            fontSize: '0.9em',
-          }}
-        >
-          {messages.join('\n') || t('noMessage')}
+      {showSystemMessages && messages.length > 0 && (
+        <div>
+          <b>{t('messages')}</b>
+          <div
+            style={{
+              whiteSpace: 'pre-wrap',
+              background: theme.colors.backgroundElevated,
+              border: `1px solid ${theme.colors.border}`,
+              color: theme.colors.text,
+              padding: 10,
+              borderRadius: 6,
+              maxHeight: 140,
+              overflowY: 'auto',
+              fontFamily: 'monospace',
+              fontSize: '0.9em',
+            }}
+          >
+            {messages.join('\n')}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

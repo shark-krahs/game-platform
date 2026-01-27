@@ -279,7 +279,9 @@ async def get_saved_games(current_user = Depends(get_current_user)):
     logger.info(f"Found {len(saved_games)} saved games for user {current_user.id}")
 
     result = []
+    from app.ratings import get_time_control_category
     for game in saved_games:
+        category = get_time_control_category(game.game_type, game.get_time_control())
         result.append({
             'id': str(game.id),
             'game_id': game.game_id,
@@ -294,7 +296,8 @@ async def get_saved_games(current_user = Depends(get_current_user)):
             'created_at': game.created_at.isoformat(),
             'updated_at': game.updated_at.isoformat(),
             'moves_count': len(game.moves) if game.moves else 0,
-            'time_control': game.get_time_control()
+            'time_control': game.get_time_control(),
+            'category': category
         })
 
     return result
@@ -321,6 +324,7 @@ async def get_saved_games_by_category(game_type: str, category: str, current_use
 
     result = []
     for game in filtered_games:
+        category = get_time_control_category(game.game_type, game.get_time_control())
         result.append({
             'id': str(game.id),
             'game_id': game.game_id,
@@ -335,7 +339,8 @@ async def get_saved_games_by_category(game_type: str, category: str, current_use
             'created_at': game.created_at.isoformat(),
             'updated_at': game.updated_at.isoformat(),
             'moves_count': len(game.moves) if game.moves else 0,
-            'time_control': game.get_time_control()
+            'time_control': game.get_time_control(),
+            'category': category
         })
 
     return result
