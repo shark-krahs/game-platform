@@ -9,6 +9,7 @@ const ConfirmEmail: React.FC = () => {
   const { confirmEmail, loading, error } = useAuth();
   const { t } = useTranslation('login');
   const [message, setMessage] = useState<string>('');
+  const [messageType, setMessageType] = useState<'success' | 'info'>('info');
   const hasConfirmed = useRef(false);
 
   useEffect(() => {
@@ -22,7 +23,10 @@ const ConfirmEmail: React.FC = () => {
     }
     hasConfirmed.current = true;
     confirmEmail(token)
-      .then((result) => setMessage(result))
+      .then((result) => {
+        setMessage(result);
+        setMessageType('success');
+      })
       .catch(() => null);
   }, [confirmEmail, searchParams, t]);
 
@@ -30,7 +34,7 @@ const ConfirmEmail: React.FC = () => {
     <Card style={{ maxWidth: 420, margin: '0 auto' }}>
       <Space direction="vertical" style={{ width: '100%' }}>
         <Typography.Title level={3}>{t('confirmEmailTitle')}</Typography.Title>
-        {message && <Alert type="success" title={message} showIcon />}
+        {message && <Alert type={messageType} title={message} showIcon />}
         {error && <Alert type="error" title={error} showIcon />}
         <Button type="primary" disabled={loading} block>
           <Link to="/login">{t('backToLogin')}</Link>

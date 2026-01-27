@@ -19,6 +19,7 @@ const Register: React.FC = () => {
   const { t } = useTranslation('register');
   const [cooldown, setCooldown] = useState<number>(0);
   const [localMessage, setLocalMessage] = useState<string>('');
+  const [localMessageType, setLocalMessageType] = useState<'success' | 'info'>('info');
   const [resendAvailable, setResendAvailable] = useState<boolean>(false);
   const storageKey = 'registerResendCooldownUntil';
 
@@ -56,6 +57,7 @@ const Register: React.FC = () => {
       await register(values.username, values.password, values.email);
       localStorage.setItem('lastRegisteredUsername', values.username);
       setLocalMessage(t('checkEmail' as any));
+      setLocalMessageType('info');
       setResendAvailable(true);
     } catch (err) {
       // Ошибка уже отображена через error из контекста
@@ -67,20 +69,24 @@ const Register: React.FC = () => {
     const username = localStorage.getItem('lastRegisteredUsername');
     if (!username) {
       setLocalMessage(t('missingUsername' as any));
+      setLocalMessageType('info');
       return;
     }
     try {
       const response = await resendConfirmation(username);
       setLocalMessage(t('resendSuccess' as any));
+      setLocalMessageType('info');
       setCooldown(response.seconds_remaining ?? 60);
     } catch (err: any) {
       if (err?.status === 429 || err?.message?.includes('429')) {
         const remaining = err?.data?.detail?.seconds_remaining;
         setLocalMessage(t('resendCooldownServer' as any));
+        setLocalMessageType('info');
         setCooldown(remaining ?? 60);
         return;
       }
       setLocalMessage(err?.message || t('resendFailed' as any));
+      setLocalMessageType('info');
     }
   };
 
@@ -184,7 +190,7 @@ const Register: React.FC = () => {
       )}
 
       {localMessage && (
-        <Alert type="success" message={localMessage} showIcon style={{ marginTop: 16 }} />
+        <Alert type={localMessageType} message={localMessage} showIcon style={{ marginTop: 16 }} />
       )}
 
       {error && (

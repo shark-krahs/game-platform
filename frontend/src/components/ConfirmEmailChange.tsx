@@ -15,6 +15,7 @@ const ConfirmEmailChange: React.FC = () => {
   const { confirmEmailChange, resendEmailChange, loading, error } = useAuth();
   const { t } = useTranslation('profile');
   const [message, setMessage] = useState<string>('');
+  const [messageType, setMessageType] = useState<'success' | 'info'>('info');
   const [needsEmailInput, setNeedsEmailInput] = useState<boolean>(false);
   const attempted = useRef(false);
   const [cooldown, setCooldown] = useState<number>(0);
@@ -62,6 +63,7 @@ const ConfirmEmailChange: React.FC = () => {
     confirmEmailChange(token)
       .then((result) => {
         setMessage(result);
+        setMessageType('success');
         setStep(1);
       })
       .catch((err: any) => {
@@ -82,6 +84,7 @@ const ConfirmEmailChange: React.FC = () => {
     try {
       const result = await confirmEmailChange(token, values.newEmail);
       setMessage(result);
+      setMessageType('info');
       setNeedsEmailInput(false);
       setCooldown(60);
       setStep(1);
@@ -117,7 +120,7 @@ const ConfirmEmailChange: React.FC = () => {
           ]}
           size="small"
         />
-        {message && <Alert type="success" title={message} showIcon />}
+        {message && <Alert type={messageType} message={message} showIcon />}
         {error && <Alert type="error" title={error} showIcon />}
         {needsEmailInput && (
           <Form<ConfirmEmailChangeValues> layout="vertical" onFinish={onFinish}>

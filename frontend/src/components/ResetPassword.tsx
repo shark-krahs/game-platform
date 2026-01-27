@@ -14,20 +14,24 @@ const ResetPassword: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { t } = useTranslation('login');
   const [infoMessage, setInfoMessage] = useState<string>('');
+  const [infoType, setInfoType] = useState<'success' | 'info'>('info');
 
   const onFinish: FormProps<ResetPasswordValues>['onFinish'] = async (values) => {
     const token = searchParams.get('token');
     if (!token) {
       setInfoMessage(t('missingToken'));
+      setInfoType('info');
       return;
     }
     if (values.newPassword !== values.confirmPassword) {
       setInfoMessage(t('passwordsDoNotMatch'));
+      setInfoType('info');
       return;
     }
     try {
       const message = await resetPassword(token, values.newPassword);
       setInfoMessage(message);
+      setInfoType('success');
     } catch (err) {
       console.error('Reset failed:', err);
     }
@@ -56,7 +60,7 @@ const ResetPassword: React.FC = () => {
             </Button>
           </Form.Item>
         </Form>
-        {infoMessage && <Alert type="info" message={infoMessage} showIcon />}
+        {infoMessage && <Alert type={infoType} message={infoMessage} showIcon />}
         {error && <Alert type="error" message={error} showIcon />}
         <Link to="/login">{t('backToLogin')}</Link>
       </Space>

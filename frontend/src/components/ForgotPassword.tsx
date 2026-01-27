@@ -14,6 +14,7 @@ const ForgotPassword: React.FC = () => {
   const { requestPasswordReset, resendPasswordReset, loading, error } = useAuth();
   const { t } = useTranslation('login');
   const [infoMessage, setInfoMessage] = useState<string>('');
+  const [infoType, setInfoType] = useState<'success' | 'info'>('info');
   const [maskedEmail, setMaskedEmail] = useState<string>('');
   const [form] = Form.useForm<ForgotPasswordValues>();
   const [cooldown, setCooldown] = useState<number>(0);
@@ -52,6 +53,7 @@ const ForgotPassword: React.FC = () => {
     try {
       const response = await requestPasswordReset(values.username);
       setInfoMessage(response.message);
+      setInfoType('info');
       setMaskedEmail(response.masked_email || '');
       setCooldown(60);
     } catch (err) {
@@ -68,6 +70,7 @@ const ForgotPassword: React.FC = () => {
     try {
       const response = await resendPasswordReset(username);
       setInfoMessage(response.message);
+      setInfoType('info');
       setMaskedEmail(response.masked_email || '');
       setCooldown(60);
     } catch (err) {
@@ -94,7 +97,7 @@ const ForgotPassword: React.FC = () => {
         </Form>
         {infoMessage && (
           <Alert
-            type="success"
+            type={infoType}
             message={infoMessage}
             description={maskedEmail ? t('emailSentTo', { email: maskedEmail }) : undefined}
             showIcon

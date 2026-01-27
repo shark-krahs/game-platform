@@ -38,6 +38,7 @@ const Profile: React.FC = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm<ProfileFormValues>();
   const [emailMessage, setEmailMessage] = useState<string>('');
+  const [emailMessageType, setEmailMessageType] = useState<'success' | 'info'>('info');
   const [emailCooldown, setEmailCooldown] = useState<number>(0);
   const storageKey = 'profileEmailChangeCooldownUntil';
   const [emailChangeRequested, setEmailChangeRequested] = useState<boolean>(false);
@@ -257,7 +258,7 @@ const Profile: React.FC = () => {
       </Card>
 
       <Card title={t('emailChange')}>
-        <Space orientation="vertical" style={{ width: '100%' }}>
+        <Space direction="vertical" style={{ width: '100%' }}>
           <Steps
             size="small"
             current={emailChangeRequested ? 1 : 0}
@@ -270,7 +271,7 @@ const Profile: React.FC = () => {
             {t('emailChangeDescription' as any)}
           </Typography.Text>
           {emailMessage && (
-            <Alert type="success" title={emailMessage} showIcon style={{ marginBottom: 16 }} />
+            <Alert type={emailMessageType} message={emailMessage} showIcon style={{ marginBottom: 16 }} />
           )}
           {emailChangeRequested && emailCooldown > 0 && (
             <Typography.Text type="secondary">
@@ -283,6 +284,7 @@ const Profile: React.FC = () => {
                 try {
                   const response = await requestEmailChange();
                   setEmailMessage(response.masked_email ? t('emailChangeSent') : response.message);
+                  setEmailMessageType('info');
                   setEmailCooldown(60);
                 } catch (err) {
                   console.error('Email change resend failed:', err);
@@ -301,6 +303,7 @@ const Profile: React.FC = () => {
               try {
                 const response = await requestEmailChange();
                 setEmailMessage(response.masked_email ? t('emailChangeSent') : response.message);
+                setEmailMessageType('info');
                 setEmailCooldown(60);
                 setEmailChangeRequested(true);
               } catch (err) {
