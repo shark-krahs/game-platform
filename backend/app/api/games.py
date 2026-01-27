@@ -425,7 +425,8 @@ async def save_game(request: dict, current_user = Depends(get_current_user)):
                 move_number=move_number,
                 player_id=move.player_id,
                 move_data=move.move_data,
-                board_state_after={},  # We'll need to reconstruct this
+                board_state_after=getattr(move, 'board_state_after', game_state.board_state),
+                time_remaining_after=getattr(move, 'time_remaining_after', game_state.time_remaining),
                 timestamp=move.timestamp,
                 time_spent=0.0  # Not tracked currently
             )
@@ -496,6 +497,7 @@ async def get_saved_game(game_id: str, current_user = Depends(get_current_user))
                 'player_id': move.player_id,
                 'move_data': json.loads(move.move_data) if isinstance(move.move_data, str) else move.move_data,
                 'board_state_after': json.loads(move.board_state_after) if isinstance(move.board_state_after, str) else move.board_state_after,
+                'time_remaining_after': json.loads(move.time_remaining_after) if move.time_remaining_after else None,
                 'timestamp': move.timestamp.isoformat(),
                 'time_spent': move.time_spent
             }

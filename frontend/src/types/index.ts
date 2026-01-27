@@ -106,6 +106,7 @@ export interface GameHistoryMove {
   player_id: number
   move_data: any
   board_state_after: any
+  time_remaining_after?: Record<number, number> | null
   timestamp: string
   time_spent: number
 }

@@ -73,7 +73,8 @@ class SavedGameRepository(BaseRepository[SavedGame]):
         return await self.update(saved_game)
 
     async def add_game_move(self, saved_game_id: UUID, move_number: int, player_id: int,
-                           move_data: dict, board_state_after: dict, timestamp, time_spent: float) -> GameHistory:
+                           move_data: dict, board_state_after: dict, timestamp, time_spent: float,
+                           time_remaining_after: Optional[dict] = None) -> GameHistory:
         """Add a move to the game history."""
         move = GameHistory(
             saved_game_id=saved_game_id,
@@ -81,6 +82,7 @@ class SavedGameRepository(BaseRepository[SavedGame]):
             player_id=player_id,
             move_data=json.dumps(move_data),
             board_state_after=json.dumps(board_state_after),
+            time_remaining_after=json.dumps(time_remaining_after) if time_remaining_after is not None else None,
             timestamp=timestamp,
             time_spent=time_spent
         )

@@ -212,6 +212,7 @@ class GameEngine:
                                 player_id=move.player_id,
                                 move_data=move.move_data,
                                 board_state_after=getattr(move, 'board_state_after', game_state.board_state),
+                                time_remaining_after=getattr(move, 'time_remaining_after', game_state.time_remaining),
                                 timestamp=move.timestamp,
                                 time_spent=0.0  # Not tracked currently
                             )
@@ -289,6 +290,7 @@ class GameEngine:
                 )
                 # Store board state after this completed turn
                 move.board_state_after = new_state.board_state
+                move.time_remaining_after = new_state.time_remaining.copy()
                 new_state.moves_history.append(move)
                 logger.info(f"Game {game_id} turn completed by player {old_current_player}, recorded in history")
 

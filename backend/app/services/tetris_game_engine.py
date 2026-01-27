@@ -118,7 +118,8 @@ class TetrisGameEngine(GameEngineInterface):
                             'initial_time': game_state.time_control.initial_time,
                             'increment': game_state.time_control.increment
                         },
-                        rated=game_state.rated
+                        rated=game_state.rated,
+                        chat_history=getattr(game_state, 'chat_history', [])
                     )
 
                     # Add moves history if available - save board state after each move
@@ -131,6 +132,7 @@ class TetrisGameEngine(GameEngineInterface):
                                 player_id=move.player_id,
                                 move_data=move.move_data,
                                 board_state_after=getattr(move, 'board_state_after', game_state.board_state),
+                                time_remaining_after=getattr(move, 'time_remaining_after', game_state.time_remaining),
                                 timestamp=move.timestamp,
                                 time_spent=0.0  # Not tracked currently
                             )
@@ -203,6 +205,7 @@ class TetrisGameEngine(GameEngineInterface):
                 )
                 # Store board state after this completed turn
                 move.board_state_after = new_state.board_state
+                move.time_remaining_after = new_state.time_remaining.copy()
                 new_state.moves_history.append(move)
                 # Reset timer for the new current player
                 new_state.time_remaining[new_state.current_player] = new_state.time_control.increment

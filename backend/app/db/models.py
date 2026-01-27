@@ -118,6 +118,7 @@ class GameHistory(SQLModel, table=True):
     player_id: int
     move_data: str  # JSON string of move data
     board_state_after: str  # JSON string of board state after move
+    time_remaining_after: Optional[str] = None  # JSON string of time remaining after move
     timestamp: datetime
     time_spent: float  # Time spent on this move in seconds
     # Back relationship to saved game

@@ -108,6 +108,9 @@ class PentagoGame(AbstractGameLogic):
             move_data=move,
             timestamp=datetime.now()
         )
+        # Store board state after this move for replay reconstruction
+        game_move.board_state_after = new_state.board_state
+        game_move.time_remaining_after = new_state.time_remaining.copy()
         new_state.moves_history.append(game_move)
 
         # Handle first move phase

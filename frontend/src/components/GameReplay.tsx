@@ -83,12 +83,13 @@ const GameReplay: React.FC = () => {
       };
     }
 
-    // For replay, we need to reconstruct the board state from moves
+    // For replay, reconstruct the board state from saved move snapshots
     // Start with initial empty state and apply moves up to currentMoveIndex
-    let currentBoardState = savedGame.board_state;
+    let currentBoardState = getInitialBoardState(savedGame.game_type);
     let currentPlayer = savedGame.current_player;
     let status: GameStatus = currentMoveIndex === 0 ? 'waiting' : 'playing';
     let winner = savedGame.winner;
+    let timeRemainingSnapshot: Record<number, number> | null = null;
 
     // If we have moves with board_state_after, use them to reconstruct state
     if (savedGame.moves && savedGame.moves.length > 0) {
@@ -102,6 +103,11 @@ const GameReplay: React.FC = () => {
             currentBoardState = typeof move.board_state_after === 'string'
               ? JSON.parse(move.board_state_after)
               : move.board_state_after;
+
+            // Capture time snapshot after this move if available
+            if (move.time_remaining_after) {
+              timeRemainingSnapshot = move.time_remaining_after as Record<number, number>;
+            }
 
             // Set current player to the player who made the next move
             if (targetMoveIndex + 1 < savedGame.moves.length) {
@@ -119,6 +125,9 @@ const GameReplay: React.FC = () => {
         currentBoardState = getInitialBoardState(savedGame.game_type);
         currentPlayer = savedGame.current_player; // Initial player
       }
+    } else if (savedGame.board_state) {
+      // If no moves are available, fall back to saved board state
+      currentBoardState = savedGame.board_state;
     }
 
     // If we've reached the end, set status to finished
@@ -127,7 +136,7 @@ const GameReplay: React.FC = () => {
     }
 
     // For pentago, extract grid from board_state for the board field
-    let board = [];
+    let board: (number | null)[][] = [];
     if (savedGame.game_type === 'pentago' && currentBoardState && currentBoardState.grid) {
       board = currentBoardState.grid;
     }
@@ -241,6 +250,17 @@ const GameReplay: React.FC = () => {
 
   const engine = getGameEngine(savedGame.game_type);
   const gameState = getCurrentGameState();
+  const activePlayerName = savedGame.players[gameState.currentPlayer]?.name;
+  const replayPlayers = savedGame.players.map((player, index) => {
+    const moveSnapshot = currentMoveIndex > 0 ? savedGame.moves[currentMoveIndex - 1]?.time_remaining_after : null;
+    const remaining = moveSnapshot && typeof moveSnapshot === 'object'
+      ? (moveSnapshot as Record<number, number>)[index] ?? savedGame.time_remaining?.[index]
+      : savedGame.time_remaining?.[index];
+    return {
+      ...player,
+      remaining: remaining ?? player.remaining ?? 0,
+    };
+  });
 
   return (
     <div style={{ padding: '20px' }}>
@@ -258,7 +278,7 @@ const GameReplay: React.FC = () => {
             firstMovePlayer={null}
             disconnectTimer={0}
             disconnectedPlayer={null}
-            players={gameState.players}
+            players={replayPlayers}
             turn={gameState.currentPlayer}
             formatTime={formatTime}
             getPlayers={getPlayers}
@@ -333,6 +353,11 @@ const GameReplay: React.FC = () => {
             <div style={{ fontSize: '1.1em' }}>
               <b>{t('status')}:</b> {t(`status.${gameState.status}` as any)}
             </div>
+            {gameState.status === 'playing' && activePlayerName && (
+              <div style={{ marginTop: '8px', fontSize: '1.1em' }}>
+                <b>{t('turn')}:</b> {activePlayerName}
+              </div>
+            )}
             {gameState.winner && (
               <div style={{ marginTop: '8px', fontSize: '1.2em', fontWeight: 'bold' }}>
                 {t('winner')}: {gameState.winner}

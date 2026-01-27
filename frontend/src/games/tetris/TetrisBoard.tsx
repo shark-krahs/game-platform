@@ -26,6 +26,8 @@ const TetrisBoard: React.FC<GameBoardProps> = ({
     gameState.players.length > 0 &&
     gameState.players[gameState.currentPlayer]?.name === user?.username;
 
+  const currentPlayerName = gameState.players[gameState.currentPlayer]?.name || `Player ${gameState.currentPlayer + 1}`;
+
   // Get data from backend
   const gameBoard = gameState.board_state?.grid || Array(BOARD_HEIGHT).fill(null).map(() => Array(BOARD_WIDTH).fill(0));
   const fallingPiece = gameState.board_state?.falling_piece || null;
@@ -288,7 +290,7 @@ const TetrisBoard: React.FC<GameBoardProps> = ({
         <div style={{ borderTop: '1px solid #555', paddingTop: '15px' }}>
           <h4 style={{ marginBottom: '10px' }}>Game Status</h4>
           <p><strong>Status:</strong> {gameState.status}</p>
-          <p><strong>Current Player:</strong> {gameState.currentPlayer + 1}</p>
+          <p><strong>Current Player:</strong> {currentPlayerName}</p>
           <p><strong>Players:</strong> {gameState.players.length}</p>
 
           {/* Hide next pieces for cleaner UI */}
@@ -299,7 +301,7 @@ const TetrisBoard: React.FC<GameBoardProps> = ({
               <strong>Scores:</strong>
               {gameState.board_state.scores.map((score: number, index: number) => (
                 <div key={index} style={{ color: index === 0 ? '#ff0000' : '#0000ff' }}>
-                  Player {index + 1}: {score} pts
+                  {gameState.players[index]?.name || `Player ${index + 1}`}: {score} pts
                 </div>
               ))}
             </div>
