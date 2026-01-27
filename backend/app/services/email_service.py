@@ -62,10 +62,10 @@ def send_email(payload: EmailPayload) -> None:
             settings.smtp_use_ssl,
             settings.smtp_use_tls,
         )
-    try:
+    def _attempt_send(force_ipv4: bool) -> None:
         host = settings.smtp_host
         port = settings.smtp_port
-        if settings.smtp_force_ipv4:
+        if force_ipv4:
             infos = socket.getaddrinfo(host, port, socket.AF_INET, socket.SOCK_STREAM)
             if infos:
                 host = infos[0][4][0]
@@ -88,7 +88,14 @@ def send_email(payload: EmailPayload) -> None:
             server.send_message(message)
             if settings.smtp_debug:
                 logger.info("SMTP message sent to %s", payload.to_address)
+
+    try:
+        _attempt_send(settings.smtp_force_ipv4)
     except Exception as exc:
+        if not settings.smtp_force_ipv4:
+            logger.warning("SMTP send failed, retrying with IPv4: %s", exc)
+            _attempt_send(True)
+            return
         logger.exception("SMTP send failed: %s", exc)
         raise
 

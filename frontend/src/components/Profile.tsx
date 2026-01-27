@@ -8,6 +8,8 @@ import {
   Space,
   Typography,
   Alert,
+  Steps,
+  notification,
   type FormProps,
 } from 'antd';
 import {
@@ -20,6 +22,7 @@ import {
 import { useAuth } from '../AuthContext';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { formatSeconds } from '../utils/validation';
 
 type ProfileFormValues = {
   oldPassword?: string;
@@ -27,7 +30,6 @@ type ProfileFormValues = {
   confirmPassword?: string;
   preferredColor: string;
   language: string;
-  newEmail?: string;
 };
 
 const Profile: React.FC = () => {
@@ -36,6 +38,39 @@ const Profile: React.FC = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm<ProfileFormValues>();
   const [emailMessage, setEmailMessage] = useState<string>('');
+  const [emailCooldown, setEmailCooldown] = useState<number>(0);
+  const storageKey = 'profileEmailChangeCooldownUntil';
+  const [emailChangeRequested, setEmailChangeRequested] = useState<boolean>(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+      const until = Number(saved);
+      const remaining = Math.max(0, Math.ceil((until - Date.now()) / 1000));
+      if (remaining > 0) {
+        setEmailCooldown(remaining);
+        setEmailChangeRequested(true);
+      } else {
+        localStorage.removeItem(storageKey);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (emailCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setEmailCooldown((prev) => Math.max(prev - 1, 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [emailCooldown]);
+
+  useEffect(() => {
+    if (emailCooldown > 0) {
+      localStorage.setItem(storageKey, String(Date.now() + emailCooldown * 1000));
+    } else {
+      localStorage.removeItem(storageKey);
+    }
+  }, [emailCooldown]);
 
   // Инициализация формы при изменении пользователя
   useEffect(() => {
@@ -52,7 +87,7 @@ const Profile: React.FC = () => {
   };
 
   const onFinish: FormProps<ProfileFormValues>['onFinish'] = async (values) => {
-    const { oldPassword, newPassword, confirmPassword, preferredColor, language, newEmail } = values;
+    const { oldPassword, newPassword, confirmPassword, preferredColor, language } = values;
 
     // Локальная валидация пароля
     if (newPassword) {
@@ -94,21 +129,16 @@ const Profile: React.FC = () => {
 
       await updateProfile(updates);
 
-      if (newEmail) {
-        const response = await requestEmailChange(newEmail);
-        setEmailMessage(response.masked_email ? t('emailChangeSent') : response.message);
-      }
-
       // Очистка полей пароля после успешного обновления
       form.setFieldsValue({
         oldPassword: '',
         newPassword: '',
         confirmPassword: '',
-        newEmail: '',
       });
 
-      // Можно заменить alert на более красивый notification (antd)
-      alert(t('profileUpdated'));
+      notification.success({
+        message: t('profileUpdated'),
+      });
     } catch (err: any) {
       // Ошибка уже в error из контекста, но можно усилить
       console.error('Profile update failed:', err);
@@ -195,13 +225,6 @@ const Profile: React.FC = () => {
             </Select>
           </Form.Item>
 
-          <Form.Item name="newEmail" label={t('newEmail')}>
-            <Input placeholder={t('newEmail')} />
-          </Form.Item>
-
-          {emailMessage && (
-            <Alert type="success" message={emailMessage} showIcon style={{ marginBottom: 16 }} />
-          )}
 
           {(form.getFieldError('oldPassword').length > 0 ||
             form.getFieldError('confirmPassword').length > 0 ||
@@ -231,6 +254,65 @@ const Profile: React.FC = () => {
             </Button>
           </Form.Item>
         </Form>
+      </Card>
+
+      <Card title={t('emailChange')}>
+        <Space orientation="vertical" style={{ width: '100%' }}>
+          <Steps
+            size="small"
+            current={emailChangeRequested ? 1 : 0}
+            items={[
+              { title: t('emailChangeStepRequest' as any) },
+              { title: t('emailChangeStepConfirm' as any) },
+            ]}
+          />
+          <Typography.Text type="secondary">
+            {t('emailChangeDescription' as any)}
+          </Typography.Text>
+          {emailMessage && (
+            <Alert type="success" title={emailMessage} showIcon style={{ marginBottom: 16 }} />
+          )}
+          {emailChangeRequested && emailCooldown > 0 && (
+            <Typography.Text type="secondary">
+              {t('resendCooldown' as any, { time: formatSeconds(emailCooldown) })}
+            </Typography.Text>
+          )}
+          {emailChangeRequested && (
+            <Button
+              onClick={async () => {
+                try {
+                  const response = await requestEmailChange();
+                  setEmailMessage(response.masked_email ? t('emailChangeSent') : response.message);
+                  setEmailCooldown(60);
+                } catch (err) {
+                  console.error('Email change resend failed:', err);
+                }
+              }}
+              disabled={emailCooldown > 0}
+            >
+              {t('resendEmail' as any)}
+            </Button>
+          )}
+          <Button
+            type="default"
+            onClick={async () => {
+              const confirmed = window.confirm(t('confirmEmailChangePrompt' as any));
+              if (!confirmed) return;
+              try {
+                const response = await requestEmailChange();
+                setEmailMessage(response.masked_email ? t('emailChangeSent') : response.message);
+                setEmailCooldown(60);
+                setEmailChangeRequested(true);
+              } catch (err) {
+                console.error('Email change request failed:', err);
+              }
+            }}
+            disabled={loading || emailCooldown > 0}
+            block
+          >
+            {t('requestEmailChange' as any)}
+          </Button>
+        </Space>
       </Card>
     </Space>
   );

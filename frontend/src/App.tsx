@@ -121,7 +121,7 @@ function AppContent() {
             color: isDark ? '#e6e6e6' : '#000',
           }}
         >
-          Game Platform ©2025
+          Game Platform ©2026
         </Footer>
       </Layout>
     </ConfigProvider>

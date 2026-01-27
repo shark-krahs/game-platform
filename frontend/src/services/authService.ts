@@ -61,16 +61,24 @@ class AuthService {
     return api.post<MessageResponse>('/auth/request-password-reset', { username });
   }
 
+  async resendPasswordReset(username: string): Promise<MessageResponse> {
+    return api.post<MessageResponse>('/auth/resend-password-reset', { username });
+  }
+
   async resetPassword(token: string, newPassword: string): Promise<MessageResponse> {
     return api.post<MessageResponse>('/auth/reset-password', { token, new_password: newPassword });
   }
 
-  async requestEmailChange(newEmail: string): Promise<MessageResponse> {
-    return api.post<MessageResponse>('/auth/request-email-change', { new_email: newEmail });
+  async requestEmailChange(): Promise<MessageResponse> {
+    return api.post<MessageResponse>('/auth/request-email-change', { confirm: true });
   }
 
-  async confirmEmailChange(token: string): Promise<MessageResponse> {
-    return api.post<MessageResponse>('/auth/confirm-email-change', { token });
+  async confirmEmailChange(token: string, newEmail?: string): Promise<MessageResponse> {
+    return api.post<MessageResponse>('/auth/confirm-email-change', { token, new_email: newEmail });
+  }
+
+  async resendEmailChange(token: string): Promise<MessageResponse> {
+    return api.post<MessageResponse>('/auth/resend-email-change', { token });
   }
 
   async getCurrentUser(): Promise<User> {

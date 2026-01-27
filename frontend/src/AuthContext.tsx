@@ -22,9 +22,11 @@ interface AuthContextValue {
   confirmEmail: (token: string) => Promise<string>;
   resendConfirmation: (username: string) => Promise<{ message: string; seconds_remaining?: number }>;
   requestPasswordReset: (username: string) => Promise<{ message: string; masked_email?: string }>;
+  resendPasswordReset: (username: string) => Promise<{ message: string; masked_email?: string }>;
   resetPassword: (token: string, newPassword: string) => Promise<string>;
-  requestEmailChange: (newEmail: string) => Promise<{ message: string; masked_email?: string }>;
-  confirmEmailChange: (token: string) => Promise<string>;
+  requestEmailChange: () => Promise<{ message: string; masked_email?: string }>;
+  confirmEmailChange: (token: string, newEmail?: string) => Promise<string>;
+  resendEmailChange: (token: string) => Promise<{ message: string; masked_email?: string }>;
   logout: () => void;
   updateProfile: (updates: Partial<User>) => Promise<User>;
   refreshUser: () => Promise<void>;
@@ -155,6 +157,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
+  const resendPasswordReset = async (username: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      return await authService.resendPasswordReset(username);
+    } catch (err: any) {
+      setError(err.message || 'Reset resend failed');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const resetPassword = async (token: string, newPassword: string) => {
     setLoading(true);
     setError(null);
@@ -169,11 +184,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  const requestEmailChange = async (newEmail: string) => {
+  const requestEmailChange = async () => {
     setLoading(true);
     setError(null);
     try {
-      return await authService.requestEmailChange(newEmail);
+      return await authService.requestEmailChange();
     } catch (err: any) {
       setError(err.message || 'Email change request failed');
       throw err;
@@ -182,14 +197,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  const confirmEmailChange = async (token: string) => {
+  const confirmEmailChange = async (token: string, newEmail?: string) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await authService.confirmEmailChange(token);
+      const response = await authService.confirmEmailChange(token, newEmail);
       return response.message;
     } catch (err: any) {
       setError(err.message || 'Email change confirmation failed');
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resendEmailChange = async (token: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      return await authService.resendEmailChange(token);
+    } catch (err: any) {
+      setError(err.message || 'Email change resend failed');
       throw err;
     } finally {
       setLoading(false);
@@ -228,9 +256,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     confirmEmail,
     resendConfirmation,
     requestPasswordReset,
+    resendPasswordReset,
     resetPassword,
     requestEmailChange,
     confirmEmailChange,
+    resendEmailChange,
     logout,
     updateProfile,
     refreshUser: fetchUserInfo,

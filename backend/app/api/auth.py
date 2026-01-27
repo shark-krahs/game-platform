@@ -67,6 +67,10 @@ class EmailRequest(BaseModel):
     username: str
 
 
+class EmailChangeResendRequest(BaseModel):
+    token: str
+
+
 class ResendCooldownResponse(BaseModel):
     message: str
     seconds_remaining: int
@@ -76,13 +80,18 @@ class TokenRequest(BaseModel):
     token: str
 
 
+class EmailChangeConfirmRequest(BaseModel):
+    token: str
+    new_email: Optional[str] = None
+
+
 class PasswordResetRequest(BaseModel):
     token: str
     new_password: str
 
 
 class ChangeEmailRequest(BaseModel):
-    new_email: str
+    confirm: bool = True
 
 
 # Repository instance
@@ -289,17 +298,29 @@ async def request_password_reset(payload: EmailRequest):
     return {"message": "reset sent", "masked_email": mask_email(user.email)}
 
 
+@router.post("/auth/resend-password-reset")
+async def resend_password_reset(payload: EmailRequest):
+    user = await user_repo.get_by_username_without_ratings(payload.username)
+    if not user or not user.email:
+        raise HTTPException(status_code=404, detail="user not found")
+    token = generate_token()
+    expires_at = datetime.utcnow() + timedelta(minutes=settings.password_reset_expire_minutes)
+    user.password_reset_token = token
+    user.password_reset_expires_at = expires_at
+    await user_repo.update(user)
+
+    reset_link = build_password_reset_link(token)
+    email_payload = build_password_reset_email(user.username, reset_link)
+    email_payload.to_address = user.email
+    send_email(email_payload)
+    return {"message": "reset resent", "masked_email": mask_email(user.email)}
+
+
 @router.post("/auth/request-email-change")
 async def request_email_change(payload: ChangeEmailRequest, current_user: User = Depends(get_current_user)):
-    if payload.new_email == current_user.email:
-        raise HTTPException(status_code=400, detail="email already set")
-    existing_email = await user_repo.get_by_email(payload.new_email)
-    if existing_email:
-        raise HTTPException(status_code=400, detail="email already registered")
-
     token = generate_token()
     expires_at = datetime.utcnow() + timedelta(minutes=settings.email_change_expire_minutes)
-    current_user.pending_email = payload.new_email
+    current_user.pending_email = None
     current_user.pending_email_token = token
     current_user.pending_email_expires_at = expires_at
     current_user.pending_email_confirmed = False
@@ -328,7 +349,7 @@ async def reset_password(payload: PasswordResetRequest):
 
 
 @router.post("/auth/confirm-email-change")
-async def confirm_email_change(payload: TokenRequest):
+async def confirm_email_change(payload: EmailChangeConfirmRequest):
     user = await user_repo.get_by_pending_email_token(payload.token)
     if not user:
         raise HTTPException(status_code=400, detail="invalid token")
@@ -336,14 +357,26 @@ async def confirm_email_change(payload: TokenRequest):
         await user_repo.clear_expired_pending_email(user)
         raise HTTPException(status_code=400, detail="token expired")
     if not user.pending_email_confirmed:
+        if not payload.new_email:
+            raise HTTPException(status_code=400, detail="new email required")
+        if payload.new_email == user.email:
+            raise HTTPException(status_code=400, detail="email already set")
+        existing_email = await user_repo.get_by_email(payload.new_email)
+        if existing_email:
+            raise HTTPException(status_code=400, detail="email already registered")
+        token = generate_token()
+        expires_at = datetime.utcnow() + timedelta(minutes=settings.email_change_expire_minutes)
+        user.pending_email = payload.new_email
+        user.pending_email_token = token
+        user.pending_email_expires_at = expires_at
         user.pending_email_confirmed = True
         await user_repo.update(user)
 
-        confirm_link = build_email_change_link(payload.token)
+        confirm_link = build_email_change_link(token)
         email_payload = build_email_change_email(user.username, confirm_link)
         email_payload.to_address = user.pending_email
         send_email(email_payload)
-        return {"message": "old email confirmed"}
+        return {"message": "new email confirmation sent"}
 
     user.email = user.pending_email
     user.pending_email = None
@@ -353,6 +386,26 @@ async def confirm_email_change(payload: TokenRequest):
     user.email_verified = True
     await user_repo.update(user)
     return {"message": "email updated"}
+
+
+@router.post("/auth/resend-email-change")
+async def resend_email_change(payload: EmailChangeResendRequest):
+    user = await user_repo.get_by_pending_email_token(payload.token)
+    if not user:
+        raise HTTPException(status_code=400, detail="invalid token")
+    if not user.pending_email:
+        raise HTTPException(status_code=400, detail="pending email missing")
+    if not user.pending_email_expires_at or user.pending_email_expires_at < datetime.utcnow():
+        await user_repo.clear_expired_pending_email(user)
+        raise HTTPException(status_code=400, detail="token expired")
+    if not user.pending_email_confirmed:
+        raise HTTPException(status_code=400, detail="new email not confirmed yet")
+
+    confirm_link = build_email_change_link(payload.token)
+    email_payload = build_email_change_email(user.username, confirm_link)
+    email_payload.to_address = user.pending_email
+    send_email(email_payload)
+    return {"message": "email change resent", "masked_email": mask_email(user.pending_email)}
 
 
 @router.get("/auth/me/active-game")

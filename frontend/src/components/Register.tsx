@@ -4,6 +4,7 @@ import { UserOutlined, LockOutlined, MailOutlined, ClockCircleOutlined } from '@
 import { useAuth } from '../AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { formatSeconds } from '../utils/validation';
 
 type RegisterFormValues = {
   username: string;
@@ -18,6 +19,7 @@ const Register: React.FC = () => {
   const { t } = useTranslation('register');
   const [cooldown, setCooldown] = useState<number>(0);
   const [localMessage, setLocalMessage] = useState<string>('');
+  const [resendAvailable, setResendAvailable] = useState<boolean>(false);
   const storageKey = 'registerResendCooldownUntil';
 
   useEffect(() => {
@@ -54,6 +56,7 @@ const Register: React.FC = () => {
       await register(values.username, values.password, values.email);
       localStorage.setItem('lastRegisteredUsername', values.username);
       setLocalMessage(t('checkEmail' as any));
+      setResendAvailable(true);
     } catch (err) {
       // Ошибка уже отображена через error из контекста
       console.error('Registration failed:', err);
@@ -165,21 +168,23 @@ const Register: React.FC = () => {
         </Button>
       </Form.Item>
 
-      <Space direction="vertical" style={{ width: '100%' }}>
-        {cooldown > 0 && (
-          <Typography.Text type="secondary">
-            <ClockCircleOutlined /> {t('resendTimerLabel' as any)} {cooldown}s
-          </Typography.Text>
-        )}
-        <Button onClick={handleResend} disabled={cooldown > 0}>
-          {cooldown > 0
-            ? t('resendCooldown' as any, { seconds: cooldown })
-            : t('resendEmail' as any)}
-        </Button>
-      </Space>
+      {resendAvailable && (
+        <Space direction="vertical" style={{ width: '100%' }}>
+          {cooldown > 0 && (
+            <Typography.Text type="secondary">
+              <ClockCircleOutlined /> {t('resendTimerLabel' as any)} {formatSeconds(cooldown)}
+            </Typography.Text>
+          )}
+          <Button onClick={handleResend} disabled={cooldown > 0}>
+            {cooldown > 0
+              ? t('resendCooldown' as any, { time: formatSeconds(cooldown) })
+              : t('resendEmail' as any)}
+          </Button>
+        </Space>
+      )}
 
       {localMessage && (
-        <Alert type="info" message={localMessage} showIcon style={{ marginTop: 16 }} />
+        <Alert type="success" message={localMessage} showIcon style={{ marginTop: 16 }} />
       )}
 
       {error && (

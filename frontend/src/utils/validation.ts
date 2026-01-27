@@ -211,3 +211,9 @@ export const validateForm = <T extends Record<string, any>>(
 export const hasFormErrors = <T>(errors: FormErrors<T>): boolean => {
   return Object.keys(errors).length > 0;
 };
+
+export const formatSeconds = (totalSeconds: number): string => {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+};
