@@ -86,7 +86,7 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
             username = user.username
 
     if not user_id:
-        await websocket.send_text(json.dumps({"type": "error", "message": "Authentication required"}))
+        await websocket.send_text(json.dumps({"type": "error", "code": "games.auth_required", "message": "Authentication required"}))
         return
 
     try:
@@ -101,7 +101,7 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
             try:
                 msg = json.loads(text)
             except Exception:
-                await websocket.send_text(json.dumps({'type':'error','message':'invalid json'}))
+                await websocket.send_text(json.dumps({'type':'error','code':'games.invalid_json','message':'invalid json'}))
                 continue
 
             action = msg.get('type')
@@ -124,7 +124,7 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
                         selected_engine = game_engine
 
                 if not game_state or game_state.status not in ['first_move', 'playing', 'disconnect_wait']:
-                    await websocket.send_text(json.dumps({'type':'error','message':'game not in playing state'}))
+                    await websocket.send_text(json.dumps({'type':'error','code':'games.not_playing_state','message':'game not in playing state'}))
                     continue
 
                 # Find player index
@@ -135,7 +135,7 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
                         break
 
                 if player_index is None:
-                    await websocket.send_text(json.dumps({'type':'error','message':'player not found'}))
+                    await websocket.send_text(json.dumps({'type':'error','code':'games.player_not_found','message':'player not found'}))
                     continue
 
                 # Process move
@@ -143,7 +143,7 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
                 valid = await selected_engine.process_move(game_id, player_index, move_data)
 
                 if not valid:
-                    await websocket.send_text(json.dumps({'type':'error','message':'invalid move'}))
+                    await websocket.send_text(json.dumps({'type':'error','code':'games.invalid_move','message':'invalid move'}))
 
             elif action == 'leave':
                 # Handle player leaving
@@ -151,7 +151,7 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
                 break
 
             else:
-                await websocket.send_text(json.dumps({'type':'error','message':'unknown action'}))
+                await websocket.send_text(json.dumps({'type':'error','code':'games.unknown_action','message':'unknown action'}))
 
     except WebSocketDisconnect:
         # Handle disconnection
@@ -173,7 +173,7 @@ async def matchmaking_websocket(websocket: WebSocket):
             username = user.username
             is_anonymous = False
         else:
-            await websocket.send_text(json.dumps({"type": "error", "message": "Invalid token"}))
+            await websocket.send_text(json.dumps({"type": "error", "code": "games.invalid_token", "message": "Invalid token"}))
             return
     else:
         # Anonymous user
@@ -305,7 +305,10 @@ async def save_game(request: dict, current_user = Depends(get_current_user)):
     title = request.get('title', f'Game {datetime.now().strftime("%Y-%m-%d %H:%M")}')
 
     if not game_id:
-        raise HTTPException(status_code=400, detail="game_id is required")
+        raise HTTPException(
+            status_code=400,
+            detail={"code": "games.game_id_required", "message": "game_id is required"},
+        )
 
     # Get game state from appropriate engine
     game_state = None
@@ -324,12 +327,21 @@ async def save_game(request: dict, current_user = Depends(get_current_user)):
             selected_engine = game_engine
 
     if not game_state:
-        raise HTTPException(status_code=404, detail="Game not found")
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "games.game_not_found", "message": "Game not found"},
+        )
 
     # Check if user is a player in this game
     user_is_player = any(player.get('user_id') == str(current_user.id) for player in game_state.players)
     if not user_is_player:
-        raise HTTPException(status_code=403, detail="You are not a player in this game")
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "code": "games.not_a_player",
+                "message": "You are not a player in this game",
+            },
+        )
 
     # Convert time_remaining dict to proper format
     time_remaining = {}
@@ -382,14 +394,32 @@ async def get_saved_game(game_id: str, current_user = Depends(get_current_user))
     try:
         uuid_game_id = UUID(game_id)
     except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid game ID format")
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "games.invalid_game_id",
+                "message": "Invalid game ID format",
+            },
+        )
 
     saved_game = await saved_game_repo.get_by_id_with_moves(uuid_game_id)
     if not saved_game:
-        raise HTTPException(status_code=404, detail="Saved game not found")
+        raise HTTPException(
+            status_code=404,
+            detail={
+                "code": "games.saved_game_not_found",
+                "message": "Saved game not found",
+            },
+        )
 
     if saved_game.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="You don't have access to this saved game")
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "code": "games.saved_game_access_denied",
+                "message": "You don't have access to this saved game",
+            },
+        )
 
     # Sort moves by move number
     moves = sorted(saved_game.moves, key=lambda m: m.move_number) if saved_game.moves else []

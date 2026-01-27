@@ -44,7 +44,7 @@ const PlayerRatings: React.FC<PlayerRatingsProps> = ({ user }) => {
   const items = [
     {
       key: 'pentago',
-      label: 'Pentago Ratings',
+      label: t('pentagoRatings' as any),
       children: (
         <Row gutter={16}>
           <Col xs={12} sm={6}>
@@ -135,7 +135,7 @@ const PlayerRatings: React.FC<PlayerRatingsProps> = ({ user }) => {
     },
     {
       key: 'tetris',
-      label: 'Tetris Ratings',
+      label: t('tetrisRatings' as any),
       children: (
         <Row gutter={16}>
           <Col xs={12} sm={6}>

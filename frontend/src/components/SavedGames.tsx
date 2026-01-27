@@ -52,7 +52,7 @@ const SavedGames: React.FC = () => {
       setSavedGames(games);
     } catch (error) {
       console.error('Failed to load saved games:', error);
-      message.error('Failed to load saved games');
+      message.error(t('savedGamesLoadFailed'));
     } finally {
       setLoading(false);
     }
@@ -138,7 +138,7 @@ const SavedGames: React.FC = () => {
       const games = await savedGamesApi.getSavedGamesByCategory(gameType, timeCategory);
 
       if (games.length === 0) {
-        message.info(`No games found in ${gameType} ${timeCategory}`);
+        message.info(t('noGamesFound', { gameType, timeCategory }));
         return;
       }
 
@@ -147,13 +147,13 @@ const SavedGames: React.FC = () => {
         navigate(`/replay/${games[0].id}`);
       } else if (games.length > 1 && games[0]) {
         // TODO: Show a list of games for this category
-        message.info(`Found ${games.length} games in ${gameType} ${timeCategory}`);
+        message.info(t('foundGames', { count: games.length, gameType, timeCategory }));
         // For now, show the most recent game
         navigate(`/replay/${games[0].id}`);
       }
     } catch (error) {
       console.error('Failed to load games by category:', error);
-      message.error('Failed to load games');
+      message.error(t('gamesLoadFailed'));
     }
   };
 
@@ -260,8 +260,8 @@ const SavedGames: React.FC = () => {
   if (!user) {
     return (
       <div style={{ textAlign: 'center', padding: '50px' }}>
-        <h2>Login Required</h2>
-        <p>Please log in to view your saved games.</p>
+        <h2>{t('loginRequiredTitle')}</h2>
+        <p>{t('loginRequiredMessage')}</p>
       </div>
     );
   }
@@ -270,7 +270,7 @@ const SavedGames: React.FC = () => {
     return (
       <div style={{ textAlign: 'center', padding: '50px' }}>
         <Spin size="large" />
-        <p>Loading saved games...</p>
+        <p>{t('loadingSavedGames')}</p>
       </div>
     );
   }

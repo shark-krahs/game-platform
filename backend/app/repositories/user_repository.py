@@ -73,9 +73,11 @@ class UserRepository(BaseRepository[User]):
             return None
         return user
 
-    async def create_user(self, username: str, password_hash: str, email: str) -> User:
+    async def create_user(self, username: str, password_hash: str, email: str, language: Optional[str] = None) -> User:
         """Create new user."""
         user = User(username=username, password_hash=password_hash, email=email)
+        if language:
+            user.language = language
         return await self.create(user)
 
     async def clear_expired_verification(self, user: User) -> User:

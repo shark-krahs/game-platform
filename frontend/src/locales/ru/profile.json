@@ -14,6 +14,7 @@
     "saving": "Сохранение...",
     "profileUpdated": "Профиль успешно обновлён",
     "email": "Почта",
+  "missingEmail": "-",
     "emailRequired": "Почта обязательна",
     "emailInvalid": "Введите корректный email",
     "emailChange": "Смена почты",
@@ -36,5 +37,14 @@
     "passwordsDoNotMatch": "Новые пароли не совпадают",
     "enterOldPassword": "Для изменения пароля требуется старый пароль",
     "english": "Английский",
-    "russian": "Русский"
+    "russian": "Русский",
+    "belarusian": "Белорусский",
+    "kazakh": "Казахский",
+    "ukrainian": "Украинский",
+    "viewSavedGames": "Просмотреть сохраненные игры",
+    "emailChangeConfirmed": "Смена почты подтверждена",
+    "emailChangeNewEmailSent": "Мы отправили письмо на новый адрес",
+    "emailChangeResent": "Письмо отправлено повторно",
+    "emailChangeRequestFailed": "Не удалось запросить смену почты",
+    "emailChangeResendFailed": "Не удалось отправить письмо повторно"
 }

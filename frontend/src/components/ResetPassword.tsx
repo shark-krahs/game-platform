@@ -29,11 +29,13 @@ const ResetPassword: React.FC = () => {
       return;
     }
     try {
-      const message = await resetPassword(token, values.newPassword);
-      setInfoMessage(message);
+      await resetPassword(token, values.newPassword);
+      setInfoMessage(t('passwordResetSuccess' as any));
       setInfoType('success');
     } catch (err) {
       console.error('Reset failed:', err);
+      setInfoMessage(t('resetFailed' as any));
+      setInfoType('info');
     }
   };
 

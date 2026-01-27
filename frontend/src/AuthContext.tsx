@@ -18,7 +18,7 @@ interface AuthContextValue {
   loading: boolean;
   error: string | null;
   login: (username: string, password: string) => Promise<void>;
-  register: (username: string, password: string, email: string) => Promise<void>;
+  register: (username: string, password: string, email: string, language: string) => Promise<void>;
   confirmEmail: (token: string) => Promise<string>;
   resendConfirmation: (username: string) => Promise<{ message: string; seconds_remaining?: number }>;
   requestPasswordReset: (username: string) => Promise<{ message: string; masked_email?: string }>;
@@ -103,11 +103,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  const register = async (username: string, password: string, email: string) => {
+  const register = async (username: string, password: string, email: string, language: string) => {
     setLoading(true);
     setError(null);
     try {
-      await authService.register(username, password, email);
+      await authService.register(username, password, email, language);
     } catch (err: any) {
       setError(err.message || 'Registration failed');
       throw err;

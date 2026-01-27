@@ -16,7 +16,7 @@ type RegisterFormValues = {
 const Register: React.FC = () => {
   const { register, resendConfirmation, loading, error } = useAuth();
   const navigate = useNavigate();
-  const { t } = useTranslation('register');
+  const { t, i18n } = useTranslation('register');
   const [cooldown, setCooldown] = useState<number>(0);
   const [localMessage, setLocalMessage] = useState<string>('');
   const [localMessageType, setLocalMessageType] = useState<'success' | 'info'>('info');
@@ -54,7 +54,7 @@ const Register: React.FC = () => {
 
   const onFinish: FormProps<RegisterFormValues>['onFinish'] = async (values) => {
     try {
-      await register(values.username, values.password, values.email);
+      await register(values.username, values.password, values.email, i18n.resolvedLanguage || i18n.language || 'en');
       localStorage.setItem('lastRegisteredUsername', values.username);
       setLocalMessage(t('checkEmail' as any));
       setLocalMessageType('info');

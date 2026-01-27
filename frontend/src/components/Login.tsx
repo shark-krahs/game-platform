@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Form, Input, Button, Alert, Typography, Space, type FormProps } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useAuth } from '../AuthContext';
@@ -14,6 +14,8 @@ const Login: React.FC = () => {
   const { login, loading, error } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation('login');
+  const [localMessage, setLocalMessage] = useState<string>('');
+  const [localMessageType, setLocalMessageType] = useState<'success' | 'info'>('info');
 
   const onFinish: FormProps<LoginFormValues>['onFinish'] = async (values) => {
     try {
@@ -21,8 +23,8 @@ const Login: React.FC = () => {
       // Если login не бросил ошибку — считаем успешным
       navigate('/lobby'); // или '/game' — как тебе удобнее после логина
     } catch (err) {
-      // Ошибка уже обработана в AuthContext (error в состоянии)
-      // Здесь ничего дополнительно делать не нужно
+      setLocalMessage(t('loginFailed' as any));
+      setLocalMessageType('info');
       console.error('Login failed:', err);
     }
   };
@@ -75,6 +77,14 @@ const Login: React.FC = () => {
           <Link to="/forgot-password">{t('forgotPassword')}</Link>
         </Typography.Text>
       </Space>
+      {localMessage && (
+        <Alert
+          message={localMessage}
+          type={localMessageType}
+          showIcon
+          style={{ marginTop: 16 }}
+        />
+      )}
       {error && (
         <Alert
           title={error}

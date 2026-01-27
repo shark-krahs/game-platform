@@ -3,7 +3,7 @@ import { Location, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../AuthContext';
 import { useTranslation } from 'react-i18next';
 import { useWebSocket } from '../hooks/useWebSocket';
-import { Row, Col, Button, message } from 'antd';
+import { Row, Col, Button } from 'antd';
 import GameBoard from './game/GameBoard';
 import GameTimers from './game/GameTimers';
 import MessageLog from './MessageLog';
@@ -117,8 +117,8 @@ const GameClient: React.FC = () => {
 
   // Utility functions
   const getQuadrantName = (quadrant: number): string => {
-    const names = ['Red', 'Blue', 'Green', 'Yellow'];
-    return names[quadrant] || 'Unknown';
+    const names = [t('quadrantRed'), t('quadrantBlue'), t('quadrantGreen'), t('quadrantYellow')];
+    return names[quadrant] || t('unknownQuadrant');
   };
 
   const formatTime = (seconds: number): string => {
@@ -160,7 +160,7 @@ const GameClient: React.FC = () => {
   // Загрузка / ожидание подключения
   if (!connected) {
     if (board === null || !Array.isArray(players)) {
-      return <div>Loading...</div>;
+      return <div>{t('loading')}</div>;
     }
     return (
       <div style={{ textAlign: 'center', padding: '50px' }}>
@@ -173,7 +173,7 @@ const GameClient: React.FC = () => {
   // Защита от undefined (на случай задержки данных)
   if (!Array.isArray(board) || !Array.isArray(players) || board.length === 0 || players.length === 0) {
     console.log('Waiting for board data:', { board: board?.length, players: players?.length, connected, status });
-    return <div style={{ textAlign: 'center', padding: '50px' }}>Loading game data...</div>;
+    return <div style={{ textAlign: 'center', padding: '50px' }}>{t('loadingGameData')}</div>;
   }
 
   // Проверка доступности движка игры
@@ -182,7 +182,7 @@ const GameClient: React.FC = () => {
       <div style={{ textAlign: 'center', padding: '50px' }}>
         <h2>{t('gameNotSupported')}</h2>
         <p>{t('gameType')}: {currentGameType}</p>
-        <p>{t('availableGames')}: pentago, tetris</p>
+        <p>{t('availableGamesList', { games: 'pentago, tetris' })}</p>
       </div>
     );
   }
@@ -270,13 +270,13 @@ const GameClient: React.FC = () => {
           {/* Action buttons */}
           <div style={{ marginTop: 8, display: 'flex', gap: '8px' }}>
             <Button onClick={resetGame} disabled={resetPending}>
-              {resetPending ? 'Reset Requested' : 'Request Reset'}
+              {resetPending ? t('resetRequested') : t('requestReset')}
             </Button>
           </div>
 
           {/* Статус игры */}
           <div style={{ marginTop: 12, fontSize: '1.1em' }}>
-            <b>{t('status')}:</b> {status}
+            <b>{t('status')}:</b> {t(`status.${status}` as any)}
           </div>
 
           {status === 'finished' && (
@@ -290,7 +290,7 @@ const GameClient: React.FC = () => {
 
           <div style={{ marginTop: 8 }}>
             <b>{t('turn')}:</b>{' '}
-            {status === 'playing' ? (players[turn]?.name || 'Unknown') : '—'}
+            {status === 'playing' ? (players[turn]?.name || t('unknownPlayer')) : t('status.notPlaying' as any)}
           </div>
 
           {error && (

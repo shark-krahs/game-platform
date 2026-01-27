@@ -23,5 +23,20 @@
     "usernameRequired": "Username is required",
     "passwordRequired": "Password is required",
     "confirmPasswordRequired": "Confirm password is required",
-    "passwordsDoNotMatch": "Passwords do not match"
+    "passwordsDoNotMatch": "Passwords do not match",
+    "emailConfirmed": "Email confirmed",
+    "passwordResetSuccess": "Password reset successfully",
+    "resetEmailSent": "Password reset link sent",
+    "resetEmailResent": "Password reset link resent",
+    "loginFailed": "Login failed",
+    "registrationFailed": "Registration failed",
+    "emailConfirmationFailed": "Email confirmation failed",
+    "resendFailedGeneric": "Resend failed",
+    "resetRequestFailed": "Failed to request password reset",
+    "resetResendFailed": "Failed to resend password reset",
+    "resetFailed": "Failed to reset password",
+    "emailChangeRequestFailed": "Failed to request email change",
+    "emailChangeConfirmationFailed": "Failed to confirm email change",
+    "emailChangeResendFailed": "Failed to resend email change",
+    "profileUpdateFailed": "Failed to update profile"
 }

@@ -61,8 +61,8 @@ const ConfirmEmailChange: React.FC = () => {
     }
     attempted.current = true;
     confirmEmailChange(token)
-      .then((result) => {
-        setMessage(result);
+      .then(() => {
+        setMessage(t('emailChangeConfirmed' as any));
         setMessageType('success');
         setStep(1);
       })
@@ -82,14 +82,16 @@ const ConfirmEmailChange: React.FC = () => {
       return;
     }
     try {
-      const result = await confirmEmailChange(token, values.newEmail);
-      setMessage(result);
+      await confirmEmailChange(token, values.newEmail);
+      setMessage(t('emailChangeNewEmailSent' as any));
       setMessageType('info');
       setNeedsEmailInput(false);
       setCooldown(60);
       setStep(1);
     } catch (err) {
       console.error('Email change confirm failed:', err);
+      setMessage(t('emailChangeConfirmationFailed' as any));
+      setMessageType('info');
     }
   };
 
@@ -100,11 +102,12 @@ const ConfirmEmailChange: React.FC = () => {
       return;
     }
     try {
-      const response = await resendEmailChange(token);
-      setResendMessage(response.message);
+      await resendEmailChange(token);
+      setResendMessage(t('emailChangeResent' as any));
       setCooldown(60);
     } catch (err) {
       console.error('Email change resend failed:', err);
+      setResendMessage(t('emailChangeResendFailed' as any));
     }
   };
 

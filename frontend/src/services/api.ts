@@ -3,6 +3,7 @@
  */
 
 import { buildHttpApiBaseUrl } from '../utils/url';
+import i18n from '../i18n';
 
 const API_BASE_URL = buildHttpApiBaseUrl();
 
@@ -71,11 +72,19 @@ class ApiService {
       }
 
       if (!response.ok) {
+        const errorCode =
+          typeof responseData.detail === 'object'
+            ? responseData.detail?.code
+            : responseData.code;
+        const localizedMessage = errorCode
+          ? i18n.t(errorCode, { defaultValue: '' })
+          : '';
         const detailMessage =
           typeof responseData.detail === 'string'
             ? responseData.detail
             : responseData.detail?.message;
         const message =
+          localizedMessage ||
           detailMessage ||
           responseData.message ||
           responseData.error ||

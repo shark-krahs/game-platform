@@ -78,7 +78,7 @@ const GameTimers: React.FC<GameTimersProps> = ({
       {/* Таймер хода для Tetris */}
       {gameType === 'tetris' && status === GAME_STATUS.PLAYING && firstMoveTimer > 0 && (
         <FirstMoveTimerContainer $isPlayerTurn={isMyFirstMove}>
-          <FirstMoveTimerText>Move Timer</FirstMoveTimerText>
+          <FirstMoveTimerText>{t('moveTimer')}</FirstMoveTimerText>
           <PlayerTimerRow>
             <FirstMoveTimerValue $isPlayerTurn={isMyFirstMove}>
               {firstMoveTimer}s

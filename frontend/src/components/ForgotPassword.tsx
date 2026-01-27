@@ -52,12 +52,14 @@ const ForgotPassword: React.FC = () => {
   const onFinish: FormProps<ForgotPasswordValues>['onFinish'] = async (values) => {
     try {
       const response = await requestPasswordReset(values.username);
-      setInfoMessage(response.message);
+      setInfoMessage(t('resetEmailSent' as any));
       setInfoType('info');
       setMaskedEmail(response.masked_email || '');
       setCooldown(60);
     } catch (err) {
       console.error('Reset request failed:', err);
+      setInfoMessage(t('resetRequestFailed' as any));
+      setInfoType('info');
     }
   };
 
@@ -65,16 +67,19 @@ const ForgotPassword: React.FC = () => {
     const username = form.getFieldValue('username');
     if (!username) {
       setInfoMessage(t('missingUsername'));
+      setInfoType('info');
       return;
     }
     try {
       const response = await resendPasswordReset(username);
-      setInfoMessage(response.message);
+      setInfoMessage(t('resetEmailResent' as any));
       setInfoType('info');
       setMaskedEmail(response.masked_email || '');
       setCooldown(60);
     } catch (err) {
       console.error('Reset resend failed:', err);
+      setInfoMessage(t('resetResendFailed' as any));
+      setInfoType('info');
     }
   };
 

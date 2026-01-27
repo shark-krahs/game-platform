@@ -42,7 +42,7 @@ const AuthSelector: React.FC = () => {
     >
       <Card>
         <Space orientation="vertical" size="large" style={{ width: '100%', textAlign: 'center' }}>
-          <Title level={2}>Game Platform</Title>
+          <Title level={2}>{t('title' as any)}</Title>
 
           <Tabs
             activeKey={activeTab}

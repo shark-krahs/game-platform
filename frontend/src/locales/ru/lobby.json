@@ -46,5 +46,14 @@
     "gameHistory": "История игр",
     "yourSavedGames": "Ваши сохраненные игры",
     "noSavedGames": "Сохраненных игр пока нет",
-    "gamesWillBeSaved": "Завершенные игры будут автоматически сохранены для просмотра"
+    "gamesWillBeSaved": "Завершенные игры будут автоматически сохранены для просмотра",
+    "pentagoRatings": "Рейтинги Pentago",
+    "tetrisRatings": "Рейтинги Tetris",
+    "savedGamesLoadFailed": "Не удалось загрузить сохраненные игры",
+    "gamesLoadFailed": "Не удалось загрузить игры",
+    "noGamesFound": "Не найдено игр в {{gameType}} {{timeCategory}}",
+    "foundGames": "Найдено {{count}} игр в {{gameType}} {{timeCategory}}",
+    "loginRequiredTitle": "Требуется вход",
+    "loginRequiredMessage": "Пожалуйста, войдите, чтобы посмотреть сохраненные игры.",
+    "loadingSavedGames": "Загрузка сохраненных игр..."
 }

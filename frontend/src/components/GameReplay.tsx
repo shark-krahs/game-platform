@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Row, Col, Button, Slider, message, Spin } from 'antd';
 import { LeftOutlined, RightOutlined, PlayCircleOutlined, PauseCircleOutlined } from '@ant-design/icons';
 import GameBoard from './game/GameBoard';
@@ -11,6 +12,7 @@ import { SavedGameDetail, GameState, GameStatus, Player } from '../types';
 const GameReplay: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation('gameClient');
 
   const [savedGame, setSavedGame] = useState<SavedGameDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -58,7 +60,7 @@ const GameReplay: React.FC = () => {
       setSavedGame(game);
     } catch (error) {
       console.error('Failed to load saved game:', error);
-      message.error('Failed to load saved game');
+      message.error(t('gamesLoadFailed' as any));
       navigate('/saved-games');
     } finally {
       setLoading(false);
@@ -198,7 +200,7 @@ const GameReplay: React.FC = () => {
     return (
       <div style={{ textAlign: 'center', padding: '50px' }}>
         <Spin size="large" />
-        <p>Loading saved game...</p>
+        <p>{t('loadingSavedGame')}</p>
       </div>
     );
   }
@@ -206,8 +208,8 @@ const GameReplay: React.FC = () => {
   if (!savedGame) {
     return (
       <div style={{ textAlign: 'center', padding: '50px' }}>
-        <h2>Game not found</h2>
-        <Button onClick={() => navigate('/saved-games')}>Back to Saved Games</Button>
+        <h2>{t('gameNotFound')}</h2>
+        <Button onClick={() => navigate('/saved-games')}>{t('backToSavedGames')}</Button>
       </div>
     );
   }
@@ -253,7 +255,7 @@ const GameReplay: React.FC = () => {
             />
           ) : (
             <div style={{ textAlign: 'center', padding: '50px' }}>
-              Game engine not available for {savedGame.game_type}
+              {t('gameEngineNotAvailable', { gameType: savedGame.game_type })}
             </div>
           )}
 
@@ -265,7 +267,7 @@ const GameReplay: React.FC = () => {
                 onClick={handlePreviousMove}
                 disabled={currentMoveIndex === 0}
               >
-                Previous
+                {t('previous')}
               </Button>
 
               <Button
@@ -273,7 +275,7 @@ const GameReplay: React.FC = () => {
                 icon={isPlaying ? <PauseCircleOutlined /> : <PlayCircleOutlined />}
                 onClick={togglePlay}
               >
-                {isPlaying ? 'Pause' : 'Play'}
+                {isPlaying ? t('pause') : t('play')}
               </Button>
 
               <Button
@@ -281,7 +283,7 @@ const GameReplay: React.FC = () => {
                 onClick={handleNextMove}
                 disabled={currentMoveIndex >= savedGame.moves.length}
               >
-                Next
+                {t('next')}
               </Button>
             </div>
 
@@ -292,11 +294,11 @@ const GameReplay: React.FC = () => {
                 value={currentMoveIndex}
                 onChange={handleMoveChange}
                 tooltip={{
-                  formatter: (value) => `Move ${value} of ${savedGame.moves.length}`
+                  formatter: (value) => t('moveOf', { current: value, total: savedGame.moves.length })
                 }}
               />
               <div style={{ marginTop: '5px', fontSize: '12px', color: '#666' }}>
-                Move {currentMoveIndex} of {savedGame.moves.length}
+                {t('moveOf', { current: currentMoveIndex, total: savedGame.moves.length })}
               </div>
             </div>
           </div>
@@ -304,11 +306,11 @@ const GameReplay: React.FC = () => {
           {/* Game status */}
           <div style={{ marginTop: '20px', textAlign: 'center' }}>
             <div style={{ fontSize: '1.1em' }}>
-              <b>Status:</b> {gameState.status}
+              <b>{t('status')}:</b> {t(`status.${gameState.status}` as any)}
             </div>
             {gameState.winner && (
               <div style={{ marginTop: '8px', fontSize: '1.2em', fontWeight: 'bold' }}>
-                Winner: {gameState.winner}
+                {t('winner')}: {gameState.winner}
               </div>
             )}
           </div>
@@ -317,7 +319,7 @@ const GameReplay: React.FC = () => {
 
       <div style={{ textAlign: 'center', marginTop: '20px' }}>
         <Button onClick={() => navigate('/saved-games')}>
-          Back to Saved Games
+          {t('backToSavedGames')}
         </Button>
       </div>
     </div>

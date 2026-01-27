@@ -141,7 +141,9 @@ const Profile: React.FC = () => {
         message: t('profileUpdated'),
       });
     } catch (err: any) {
-      // Ошибка уже в error из контекста, но можно усилить
+      notification.error({
+        message: t('updateFailed'),
+      });
       console.error('Profile update failed:', err);
     }
   };
@@ -157,7 +159,7 @@ const Profile: React.FC = () => {
               <UserOutlined /> <strong>{t('username')}:</strong> {user?.username}
             </Typography.Text>
             <Typography.Text>
-              <UserOutlined /> <strong>{t('email')}:</strong> {user?.email || '-'}
+              <UserOutlined /> <strong>{t('email')}:</strong> {user?.email || t('missingEmail' as any)}
             </Typography.Text>
             <Typography.Text>
               <StarOutlined /> <strong>{t('stars')}:</strong> {user?.stars ?? 0}
@@ -170,7 +172,7 @@ const Profile: React.FC = () => {
             onClick={() => navigate('/saved-games')}
             block
           >
-            View Saved Games
+            {t('viewSavedGames' as any)}
           </Button>
         </Space>
       </Card>
@@ -219,10 +221,12 @@ const Profile: React.FC = () => {
           </Form.Item>
 
           <Form.Item label={<><GlobalOutlined /> {t('language')}</>} name="language">
-            <Select onChange={handleChangeLanguage} style={{ width: 120 }}>
+            <Select onChange={handleChangeLanguage} style={{ width: 160 }}>
               <Select.Option value="en">{t('english')}</Select.Option>
               <Select.Option value="ru">{t('russian')}</Select.Option>
-              {/* Добавь другие языки при необходимости */}
+              <Select.Option value="be">{t('belarusian')}</Select.Option>
+              <Select.Option value="kk">{t('kazakh')}</Select.Option>
+              <Select.Option value="uk">{t('ukrainian')}</Select.Option>
             </Select>
           </Form.Item>
 
@@ -283,11 +287,13 @@ const Profile: React.FC = () => {
               onClick={async () => {
                 try {
                   const response = await requestEmailChange();
-                  setEmailMessage(response.masked_email ? t('emailChangeSent') : response.message);
+                  setEmailMessage(response.masked_email ? t('emailChangeSent') : t('emailChangeResent' as any));
                   setEmailMessageType('info');
                   setEmailCooldown(60);
                 } catch (err) {
                   console.error('Email change resend failed:', err);
+                  setEmailMessage(t('emailChangeResendFailed' as any));
+                  setEmailMessageType('info');
                 }
               }}
               disabled={emailCooldown > 0}
@@ -302,12 +308,14 @@ const Profile: React.FC = () => {
               if (!confirmed) return;
               try {
                 const response = await requestEmailChange();
-                setEmailMessage(response.masked_email ? t('emailChangeSent') : response.message);
+                setEmailMessage(response.masked_email ? t('emailChangeSent') : t('emailChangeSent'));
                 setEmailMessageType('info');
                 setEmailCooldown(60);
                 setEmailChangeRequested(true);
               } catch (err) {
                 console.error('Email change request failed:', err);
+                setEmailMessage(t('emailChangeRequestFailed' as any));
+                setEmailMessageType('info');
               }
             }}
             disabled={loading || emailCooldown > 0}

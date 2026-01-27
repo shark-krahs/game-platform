@@ -46,5 +46,14 @@
     "gameHistory": "Game History",
     "yourSavedGames": "Your Saved Games",
     "noSavedGames": "No saved games yet",
-    "gamesWillBeSaved": "Completed games will be automatically saved for replay"
+    "gamesWillBeSaved": "Completed games will be automatically saved for replay",
+    "pentagoRatings": "Pentago Ratings",
+    "tetrisRatings": "Tetris Ratings",
+    "savedGamesLoadFailed": "Failed to load saved games",
+    "gamesLoadFailed": "Failed to load games",
+    "noGamesFound": "No games found in {{gameType}} {{timeCategory}}",
+    "foundGames": "Found {{count}} games in {{gameType}} {{timeCategory}}",
+    "loginRequiredTitle": "Login Required",
+    "loginRequiredMessage": "Please log in to view your saved games.",
+    "loadingSavedGames": "Loading saved games..."
 }

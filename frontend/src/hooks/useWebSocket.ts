@@ -119,13 +119,15 @@ export function useWebSocket(
             setError(null);
           } else if (msg.type === 'error') {
             console.warn('Game error:', msg.message);
-            if (msg.message === 'room full') {
+            const localizedError = msg.code ? t(msg.code, { defaultValue: '' }) : '';
+            const errorMessage = localizedError || msg.message;
+            if (msg.code === 'games.room_full' || msg.message === 'room full') {
               alert(t('roomFull'));
               navigate('/lobby');
               return;
             }
-            setError(msg.message);
-            setMessages((m) => [...m, `${t('error')}: ${msg.message}`]);
+            setError(errorMessage);
+            setMessages((m) => [...m, `${t('error')}: ${errorMessage}`]);
           } else {
             console.log('Unhandled message type:', msg.type);
             setMessages((m) => [...m, ev.data]);

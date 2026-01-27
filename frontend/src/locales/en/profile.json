@@ -14,6 +14,7 @@
     "saving": "Saving...",
     "profileUpdated": "Profile updated successfully",
     "email": "Email",
+    "missingEmail": "-",
     "emailRequired": "Email is required",
     "emailInvalid": "Enter a valid email",
     "emailChange": "Change email",
@@ -36,5 +37,14 @@
     "passwordsDoNotMatch": "New passwords do not match",
     "enterOldPassword": "Old password is required to change password",
     "english": "English",
-    "russian": "Russian"
+    "russian": "Russian",
+    "belarusian": "Belarusian",
+    "kazakh": "Kazakh",
+    "ukrainian": "Ukrainian",
+    "viewSavedGames": "View Saved Games",
+    "emailChangeConfirmed": "Email change confirmed",
+    "emailChangeNewEmailSent": "We sent an email to the new address",
+    "emailChangeResent": "Confirmation email resent",
+    "emailChangeRequestFailed": "Failed to request email change",
+    "emailChangeResendFailed": "Failed to resend email change"
 }

@@ -23,11 +23,14 @@ const ConfirmEmail: React.FC = () => {
     }
     hasConfirmed.current = true;
     confirmEmail(token)
-      .then((result) => {
-        setMessage(result);
+      .then(() => {
+        setMessage(t('emailConfirmed' as any));
         setMessageType('success');
       })
-      .catch(() => null);
+      .catch(() => {
+        setMessage(t('emailConfirmationFailed' as any));
+        setMessageType('info');
+      });
   }, [confirmEmail, searchParams, t]);
 
   return (

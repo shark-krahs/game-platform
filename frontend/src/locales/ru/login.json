@@ -23,5 +23,20 @@
     "usernameRequired": "Требуется имя пользователя",
     "passwordRequired": "Требуется пароль",
     "confirmPasswordRequired": "Подтверждение пароля обязательно",
-    "passwordsDoNotMatch": "Пароли не совпадают"
+    "passwordsDoNotMatch": "Пароли не совпадают",
+    "emailConfirmed": "Почта подтверждена",
+    "passwordResetSuccess": "Пароль успешно сброшен",
+    "resetEmailSent": "Ссылка для сброса отправлена",
+    "resetEmailResent": "Ссылка для сброса отправлена повторно",
+    "loginFailed": "Не удалось войти",
+    "registrationFailed": "Не удалось зарегистрироваться",
+    "emailConfirmationFailed": "Не удалось подтвердить почту",
+    "resendFailedGeneric": "Не удалось отправить повторно",
+    "resetRequestFailed": "Не удалось запросить сброс пароля",
+    "resetResendFailed": "Не удалось повторно отправить сброс",
+    "resetFailed": "Не удалось сбросить пароль",
+    "emailChangeRequestFailed": "Не удалось запросить смену почты",
+    "emailChangeConfirmationFailed": "Не удалось подтвердить смену почты",
+    "emailChangeResendFailed": "Не удалось повторно отправить смену почты",
+    "profileUpdateFailed": "Не удалось обновить профиль"
 }
