@@ -55,7 +55,7 @@ class GameRatingRepository(BaseRepository[GameRating]):
 
     async def update_rating_after_game(self, rating: GameRating) -> GameRating:
         """Update rating after game completion."""
-        rating.last_played = datetime.utcnow()
+        rating.last_played = datetime.now()
         rating.games_played += 1
         return await self.update(rating)
 

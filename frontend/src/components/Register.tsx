@@ -1,29 +1,83 @@
-import React from 'react';
-import { Form, Input, Button, Alert, type FormProps } from 'antd';
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
+import React, { useEffect, useState } from 'react';
+import { Form, Input, Button, Alert, Typography, Space, type FormProps } from 'antd';
+import { UserOutlined, LockOutlined, MailOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { useAuth } from '../AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 type RegisterFormValues = {
   username: string;
+  email: string;
   password: string;
   confirmPassword: string;
 };
 
 const Register: React.FC = () => {
-  const { register, loading, error } = useAuth();
+  const { register, resendConfirmation, loading, error } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation('register');
+  const [cooldown, setCooldown] = useState<number>(0);
+  const [localMessage, setLocalMessage] = useState<string>('');
+  const storageKey = 'registerResendCooldownUntil';
+
+  useEffect(() => {
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+      const until = Number(saved);
+      const remaining = Math.max(0, Math.ceil((until - Date.now()) / 1000));
+      if (remaining > 0) {
+        setCooldown(remaining);
+      } else {
+        localStorage.removeItem(storageKey);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setInterval(() => {
+      setCooldown((prev) => Math.max(prev - 1, 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldown]);
+
+  useEffect(() => {
+    if (cooldown > 0) {
+      localStorage.setItem(storageKey, String(Date.now() + cooldown * 1000));
+    } else {
+      localStorage.removeItem(storageKey);
+    }
+  }, [cooldown]);
 
   const onFinish: FormProps<RegisterFormValues>['onFinish'] = async (values) => {
     try {
-      await register(values.username, values.password);
-      // Если register не бросил ошибку — регистрация успешна
-      navigate('/lobby'); // или '/game' — как у тебя принято после регистрации
+      await register(values.username, values.password, values.email);
+      localStorage.setItem('lastRegisteredUsername', values.username);
+      setLocalMessage(t('checkEmail' as any));
     } catch (err) {
       // Ошибка уже отображена через error из контекста
       console.error('Registration failed:', err);
+    }
+  };
+
+  const handleResend = async () => {
+    const username = localStorage.getItem('lastRegisteredUsername');
+    if (!username) {
+      setLocalMessage(t('missingUsername' as any));
+      return;
+    }
+    try {
+      const response = await resendConfirmation(username);
+      setLocalMessage(t('resendSuccess' as any));
+      setCooldown(response.seconds_remaining ?? 60);
+    } catch (err: any) {
+      if (err?.status === 429 || err?.message?.includes('429')) {
+        const remaining = err?.data?.detail?.seconds_remaining;
+        setLocalMessage(t('resendCooldownServer' as any));
+        setCooldown(remaining ?? 60);
+        return;
+      }
+      setLocalMessage(err?.message || t('resendFailed' as any));
     }
   };
 
@@ -46,6 +100,20 @@ const Register: React.FC = () => {
           prefix={<UserOutlined />}
           placeholder={t('username')}
           autoComplete="username"
+        />
+      </Form.Item>
+
+      <Form.Item<RegisterFormValues>
+        name="email"
+        rules={[
+          { required: true, message: t('emailRequired') },
+          { type: 'email', message: t('emailInvalid') },
+        ]}
+      >
+        <Input
+          prefix={<MailOutlined />}
+          placeholder={t('email')}
+          autoComplete="email"
         />
       </Form.Item>
 
@@ -96,6 +164,23 @@ const Register: React.FC = () => {
           {t('register')}
         </Button>
       </Form.Item>
+
+      <Space direction="vertical" style={{ width: '100%' }}>
+        {cooldown > 0 && (
+          <Typography.Text type="secondary">
+            <ClockCircleOutlined /> {t('resendTimerLabel' as any)} {cooldown}s
+          </Typography.Text>
+        )}
+        <Button onClick={handleResend} disabled={cooldown > 0}>
+          {cooldown > 0
+            ? t('resendCooldown' as any, { seconds: cooldown })
+            : t('resendEmail' as any)}
+        </Button>
+      </Space>
+
+      {localMessage && (
+        <Alert type="info" message={localMessage} showIcon style={{ marginTop: 16 }} />
+      )}
 
       {error && (
         <Alert

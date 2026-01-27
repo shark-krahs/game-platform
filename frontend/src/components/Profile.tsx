@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Card,
   Form,
@@ -27,13 +27,15 @@ type ProfileFormValues = {
   confirmPassword?: string;
   preferredColor: string;
   language: string;
+  newEmail?: string;
 };
 
 const Profile: React.FC = () => {
-  const { user, updateProfile, error, loading } = useAuth();
+  const { user, updateProfile, requestEmailChange, error, loading } = useAuth();
   const { t, i18n } = useTranslation('profile');
   const navigate = useNavigate();
   const [form] = Form.useForm<ProfileFormValues>();
+  const [emailMessage, setEmailMessage] = useState<string>('');
 
   // Инициализация формы при изменении пользователя
   useEffect(() => {
@@ -50,7 +52,7 @@ const Profile: React.FC = () => {
   };
 
   const onFinish: FormProps<ProfileFormValues>['onFinish'] = async (values) => {
-    const { oldPassword, newPassword, confirmPassword, preferredColor, language } = values;
+    const { oldPassword, newPassword, confirmPassword, preferredColor, language, newEmail } = values;
 
     // Локальная валидация пароля
     if (newPassword) {
@@ -92,11 +94,17 @@ const Profile: React.FC = () => {
 
       await updateProfile(updates);
 
+      if (newEmail) {
+        const response = await requestEmailChange(newEmail);
+        setEmailMessage(response.masked_email ? t('emailChangeSent') : response.message);
+      }
+
       // Очистка полей пароля после успешного обновления
       form.setFieldsValue({
         oldPassword: '',
         newPassword: '',
         confirmPassword: '',
+        newEmail: '',
       });
 
       // Можно заменить alert на более красивый notification (antd)
@@ -116,6 +124,9 @@ const Profile: React.FC = () => {
           <Space direction="vertical">
             <Typography.Text>
               <UserOutlined /> <strong>{t('username')}:</strong> {user?.username}
+            </Typography.Text>
+            <Typography.Text>
+              <UserOutlined /> <strong>{t('email')}:</strong> {user?.email || '-'}
             </Typography.Text>
             <Typography.Text>
               <StarOutlined /> <strong>{t('stars')}:</strong> {user?.stars ?? 0}
@@ -183,6 +194,14 @@ const Profile: React.FC = () => {
               {/* Добавь другие языки при необходимости */}
             </Select>
           </Form.Item>
+
+          <Form.Item name="newEmail" label={t('newEmail')}>
+            <Input placeholder={t('newEmail')} />
+          </Form.Item>
+
+          {emailMessage && (
+            <Alert type="success" message={emailMessage} showIcon style={{ marginBottom: 16 }} />
+          )}
 
           {(form.getFieldError('oldPassword').length > 0 ||
             form.getFieldError('confirmPassword').length > 0 ||

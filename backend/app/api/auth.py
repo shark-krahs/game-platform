@@ -1,5 +1,5 @@
 import logging
-from datetime import timedelta
+from datetime import timedelta, datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -12,6 +12,17 @@ from app.core.config import settings
 from app.repositories.user_repository import UserRepository
 from app.db.models import User
 from app.db.database import async_session
+from app.services.email_service import (
+    generate_token,
+    build_confirm_link,
+    build_password_reset_link,
+    build_email_change_link,
+    build_verification_email,
+    build_password_reset_email,
+    build_email_change_email,
+    send_email,
+    mask_email,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -23,11 +34,21 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 class UserCreate(BaseModel):
     username: str
     password: str
+    email: str
 
 
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+class RegisterResponse(BaseModel):
+    message: str
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
 
 
 class TokenData(BaseModel):
@@ -39,6 +60,29 @@ class UserUpdate(BaseModel):
     new_password: Optional[str] = None
     preferred_color: Optional[str] = None
     language: Optional[str] = None
+    email: Optional[str] = None
+
+
+class EmailRequest(BaseModel):
+    username: str
+
+
+class ResendCooldownResponse(BaseModel):
+    message: str
+    seconds_remaining: int
+
+
+class TokenRequest(BaseModel):
+    token: str
+
+
+class PasswordResetRequest(BaseModel):
+    token: str
+    new_password: str
+
+
+class ChangeEmailRequest(BaseModel):
+    new_email: str
 
 
 # Repository instance
@@ -60,26 +104,48 @@ async def authenticate_user(username: str, password: str) -> Optional[User]:
     return user
 
 
-@router.post("/auth/register", response_model=Token)
+@router.post("/auth/register", response_model=RegisterResponse)
 async def register(user_in: UserCreate):
     """Register new user."""
     existing = await user_repo.get_by_username_without_ratings(user_in.username)
     if existing:
         raise HTTPException(status_code=400, detail="username already registered")
 
-    password_hash = get_password_hash(user_in.password)
-    user = await user_repo.create_user(user_in.username, password_hash)
+    existing_email = await user_repo.get_by_email(user_in.email)
+    if existing_email:
+        if not existing_email.email_verified:
+            if existing_email.email_verification_expires_at and existing_email.email_verification_expires_at < datetime.utcnow():
+                await user_repo.delete(existing_email)
+            else:
+                raise HTTPException(status_code=400, detail="email already registered but not verified")
+        else:
+            raise HTTPException(status_code=400, detail="email already registered")
 
-    access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
-    access_token = create_access_token({"sub": user.username}, expires_delta=access_token_expires)
-    return {"access_token": access_token, "token_type": "bearer"}
+    password_hash = get_password_hash(user_in.password)
+    user = await user_repo.create_user(user_in.username, password_hash, user_in.email)
+
+    token = generate_token()
+    expires_at = datetime.utcnow() + timedelta(minutes=settings.email_verification_expire_minutes)
+    user.email_verification_token = token
+    user.email_verification_expires_at = expires_at
+    user.email_verification_sent_at = datetime.utcnow()
+    await user_repo.update(user)
+
+    confirm_link = build_confirm_link(token)
+    email_payload = build_verification_email(user.username, confirm_link)
+    email_payload.to_address = user.email
+    send_email(email_payload)
+
+    return {"message": "verification sent"}
 
 
 @router.post("/auth/login", response_model=Token)
-async def login(form_data: UserCreate):
+async def login(form_data: LoginRequest):
     user = await authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect username or password", headers={"WWW-Authenticate": "Bearer"})
+    if not user.email_verified:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="email not verified")
     access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
     access_token = create_access_token({"sub": user.username}, expires_delta=access_token_expires)
     return {"access_token": access_token, "token_type": "bearer"}
@@ -121,6 +187,8 @@ async def read_current_user(current_user: User = Depends(get_current_user)):
     return {
         "id": current_user.id,
         "username": current_user.username,
+        "email": current_user.email,
+        "email_verified": current_user.email_verified,
         "ratings": ratings_dict,
         "preferred_color": current_user.preferred_color,
         "language": current_user.language
@@ -145,15 +213,146 @@ async def update_current_user(user_update: UserUpdate, current_user: User = Depe
     if user_update.language is not None:
         updates['language'] = user_update.language
 
+
     if updates:
         updated_user = await user_repo.update_user_profile(current_user, **updates)
 
     return {
         "id": current_user.id,
         "username": current_user.username,
+        "email": current_user.email,
+        "email_verified": current_user.email_verified,
         "preferred_color": current_user.preferred_color,
         "language": current_user.language
     }
+
+
+@router.post("/auth/confirm-email")
+async def confirm_email(payload: TokenRequest):
+    user = await user_repo.get_by_verification_token(payload.token)
+    if not user:
+        raise HTTPException(status_code=400, detail="invalid token")
+    if not user.email_verification_expires_at or user.email_verification_expires_at < datetime.utcnow():
+        await user_repo.delete(user)
+        raise HTTPException(status_code=400, detail="token expired")
+    user.email_verified = True
+    user.email_verification_token = None
+    user.email_verification_expires_at = None
+    await user_repo.update(user)
+    return {"message": "email confirmed"}
+
+
+@router.post("/auth/resend-confirmation")
+async def resend_confirmation(payload: EmailRequest):
+    user = await user_repo.get_by_username_without_ratings(payload.username)
+    if not user or not user.email:
+        raise HTTPException(status_code=404, detail="user not found")
+    if user.email_verification_sent_at:
+        elapsed = (datetime.utcnow() - user.email_verification_sent_at).total_seconds()
+        if elapsed < settings.email_verification_resend_cooldown_seconds:
+            remaining = int(settings.email_verification_resend_cooldown_seconds - elapsed)
+            raise HTTPException(
+                status_code=429,
+                detail={"message": "resend cooldown", "seconds_remaining": remaining}
+            )
+    if user.email_verified:
+        return {"message": "email already verified"}
+    token = generate_token()
+    user.email_verification_sent_at = datetime.utcnow()
+    expires_at = datetime.utcnow() + timedelta(minutes=settings.email_verification_expire_minutes)
+    user.email_verification_token = token
+    user.email_verification_expires_at = expires_at
+    await user_repo.update(user)
+
+    confirm_link = build_confirm_link(token)
+    email_payload = build_verification_email(user.username, confirm_link)
+    email_payload.to_address = user.email
+    send_email(email_payload)
+    return {"message": "confirmation sent"}
+
+
+@router.post("/auth/request-password-reset")
+async def request_password_reset(payload: EmailRequest):
+    user = await user_repo.get_by_username_without_ratings(payload.username)
+    if not user or not user.email:
+        raise HTTPException(status_code=404, detail="user not found")
+    token = generate_token()
+    expires_at = datetime.utcnow() + timedelta(minutes=settings.password_reset_expire_minutes)
+    user.password_reset_token = token
+    user.password_reset_expires_at = expires_at
+    await user_repo.update(user)
+
+    reset_link = build_password_reset_link(token)
+    email_payload = build_password_reset_email(user.username, reset_link)
+    email_payload.to_address = user.email
+    send_email(email_payload)
+    return {"message": "reset sent", "masked_email": mask_email(user.email)}
+
+
+@router.post("/auth/request-email-change")
+async def request_email_change(payload: ChangeEmailRequest, current_user: User = Depends(get_current_user)):
+    if payload.new_email == current_user.email:
+        raise HTTPException(status_code=400, detail="email already set")
+    existing_email = await user_repo.get_by_email(payload.new_email)
+    if existing_email:
+        raise HTTPException(status_code=400, detail="email already registered")
+
+    token = generate_token()
+    expires_at = datetime.utcnow() + timedelta(minutes=settings.email_change_expire_minutes)
+    current_user.pending_email = payload.new_email
+    current_user.pending_email_token = token
+    current_user.pending_email_expires_at = expires_at
+    current_user.pending_email_confirmed = False
+    await user_repo.update(current_user)
+
+    confirm_link = build_email_change_link(token)
+    email_payload = build_email_change_email(current_user.username, confirm_link)
+    email_payload.to_address = current_user.email
+    send_email(email_payload)
+    return {"message": "confirmation sent", "masked_email": mask_email(current_user.email)}
+
+
+@router.post("/auth/reset-password")
+async def reset_password(payload: PasswordResetRequest):
+    user = await user_repo.get_by_password_reset_token(payload.token)
+    if not user:
+        raise HTTPException(status_code=400, detail="invalid token")
+    if not user.password_reset_expires_at or user.password_reset_expires_at < datetime.utcnow():
+        await user_repo.clear_expired_password_reset(user)
+        raise HTTPException(status_code=400, detail="token expired")
+    user.password_hash = get_password_hash(payload.new_password)
+    user.password_reset_token = None
+    user.password_reset_expires_at = None
+    await user_repo.update(user)
+    return {"message": "password reset"}
+
+
+@router.post("/auth/confirm-email-change")
+async def confirm_email_change(payload: TokenRequest):
+    user = await user_repo.get_by_pending_email_token(payload.token)
+    if not user:
+        raise HTTPException(status_code=400, detail="invalid token")
+    if not user.pending_email_expires_at or user.pending_email_expires_at < datetime.utcnow():
+        await user_repo.clear_expired_pending_email(user)
+        raise HTTPException(status_code=400, detail="token expired")
+    if not user.pending_email_confirmed:
+        user.pending_email_confirmed = True
+        await user_repo.update(user)
+
+        confirm_link = build_email_change_link(payload.token)
+        email_payload = build_email_change_email(user.username, confirm_link)
+        email_payload.to_address = user.pending_email
+        send_email(email_payload)
+        return {"message": "old email confirmed"}
+
+    user.email = user.pending_email
+    user.pending_email = None
+    user.pending_email_token = None
+    user.pending_email_expires_at = None
+    user.pending_email_confirmed = False
+    user.email_verified = True
+    await user_repo.update(user)
+    return {"message": "email updated"}
 
 
 @router.get("/auth/me/active-game")

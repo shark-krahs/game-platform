@@ -9,6 +9,17 @@ class User(SQLModel, table=True):
     id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
     username: str
     password_hash: Optional[str] = None
+    email: Optional[str] = None
+    email_verified: bool = False
+    email_verification_token: Optional[str] = None
+    email_verification_expires_at: Optional[datetime] = None
+    email_verification_sent_at: Optional[datetime] = None
+    password_reset_token: Optional[str] = None
+    password_reset_expires_at: Optional[datetime] = None
+    pending_email: Optional[str] = None
+    pending_email_token: Optional[str] = None
+    pending_email_expires_at: Optional[datetime] = None
+    pending_email_confirmed: bool = False
     stars: int = 0
     preferred_color: str = '#4287f5'
     language: str = 'en'

@@ -1,8 +1,8 @@
-import React from 'react';
-import { Form, Input, Button, Alert, type FormProps } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Form, Input, Button, Alert, Typography, Space, type FormProps } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useAuth } from '../AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 type LoginFormValues = {
@@ -26,6 +26,7 @@ const Login: React.FC = () => {
       console.error('Login failed:', err);
     }
   };
+
 
   return (
     <Form<LoginFormValues>
@@ -69,6 +70,11 @@ const Login: React.FC = () => {
         </Button>
       </Form.Item>
 
+      <Space direction="vertical" style={{ width: '100%' }}>
+        <Typography.Text>
+          <Link to="/forgot-password">{t('forgotPassword')}</Link>
+        </Typography.Text>
+      </Space>
       {error && (
         <Alert
           title={error}

@@ -71,8 +71,12 @@ class ApiService {
       }
 
       if (!response.ok) {
+        const detailMessage =
+          typeof responseData.detail === 'string'
+            ? responseData.detail
+            : responseData.detail?.message;
         const message =
-          responseData.detail ||
+          detailMessage ||
           responseData.message ||
           responseData.error ||
           `HTTP ${response.status}`;

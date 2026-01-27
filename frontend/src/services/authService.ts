@@ -10,7 +10,13 @@ interface LoginResponse {
 }
 
 interface RegisterResponse {
-  access_token: string;
+  message: string;
+}
+
+interface MessageResponse {
+  message: string;
+  masked_email?: string;
+  seconds_remaining?: number;
 }
 
 class AuthService {
@@ -30,19 +36,41 @@ class AuthService {
     }
   }
 
-  async register(username: string, password: string): Promise<RegisterResponse> {
+  async register(username: string, password: string, email: string): Promise<RegisterResponse> {
     try {
       const response = await api.post<RegisterResponse>('/auth/register', {
         username,
         password,
+        email,
       });
-      if (response.access_token) {
-        localStorage.setItem('authToken', response.access_token);
-      }
       return response;
     } catch (error) {
       throw new Error((error as Error).message || 'Registration failed');
     }
+  }
+
+  async confirmEmail(token: string): Promise<MessageResponse> {
+    return api.post<MessageResponse>('/auth/confirm-email', { token });
+  }
+
+  async resendConfirmation(username: string): Promise<MessageResponse> {
+    return api.post<MessageResponse>('/auth/resend-confirmation', { username });
+  }
+
+  async requestPasswordReset(username: string): Promise<MessageResponse> {
+    return api.post<MessageResponse>('/auth/request-password-reset', { username });
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<MessageResponse> {
+    return api.post<MessageResponse>('/auth/reset-password', { token, new_password: newPassword });
+  }
+
+  async requestEmailChange(newEmail: string): Promise<MessageResponse> {
+    return api.post<MessageResponse>('/auth/request-email-change', { new_email: newEmail });
+  }
+
+  async confirmEmailChange(token: string): Promise<MessageResponse> {
+    return api.post<MessageResponse>('/auth/confirm-email-change', { token });
   }
 
   async getCurrentUser(): Promise<User> {

@@ -16,6 +16,10 @@ import GameErrorBoundary from './components/common/GameErrorBoundary';
 import AppHeader from './components/layout/AppHeader';
 import AppBackground from './components/layout/AppBackground';
 import AuthSelector from './components/AuthSelector';
+import ConfirmEmail from './components/ConfirmEmail';
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
+import ConfirmEmailChange from './components/ConfirmEmailChange';
 import GameClient from './components/GameClient';
 import GameReplay from './components/GameReplay';
 import SavedGames from './components/SavedGames';
@@ -82,6 +86,10 @@ function AppContent() {
                   <Route path="/lobby" element={<Lobby />} />
                   <Route path="/login" element={<AuthSelector />} />
                   <Route path="/register" element={<AuthSelector />} />
+                  <Route path="/confirm-email" element={<ConfirmEmail />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/confirm-email-change" element={<ConfirmEmailChange />} />
                   <Route path="*" element={<Navigate to="/lobby" replace />} />
                 </>
               ) : (
@@ -98,6 +106,7 @@ function AppContent() {
                   <Route path="/saved-games" element={<SavedGames />} />
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/lobby" element={<Lobby />} />
+                  <Route path="/confirm-email-change" element={<ConfirmEmailChange />} />
                   <Route path="*" element={<Navigate to="/lobby" replace />} />
                 </>
               )}
