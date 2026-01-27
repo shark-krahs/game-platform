@@ -57,6 +57,7 @@ class TetrisGame(AbstractGameLogic):
             time_remaining={i: float(time_control.increment) for i in range(len(players))},
             winner=None,
             moves_history=[],
+            chat_history=[],
             created_at=datetime.now(),
             config=self.config,
             time_control=time_control
@@ -75,6 +76,7 @@ class TetrisGame(AbstractGameLogic):
             time_remaining=game_state.time_remaining.copy(),
             winner=game_state.winner,
             moves_history=game_state.moves_history.copy(),
+            chat_history=game_state.chat_history.copy(),
             created_at=game_state.created_at,
             config=game_state.config,
             time_control=game_state.time_control,

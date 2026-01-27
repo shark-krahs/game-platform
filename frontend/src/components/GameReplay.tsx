@@ -8,6 +8,7 @@ import GameTimers from './game/GameTimers';
 import { getGameEngine } from '../games/registry';
 import savedGamesApi from '../services/savedGamesApi';
 import { SavedGameDetail, GameState, GameStatus, Player } from '../types';
+import MessageLog from './MessageLog';
 
 const GameReplay: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
@@ -314,6 +315,8 @@ const GameReplay: React.FC = () => {
               </div>
             )}
           </div>
+
+          <MessageLog messages={[]} chatMessages={savedGame.chat_history || []} disabled />
         </Col>
       </Row>
 

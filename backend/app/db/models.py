@@ -63,6 +63,7 @@ class SavedGame(SQLModel, table=True):
     time_remaining: str  # JSON string of time remaining dict
     winner: Optional[int] = None
     moves_history: str  # JSON string of moves history
+    chat_history: Optional[str] = None  # JSON string of chat messages
     time_control: str  # JSON string of time control
     rated: bool = False
     created_at: datetime = Field(default_factory=datetime.now)
@@ -95,6 +96,12 @@ class SavedGame(SQLModel, table=True):
 
     def get_moves_history(self) -> list:
         return json.loads(self.moves_history) if self.moves_history else []
+
+    def set_chat_history(self, chat_history: list):
+        self.chat_history = json.dumps(chat_history)
+
+    def get_chat_history(self) -> list:
+        return json.loads(self.chat_history) if self.chat_history else []
 
     def set_time_control(self, time_control: dict):
         self.time_control = json.dumps(time_control)

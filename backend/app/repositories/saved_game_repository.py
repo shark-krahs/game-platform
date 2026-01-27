@@ -41,7 +41,8 @@ class SavedGameRepository(BaseRepository[SavedGame]):
     async def create_saved_game(self, user_id: UUID, game_id: str, game_type: str, title: str,
                                game_state: dict, players: list, current_player: int,
                                time_remaining: dict, winner: Optional[int], moves_history: list,
-                               time_control: dict, rated: bool = False) -> SavedGame:
+                               time_control: dict, rated: bool = False,
+                               chat_history: Optional[list] = None) -> SavedGame:
         """Create a new saved game."""
         saved_game = SavedGame(
             user_id=user_id,
@@ -59,6 +60,7 @@ class SavedGameRepository(BaseRepository[SavedGame]):
         saved_game.set_players(players)
         saved_game.set_time_remaining(time_remaining)
         saved_game.set_moves_history(moves_history)
+        saved_game.set_chat_history(chat_history or [])
         saved_game.set_time_control(time_control)
 
         return await self.create(saved_game)

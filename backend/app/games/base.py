@@ -49,6 +49,7 @@ class GameState:
     time_remaining: Dict[int, float]
     winner: Optional[int]
     moves_history: List[GameMove]
+    chat_history: List[Dict[str, Any]]
     created_at: datetime
     config: GameConfig
     time_control: TimeControl

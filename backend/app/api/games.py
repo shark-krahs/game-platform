@@ -145,6 +145,48 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
                 if not valid:
                     await websocket.send_text(json.dumps({'type':'error','code':'games.invalid_move','message':'invalid move'}))
 
+            elif action == 'chat':
+                # Handle chat message during game
+                content = (msg.get('message') or '').strip()
+                if not content:
+                    await websocket.send_text(json.dumps({'type':'error','code':'games.chat_empty','message':'empty message'}))
+                    continue
+
+                # Get game state from appropriate engine
+                game_state = None
+                selected_engine = None
+
+                # Try Tetris engine first
+                from app.services.tetris_game_engine import tetris_game_engine
+                game_state = tetris_game_engine.get_game_state(game_id)
+                if game_state:
+                    selected_engine = tetris_game_engine
+                else:
+                    # Try general game engine
+                    from app.services.game_engine import game_engine
+                    game_state = game_engine.get_game_state(game_id)
+                    if game_state:
+                        selected_engine = game_engine
+
+                if not game_state or game_state.status not in ['first_move', 'playing', 'disconnect_wait']:
+                    await websocket.send_text(json.dumps({'type':'error','code':'games.not_playing_state','message':'game not in playing state'}))
+                    continue
+
+                chat_entry = {
+                    'user_id': user_id,
+                    'username': username,
+                    'message': content,
+                    'timestamp': datetime.now().isoformat()
+                }
+
+                if not hasattr(game_state, 'chat_history'):
+                    game_state.chat_history = []
+
+                game_state.chat_history.append(chat_entry)
+
+                from app.services.game_state import broadcast_to_game
+                await broadcast_to_game(game_id, {'type': 'chat', 'chat': chat_entry})
+
             elif action == 'leave':
                 # Handle player leaving
                 await handle_player_leave(game_id, user_id)
@@ -365,7 +407,8 @@ async def save_game(request: dict, current_user = Depends(get_current_user)):
             'initial_time': game_state.time_control.initial_time,
             'increment': game_state.time_control.increment
         },
-        rated=game_state.rated
+        rated=game_state.rated,
+        chat_history=getattr(game_state, 'chat_history', [])
     )
 
     # Add moves history if available
@@ -437,6 +480,7 @@ async def get_saved_game(game_id: str, current_user = Depends(get_current_user))
         'time_remaining': saved_game.get_time_remaining(),
         'winner': saved_game.winner,
         'moves_history': saved_game.get_moves_history(),
+        'chat_history': saved_game.get_chat_history(),
         'time_control': saved_game.get_time_control(),
         'rated': saved_game.rated,
         'created_at': saved_game.created_at.isoformat(),

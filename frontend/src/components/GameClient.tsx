@@ -45,6 +45,7 @@ const GameClient: React.FC = () => {
     disconnectTimer,
     disconnectedPlayer,
     messages,
+    chatMessages,
     error,
     sendMessage,
   } = useWebSocket(gameId, authToken, user, navigate, location);
@@ -111,6 +112,10 @@ const GameClient: React.FC = () => {
 
   const resetGame = () => {
     sendMessage({ type: 'reset' });
+  };
+
+  const sendChatMessage = (message: string) => {
+    sendMessage({ type: 'chat', message });
   };
 
 
@@ -299,7 +304,12 @@ const GameClient: React.FC = () => {
             </div>
           )}
 
-          <MessageLog messages={messages} />
+          <MessageLog
+            messages={messages}
+            chatMessages={chatMessages}
+            onSendChat={sendChatMessage}
+            disabled={status === 'finished'}
+          />
         </Col>
       </Row>
     </div>

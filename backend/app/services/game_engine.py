@@ -198,7 +198,8 @@ class GameEngine:
                             'initial_time': game_state.time_control.initial_time,
                             'increment': game_state.time_control.increment
                         },
-                        rated=game_state.rated
+                        rated=game_state.rated,
+                        chat_history=getattr(game_state, 'chat_history', [])
                     )
 
                     # Add moves history if available - save board state after each move

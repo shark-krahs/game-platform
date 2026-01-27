@@ -45,6 +45,13 @@ export interface GameMove {
   timestamp: string
 }
 
+export interface ChatMessage {
+  user_id: string
+  username: string
+  message: string
+  timestamp: string
+}
+
 export interface Player {
   id: number
   name: string
@@ -89,6 +96,7 @@ export interface SavedGameDetail extends SavedGame {
   moves_history: any[]
   time_control: TimeControl
   moves: GameHistoryMove[]
+  chat_history?: ChatMessage[]
 }
 
 export interface GameHistoryMove {

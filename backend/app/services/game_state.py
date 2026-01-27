@@ -93,6 +93,7 @@ async def broadcast_state(game_id: str, game_state: GameState):
         'status': game_state.status,
         'current_player': game_state.current_player,
         'winner': game_state.winner,
+        'chat': getattr(game_state, 'chat_history', []),
     }
 
     # Handle board data differently for different games

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Location, NavigateFunction } from 'react-router-dom';
-import { User, GameStatus, Player } from '../types';
+import { User, GameStatus, Player, ChatMessage } from '../types';
 import { buildWsApiBaseUrl } from '../utils/url';
 
 interface TetrisBoardState {
@@ -31,6 +31,7 @@ interface UseWebSocketReturn {
   disconnectedPlayer: number | null;
 
   messages: string[];
+  chatMessages: ChatMessage[];
 
   sendMessage: (message: any) => void;
   disconnect: () => void;
@@ -48,6 +49,7 @@ export function useWebSocket(
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [connected, setConnected] = useState(false);
   const [messages, setMessages] = useState<string[]>([]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
 
   const [board, setBoard] = useState<(number | null)[][] | null>(null);
   const [board_state, setBoardState] = useState<TetrisBoardState | null>(null);
@@ -116,7 +118,14 @@ export function useWebSocket(
             setDisconnectedPlayer(
               msg.disconnected_player !== undefined ? msg.disconnected_player : null
             );
+            if (Array.isArray(msg.chat)) {
+              setChatMessages(msg.chat);
+            }
             setError(null);
+          } else if (msg.type === 'chat') {
+            if (msg.chat) {
+              setChatMessages((prev) => [...prev, msg.chat]);
+            }
           } else if (msg.type === 'error') {
             console.warn('Game error:', msg.message);
             const localizedError = msg.code ? t(msg.code, { defaultValue: '' }) : '';
@@ -209,6 +218,7 @@ export function useWebSocket(
     disconnectedPlayer,
 
     messages,
+    chatMessages,
 
     sendMessage,
     disconnect,
