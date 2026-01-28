@@ -9,6 +9,7 @@ from datetime import datetime
 
 from app.games import GameFactory
 from app.games.base import GameState, TimeControl
+from app.services.bot_manager import is_bot_player, schedule_bot_move
 from .game_engine import GameEngineInterface, broadcast_state
 
 logger = logging.getLogger(__name__)
@@ -38,7 +39,7 @@ class TetrisGameEngine(GameEngineInterface):
         # Clear active games for both players
         from app.repositories.user_active_game_repository import UserActiveGameRepository
         for player in game_state.players:
-            if player.get('user_id'):
+            if player.get('user_id') and not is_bot_player(player):
                 await UserActiveGameRepository.clear_active_game(player['user_id'])
 
         # Update ratings if this was a rated game
@@ -55,18 +56,37 @@ class TetrisGameEngine(GameEngineInterface):
                 winner_code = 2  # player2 won
 
             if player1_id_str and player2_id_str:
-                try:
-                    player1_uuid = UUID(player1_id_str)
-                    player2_uuid = UUID(player2_id_str)
-                    # Update ratings synchronously to ensure they're saved before user returns to lobby
-                    await RatingCalculator.update_ratings_after_game(
-                        game_state.game_type,
-                        game_state.time_control_str,
-                        player1_uuid, player2_uuid, winner_code
-                    )
-                    logger.info(f"Updated ratings for Tetris game {game_id}: winner={game_state.winner}")
-                except Exception as e:
-                    logger.error(f"Failed to convert user IDs to UUID for Tetris ratings update: {e}")
+                if is_bot_player(game_state.players[0]) or is_bot_player(game_state.players[1]):
+                    try:
+                        human_player = (
+                            game_state.players[0]
+                            if not is_bot_player(game_state.players[0])
+                            else game_state.players[1]
+                        )
+                        human_player_id = UUID(human_player['user_id'])
+                        human_winner_code = 1 if game_state.winner == human_player['name'] else 2
+                        await RatingCalculator.update_ratings_after_bot_game(
+                            game_state.game_type,
+                            game_state.time_control_str,
+                            human_player_id,
+                            human_winner_code,
+                        )
+                        logger.info(f"Updated ratings for bot Tetris game {game_id}: winner={game_state.winner}")
+                    except Exception as e:
+                        logger.error(f"Failed to update ratings for bot Tetris game {game_id}: {e}")
+                else:
+                    try:
+                        player1_uuid = UUID(player1_id_str)
+                        player2_uuid = UUID(player2_id_str)
+                        # Update ratings synchronously to ensure they're saved before user returns to lobby
+                        await RatingCalculator.update_ratings_after_game(
+                            game_state.game_type,
+                            game_state.time_control_str,
+                            player1_uuid, player2_uuid, winner_code
+                        )
+                        logger.info(f"Updated ratings for Tetris game {game_id}: winner={game_state.winner}")
+                    except Exception as e:
+                        logger.error(f"Failed to convert user IDs to UUID for Tetris ratings update: {e}")
 
         # Clean up finished game after some time
         asyncio.create_task(self._cleanup_finished_game_after_delay(game_id))
@@ -81,7 +101,7 @@ class TetrisGameEngine(GameEngineInterface):
         logger.info(f"Auto-saving Tetris game {game_id} for all authenticated players")
 
         for player in game_state.players:
-            if player.get('user_id'):
+            if player.get('user_id') and not is_bot_player(player):
                 try:
                     user_id = UUID(player['user_id'])
                     title = f"{game_state.game_type.title()} - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
@@ -214,6 +234,13 @@ class TetrisGameEngine(GameEngineInterface):
             self.active_games[game_id] = new_state
             await broadcast_state(game_id, new_state)
 
+            # Schedule bot move if it's bot's turn
+            if any(is_bot_player(player) for player in new_state.players):
+                bot_player = new_state.players[new_state.current_player]
+                if is_bot_player(bot_player):
+                    difficulty = bot_player.get("difficulty", 1)
+                    asyncio.create_task(schedule_bot_move(new_state, game_id, difficulty, self))
+
         return valid
 
     def get_game_state(self, game_id: str) -> Optional[GameState]:
@@ -285,6 +312,13 @@ class TetrisGameEngine(GameEngineInterface):
 
                         # Broadcast state immediately after turn change
                         await broadcast_state(game_id, game_state)
+
+                        # Schedule bot move if it's bot's turn
+                        if any(is_bot_player(player) for player in game_state.players):
+                            bot_player = game_state.players[game_state.current_player]
+                            if is_bot_player(bot_player):
+                                difficulty = bot_player.get("difficulty", 1)
+                                asyncio.create_task(schedule_bot_move(game_state, game_id, difficulty, self))
 
                 # Update move timer only if player has a falling piece
                 if game_state.board_state.get('falling_piece'):

@@ -4,6 +4,8 @@ from pydantic import BaseModel
 import asyncio
 import time
 
+from app.services.bot_manager import BOT_WAIT_SECONDS, build_bot_profile
+
 logger = logging.getLogger(__name__)
 
 class JoinData(BaseModel):
@@ -103,3 +105,50 @@ async def matchmaking_loop():
             if pair:
                 from app.services.game_state import create_matched_game
                 await create_matched_game(pair[0].game_type, pair[0].time_control, pair[0], pair[1])
+            else:
+                await try_match_with_bot(pool_key)
+
+
+async def try_match_with_bot(pool_key: str):
+    if pool_key not in pools:
+        return None
+
+    players = pools[pool_key]
+    if len(players) != 1:
+        return None
+
+    waiting_player = players[0]
+    if time.time() - waiting_player.joined_at < BOT_WAIT_SECONDS:
+        return None
+
+    bot_profile = build_bot_profile(waiting_player.rating, waiting_player.game_type)
+    bot_player = WaitingPlayer(
+        user_id=bot_profile["user_id"],
+        username=bot_profile["username"],
+        rating=float(waiting_player.rating),
+        game_type=waiting_player.game_type,
+        time_control=waiting_player.time_control,
+        rated=waiting_player.rated,
+        is_anonymous=True,
+        joined_at=time.time(),
+        ws=None,
+    )
+
+    pools[pool_key] = []
+    logger.info(
+        "Matching player with bot",
+        extra={
+            "player": waiting_player.username,
+            "game_type": waiting_player.game_type,
+            "difficulty": bot_profile["difficulty"],
+        },
+    )
+
+    from app.services.game_state import create_matched_game
+    await create_matched_game(
+        waiting_player.game_type,
+        waiting_player.time_control,
+        waiting_player,
+        bot_player,
+        bot_difficulty=bot_profile["difficulty"],
+    )

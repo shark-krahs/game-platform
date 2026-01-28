@@ -8,6 +8,7 @@ from typing import Dict, Any, Optional, Set
 import uuid
 
 from app.games.base import GameState, TimeControl
+from app.services.bot_manager import is_bot_player, schedule_bot_move
 
 logger = logging.getLogger(__name__)
 
@@ -121,7 +122,13 @@ async def broadcast_state(game_id: str, game_state: GameState):
     await broadcast_to_game(game_id, state)
 
 
-async def create_matched_game(game_type: str, time_control: str, player1: Any, player2: Any) -> str:
+async def create_matched_game(
+    game_type: str,
+    time_control: str,
+    player1: Any,
+    player2: Any,
+    bot_difficulty: Optional[int] = None,
+) -> str:
     """
     Create a matched game for two players.
 
@@ -153,15 +160,22 @@ async def create_matched_game(game_type: str, time_control: str, player1: Any, p
             'id': player1.user_id,
             'name': player1.username,
             'color': '#007bff',
-            'user_id': player1.user_id
+            'user_id': player1.user_id,
+            'rating': getattr(player1, 'rating', None),
         },
         {
             'id': player2.user_id,
             'name': player2.username,
             'color': '#dc3545',
-            'user_id': player2.user_id
+            'user_id': player2.user_id,
+            'rating': getattr(player2, 'rating', None),
         }
     ]
+
+    if bot_difficulty is not None:
+        for player in players:
+            if is_bot_player(player):
+                player['difficulty'] = bot_difficulty
 
     time_control_obj = TimeControl(
         type='move_time',
@@ -172,10 +186,12 @@ async def create_matched_game(game_type: str, time_control: str, player1: Any, p
     # Create game using GameEngine
     game_state = await game_engine.create_game(game_id, game_type, players, time_control_obj)
 
-    # Set active game for both players
+    # Set active game for both players (skip bots)
     from app.repositories.user_active_game_repository import UserActiveGameRepository
-    await UserActiveGameRepository.set_active_game(player1.user_id, game_id)
-    await UserActiveGameRepository.set_active_game(player2.user_id, game_id)
+    if not is_bot_player(players[0]):
+        await UserActiveGameRepository.set_active_game(player1.user_id, game_id)
+    if not is_bot_player(players[1]):
+        await UserActiveGameRepository.set_active_game(player2.user_id, game_id)
 
     # Initialize connections dict for this game
     game_connections[game_id] = {}
@@ -184,11 +200,23 @@ async def create_matched_game(game_type: str, time_control: str, player1: Any, p
 
     # Notify both players with their assigned colors
     try:
-        await player1.ws.send_text(json.dumps({"type": "match_found", "game_id": game_id, "color": "#007bff"}))
-        await player2.ws.send_text(json.dumps({"type": "match_found", "game_id": game_id, "color": "#dc3545"}))
+        if player1.ws:
+            await player1.ws.send_text(json.dumps({"type": "match_found", "game_id": game_id, "color": "#007bff"}))
+        if player2.ws:
+            await player2.ws.send_text(json.dumps({"type": "match_found", "game_id": game_id, "color": "#dc3545"}))
         logger.info(f"Match notifications sent to {player1.username} and {player2.username}")
     except Exception as e:
         logger.error(f"Failed to notify players: {e}")
+
+    # Schedule bot move if bot starts
+    if bot_difficulty is not None:
+        selected_engine = game_engine
+        if game_type == 'tetris':
+            from app.services.tetris_game_engine import tetris_game_engine
+            selected_engine = tetris_game_engine
+
+        if is_bot_player(players[0]) or is_bot_player(players[1]):
+            asyncio.create_task(schedule_bot_move(game_state, game_id, bot_difficulty, selected_engine))
 
     return game_id
 
@@ -299,7 +327,7 @@ async def handle_player_leave(game_id: str, user_id: str):
             # Clear active games for all players
             from app.repositories.user_active_game_repository import UserActiveGameRepository
             for player in game_state.players:
-                if player.get('user_id'):
+                if player.get('user_id') and not is_bot_player(player):
                     await UserActiveGameRepository.clear_active_game(player['user_id'])
         elif connected_count == 1 and game_state.status != 'finished':
             # One player left, find which one and start disconnection timer
@@ -354,7 +382,7 @@ async def timeout_abandoned_game(game_id: str):
         # Clear active games for all players
         from app.repositories.user_active_game_repository import UserActiveGameRepository
         for player in game_state.players:
-            if player.get('user_id'):
+            if player.get('user_id') and not is_bot_player(player):
                 await UserActiveGameRepository.clear_active_game(player['user_id'])
 
     # End the game

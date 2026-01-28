@@ -131,6 +131,35 @@ class RatingCalculator:
         await rating_repo.update_rating_after_game(p2_rating)
 
     @staticmethod
+    async def update_ratings_after_bot_game(
+        game_type: str,
+        time_control_str: str,
+        player_id: UUID,
+        winner: int,
+    ):
+        """Update ratings for a player in a rated game against a bot (mirror rating)."""
+        category = get_time_control_type(f"{game_type}_{time_control_str}")
+        categorized_game_type = f"{game_type}_{category}"
+
+        player_rating = await RatingCalculator.get_or_create_game_rating(player_id, categorized_game_type)
+
+        mirrored_rating = RatingCalculator.calculate_new_ratings(
+            player_rating.rating,
+            player_rating.rd,
+            player_rating.volatility,
+            player_rating.rating,
+            player_rating.rd,
+            player_rating.volatility,
+            winner,
+        )
+
+        player_rating.rating = mirrored_rating[0]
+        player_rating.rd = mirrored_rating[1]
+        player_rating.volatility = mirrored_rating[2]
+
+        await rating_repo.update_rating_after_game(player_rating)
+
+    @staticmethod
     async def get_game_rating(user_id: UUID, game_type: str) -> Optional[GameRating]:
         """Get game rating for user, returns None if not found."""
         return await rating_repo.get_game_rating(user_id, game_type)

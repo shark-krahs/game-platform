@@ -35,7 +35,7 @@ const ConfirmEmail: React.FC = () => {
 
   return (
     <Card style={{ maxWidth: 420, margin: '0 auto' }}>
-      <Space direction="vertical" style={{ width: '100%' }}>
+      <Space orientation="vertical" style={{ width: '100%' }}>
         <Typography.Title level={3}>{t('confirmEmailTitle')}</Typography.Title>
         {message && <Alert type={messageType} title={message} showIcon />}
         {error && <Alert type="error" title={error} showIcon />}
