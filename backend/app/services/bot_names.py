@@ -129,18 +129,17 @@ def generate_bot_name() -> str:
     style = random.choice(["simple", "prefix", "suffix", "spaced", "callsign"])
 
     if style == "prefix":
-        return f"{random.choice(PREFIXES)}{noun}{number}"
-    if style == "suffix":
-        return f"{adjective}{noun}{random.choice(SUFFIXES)}"
-    if style == "spaced":
-        return f"{adjective} {noun}"
-    if style == "callsign":
-        return f"{adjective}{random.choice(PREFIXES)}-{number}"
+        base = f"{random.choice(PREFIXES)}{noun}{number}"
+    elif style == "suffix":
+        base = f"{adjective}{noun}{random.choice(SUFFIXES)}"
+    elif style == "spaced":
+        base = f"{adjective} {noun}"
+    elif style == "callsign":
+        base = f"{adjective}{random.choice(PREFIXES)}-{number}"
+    else:
+        base = _shuffle_segments([adjective, noun, str(number)])
 
-    if style == "simple":
-        return _shuffle_segments([adjective, noun, str(number)])
-
-    return f"{adjective}{noun}{number}"
+    return _randomize_case(base)
 
 
 def _shuffle_segments(segments: list) -> str:
@@ -148,3 +147,25 @@ def _shuffle_segments(segments: list) -> str:
     random.shuffle(segments)
     joiner = random.choice(["", "_", "-"])
     return joiner.join(segments)
+
+
+def _randomize_case(value: str) -> str:
+    styles = ["title", "lower", "upper", "alternating", "random"]
+    style = random.choice(styles)
+
+    if style == "title":
+        return value.title()
+    if style == "lower":
+        return value.lower()
+    if style == "upper":
+        return value.upper()
+    if style == "alternating":
+        return "".join(
+            char.upper() if index % 2 == 0 else char.lower()
+            for index, char in enumerate(value)
+        )
+
+    return "".join(
+        char.upper() if random.random() > 0.5 else char.lower()
+        for char in value
+    )
