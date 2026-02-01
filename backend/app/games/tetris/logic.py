@@ -3,11 +3,11 @@ Tetris for two players game logic implementation.
 """
 import logging
 import random
-from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime
+from typing import Dict, Any, List, Optional, Tuple
 
-from ..base import AbstractGameLogic, GameConfig, GameState, GameMove, TimeControl
 from .board import TetrisBoard
+from ..base import AbstractGameLogic, GameConfig, GameState, TimeControl
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ class TetrisGame(AbstractGameLogic):
         for i, player in enumerate(players):
             game_players.append({
                 'id': player.get('id', i),
-                'name': player.get('name', f'Player {i+1}'),
+                'name': player.get('name', f'Player {i + 1}'),
                 'color': player.get('color', f'color_{i}'),
                 'user_id': player.get('user_id')
             })
@@ -137,7 +137,8 @@ class TetrisGame(AbstractGameLogic):
                 if lines_cleared > 0:
                     score = self.board._calculate_score(lines_cleared)
                     new_state.board_state['scores'][new_state.current_player] += score
-                    logger.info(f"Tetris manual placement: player {new_state.current_player} scored {score} points for {lines_cleared} lines")
+                    logger.info(
+                        f"Tetris manual placement: player {new_state.current_player} scored {score} points for {lines_cleared} lines")
 
             # Switch to next player
             next_player = (new_state.current_player + 1) % len(new_state.players)

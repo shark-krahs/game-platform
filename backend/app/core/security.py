@@ -1,7 +1,10 @@
 from datetime import datetime, timedelta
 from typing import Optional
+
 import bcrypt
+
 bcrypt.__about__ = bcrypt
+
 from passlib.context import CryptContext
 from jose import jwt
 

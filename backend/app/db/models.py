@@ -1,8 +1,9 @@
-from sqlmodel import SQLModel, Field, Relationship
-from typing import Optional, List
-from datetime import datetime
-from uuid import UUID, uuid4
 import json
+from datetime import datetime
+from typing import Optional, List
+from uuid import UUID, uuid4
+
+from sqlmodel import SQLModel, Field, Relationship
 
 
 class User(SQLModel, table=True):

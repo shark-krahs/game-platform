@@ -1,5 +1,5 @@
 import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
+import {initReactI18next} from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
 // Импортируем JSON-файлы с типом any (или создадим типы позже, если захочешь строгость)
@@ -41,78 +41,78 @@ import ukGameClient from './locales/uk/gameClient.json';
 
 // Опционально: тип для ресурсов (если хочешь строгую типизацию переводов)
 declare module 'i18next' {
-  interface CustomTypeOptions {
-    defaultNS: 'app';
-    resources: {
-      app: typeof enApp;
-      authSelector: typeof enAuthSelector;
-      profile: typeof enProfile;
-      lobby: typeof enLobby;
-      login: typeof enLogin;
-      register: typeof enRegister;
-      gameClient: typeof enGameClient;
-    };
-  }
+    interface CustomTypeOptions {
+        defaultNS: 'app';
+        resources: {
+            app: typeof enApp;
+            authSelector: typeof enAuthSelector;
+            profile: typeof enProfile;
+            lobby: typeof enLobby;
+            login: typeof enLogin;
+            register: typeof enRegister;
+            gameClient: typeof enGameClient;
+        };
+    }
 }
 
 i18n
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .init({
-    resources: {
-      en: {
-        app: enApp,
-        authSelector: enAuthSelector,
-        profile: enProfile,
-        lobby: enLobby,
-        login: enLogin,
-        register: enRegister,
-        gameClient: enGameClient,
-      },
-      ru: {
-        app: ruApp,
-        authSelector: ruAuthSelector,
-        profile: ruProfile,
-        lobby: ruLobby,
-        login: ruLogin,
-        register: ruRegister,
-        gameClient: ruGameClient,
-      },
-      be: {
-        app: beApp,
-        authSelector: beAuthSelector,
-        profile: beProfile,
-        lobby: beLobby,
-        login: beLogin,
-        register: beRegister,
-        gameClient: beGameClient,
-      },
-      kk: {
-        app: kkApp,
-        authSelector: kkAuthSelector,
-        profile: kkProfile,
-        lobby: kkLobby,
-        login: kkLogin,
-        register: kkRegister,
-        gameClient: kkGameClient,
-      },
-      uk: {
-        app: ukApp,
-        authSelector: ukAuthSelector,
-        profile: ukProfile,
-        lobby: ukLobby,
-        login: ukLogin,
-        register: ukRegister,
-        gameClient: ukGameClient,
-      },
-    },
-    fallbackLng: 'en',
-    debug: import.meta.env.DEV, // В продакшене отключится (лучше, чем true)
-    interpolation: {
-      escapeValue: false, // React уже экранирует
-    },
-    ns: ['app', 'authSelector', 'gameClient', 'profile', 'lobby', 'login', 'register'],
-    defaultNS: 'app',
-  });
+    .use(LanguageDetector)
+    .use(initReactI18next)
+    .init({
+        resources: {
+            en: {
+                app: enApp,
+                authSelector: enAuthSelector,
+                profile: enProfile,
+                lobby: enLobby,
+                login: enLogin,
+                register: enRegister,
+                gameClient: enGameClient,
+            },
+            ru: {
+                app: ruApp,
+                authSelector: ruAuthSelector,
+                profile: ruProfile,
+                lobby: ruLobby,
+                login: ruLogin,
+                register: ruRegister,
+                gameClient: ruGameClient,
+            },
+            be: {
+                app: beApp,
+                authSelector: beAuthSelector,
+                profile: beProfile,
+                lobby: beLobby,
+                login: beLogin,
+                register: beRegister,
+                gameClient: beGameClient,
+            },
+            kk: {
+                app: kkApp,
+                authSelector: kkAuthSelector,
+                profile: kkProfile,
+                lobby: kkLobby,
+                login: kkLogin,
+                register: kkRegister,
+                gameClient: kkGameClient,
+            },
+            uk: {
+                app: ukApp,
+                authSelector: ukAuthSelector,
+                profile: ukProfile,
+                lobby: ukLobby,
+                login: ukLogin,
+                register: ukRegister,
+                gameClient: ukGameClient,
+            },
+        },
+        fallbackLng: 'en',
+        debug: import.meta.env.DEV, // В продакшене отключится (лучше, чем true)
+        interpolation: {
+            escapeValue: false, // React уже экранирует
+        },
+        ns: ['app', 'authSelector', 'gameClient', 'profile', 'lobby', 'login', 'register'],
+        defaultNS: 'app',
+    });
 
 export default i18n;

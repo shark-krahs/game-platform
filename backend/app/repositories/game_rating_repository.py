@@ -1,12 +1,14 @@
 """
 Game rating repository for database operations related to game ratings.
 """
-from typing import Optional, List
 from datetime import datetime
+from typing import Optional, List
 from uuid import UUID
-from sqlmodel import select
+
 from app.db.database import async_session
 from app.db.models import GameRating
+from sqlmodel import select
+
 from .base import BaseRepository
 
 

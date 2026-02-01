@@ -3,8 +3,8 @@ Tetris for two players board implementation.
 """
 import logging
 import random
-from typing import Dict, Any, Optional, List, Tuple
 from copy import deepcopy
+from typing import Dict, Any, Optional, List, Tuple
 
 from ..base import AbstractGameBoard
 

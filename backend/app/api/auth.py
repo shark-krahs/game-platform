@@ -2,16 +2,11 @@ import logging
 from datetime import timedelta, datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from pydantic import BaseModel
-from jose import JWTError, jwt
-
-from app.core.security import verify_password, get_password_hash, create_access_token
 from app.core.config import settings
-from app.repositories.user_repository import UserRepository
-from app.db.models import User
+from app.core.security import verify_password, get_password_hash, create_access_token
 from app.db.database import async_session
+from app.db.models import User
+from app.repositories.user_repository import UserRepository
 from app.services.email_service import (
     generate_token,
     build_confirm_link,
@@ -23,6 +18,10 @@ from app.services.email_service import (
     send_email,
     mask_email,
 )
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError, jwt
+from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
@@ -214,6 +213,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
         raise credentials_exception
     return user
 
+
 async def get_user_from_token(token: str) -> User | None:
     try:
         payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
@@ -272,7 +272,6 @@ async def update_current_user(user_update: UserUpdate, current_user: User = Depe
 
     if user_update.language is not None:
         updates['language'] = user_update.language
-
 
     if updates:
         updated_user = await user_repo.update_user_profile(current_user, **updates)

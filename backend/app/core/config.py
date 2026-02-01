@@ -1,9 +1,9 @@
 import logging
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
-
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 ROOT_DIR = BASE_DIR.parent
@@ -37,6 +37,7 @@ class Settings(BaseSettings):
     email_verification_resend_cooldown_seconds: int = int(os.getenv("EMAIL_VERIFICATION_RESEND_COOLDOWN_SECONDS", "60"))
     password_reset_expire_minutes: int = int(os.getenv("PASSWORD_RESET_EXPIRE_MINUTES", "30"))
     email_change_expire_minutes: int = int(os.getenv("EMAIL_CHANGE_EXPIRE_MINUTES", "60"))
+
 
 settings = Settings()
 

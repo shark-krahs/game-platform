@@ -12,21 +12,21 @@ export const WIN_LENGTH = 4; // Connect 4 to win
 
 // Move types
 export const MOVE_TYPES = {
-  PLACE_AND_ROTATE: 'pentago_move'
+    PLACE_AND_ROTATE: 'pentago_move'
 } as const;
 
 // Quadrant names and colors
 export const QUADRANT_INFO = {
-  0: { name: 'quadrantRed', color: '#ff0000' },
-  1: { name: 'quadrantBlue', color: '#0000ff' },
-  2: { name: 'quadrantGreen', color: '#00ff00' },
-  3: { name: 'quadrantYellow', color: '#ffff00' }
+    0: {name: 'quadrantRed', color: '#ff0000'},
+    1: {name: 'quadrantBlue', color: '#0000ff'},
+    2: {name: 'quadrantGreen', color: '#00ff00'},
+    3: {name: 'quadrantYellow', color: '#ffff00'}
 } as const;
 
 // Rotation directions
 export const ROTATION_DIRECTIONS = {
-  CLOCKWISE: 'clockwise',
-  COUNTERCLOCKWISE: 'counterclockwise'
+    CLOCKWISE: 'clockwise',
+    COUNTERCLOCKWISE: 'counterclockwise'
 } as const;
 
 export type RotationDirection = typeof ROTATION_DIRECTIONS[keyof typeof ROTATION_DIRECTIONS];

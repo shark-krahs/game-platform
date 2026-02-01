@@ -1,15 +1,16 @@
-import glicko2
 import logging
 from typing import Tuple, Optional
-from datetime import datetime
 from uuid import UUID
-from app.repositories.game_rating_repository import GameRatingRepository
+
+import glicko2
 from app.db.models import GameRating
+from app.repositories.game_rating_repository import GameRatingRepository
 
 logger = logging.getLogger(__name__)
 
 # Repository instance
 rating_repo = GameRatingRepository()
+
 
 def get_time_control_type(time_control_str: str) -> str:
     """Categorize time control into bullet/blitz/rapid/classical based on total time"""
@@ -43,6 +44,7 @@ def get_time_control_type(time_control_str: str) -> str:
         pass
     return 'blitz'  # default
 
+
 def get_time_control_category(game_type: str, time_control: dict) -> str:
     """Categorize time control into bullet/blitz/rapid/classical based on time_control object"""
     try:
@@ -74,10 +76,12 @@ def get_time_control_category(game_type: str, time_control: dict) -> str:
         pass
     return 'blitz'  # default
 
+
 class RatingCalculator:
     @staticmethod
     def calculate_new_ratings(p1_rating: float, p1_rd: float, p1_vol: float,
-                            p2_rating: float, p2_rd: float, p2_vol: float, winner: int) -> Tuple[float, float, float, float, float, float]:
+                              p2_rating: float, p2_rd: float, p2_vol: float, winner: int) -> Tuple[
+        float, float, float, float, float, float]:
         """
         Calculate new Glicko2 ratings after a game.
         winner: 1 if player1 won, 2 if player2 won, 0 if draw
@@ -107,7 +111,8 @@ class RatingCalculator:
         return await rating_repo.get_or_create_rating(user_id, game_type)
 
     @staticmethod
-    async def update_ratings_after_game(game_type: str, time_control_str: str, player1_id: UUID, player2_id: UUID, winner: int):
+    async def update_ratings_after_game(game_type: str, time_control_str: str, player1_id: UUID, player2_id: UUID,
+                                        winner: int):
         """Update player ratings in specific game category after a rated game."""
         category = get_time_control_type(f"{game_type}_{time_control_str}")
         categorized_game_type = f"{game_type}_{category}"
@@ -132,10 +137,10 @@ class RatingCalculator:
 
     @staticmethod
     async def update_ratings_after_bot_game(
-        game_type: str,
-        time_control_str: str,
-        player_id: UUID,
-        winner: int,
+            game_type: str,
+            time_control_str: str,
+            player_id: UUID,
+            winner: int,
     ):
         """Update ratings for a player in a rated game against a bot (mirror rating)."""
         category = get_time_control_type(f"{game_type}_{time_control_str}")

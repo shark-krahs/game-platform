@@ -1,14 +1,16 @@
 """
 Saved game repository for database operations related to saved games.
 """
+import json
 from typing import List, Optional
 from uuid import UUID
-from sqlmodel import select
-from sqlalchemy.orm import selectinload
+
 from app.db.database import async_session
 from app.db.models import SavedGame, GameHistory, User
+from sqlalchemy.orm import selectinload
+from sqlmodel import select
+
 from .base import BaseRepository
-import json
 
 
 class SavedGameRepository(BaseRepository[SavedGame]):
@@ -39,10 +41,10 @@ class SavedGameRepository(BaseRepository[SavedGame]):
             return result.first()
 
     async def create_saved_game(self, user_id: UUID, game_id: str, game_type: str, title: str,
-                               game_state: dict, players: list, current_player: int,
-                               time_remaining: dict, winner: Optional[int], moves_history: list,
-                               time_control: dict, rated: bool = False,
-                               chat_history: Optional[list] = None) -> SavedGame:
+                                game_state: dict, players: list, current_player: int,
+                                time_remaining: dict, winner: Optional[int], moves_history: list,
+                                time_control: dict, rated: bool = False,
+                                chat_history: Optional[list] = None) -> SavedGame:
         """Create a new saved game."""
         saved_game = SavedGame(
             user_id=user_id,
@@ -73,8 +75,8 @@ class SavedGameRepository(BaseRepository[SavedGame]):
         return await self.update(saved_game)
 
     async def add_game_move(self, saved_game_id: UUID, move_number: int, player_id: int,
-                           move_data: dict, board_state_after: dict, timestamp, time_spent: float,
-                           time_remaining_after: Optional[dict] = None) -> GameHistory:
+                            move_data: dict, board_state_after: dict, timestamp, time_spent: float,
+                            time_remaining_after: Optional[dict] = None) -> GameHistory:
         """Add a move to the game history."""
         move = GameHistory(
             saved_game_id=saved_game_id,

@@ -1,12 +1,9 @@
 """
 Base game engine interfaces and shared functionality.
 """
-import logging
 import asyncio
-import json
+import logging
 from typing import Dict, Any, Optional, List, Protocol
-from datetime import datetime
-from abc import ABC, abstractmethod
 
 from app.games import GameFactory
 from app.games.base import GameState, TimeControl
@@ -18,7 +15,8 @@ logger = logging.getLogger(__name__)
 class GameEngineInterface(Protocol):
     """Protocol for game engine implementations."""
 
-    async def create_game(self, game_id: str, game_type: str, players: List[Dict[str, Any]], time_control: TimeControl) -> GameState:
+    async def create_game(self, game_id: str, game_type: str, players: List[Dict[str, Any]],
+                          time_control: TimeControl) -> GameState:
         """Create a new game instance."""
         ...
 
@@ -238,7 +236,8 @@ class GameEngine:
                             )
                             move_number += 1
 
-                    logger.info(f"Successfully auto-saved game {game_id} for user {player['name']} with ID {saved_game.id}")
+                    logger.info(
+                        f"Successfully auto-saved game {game_id} for user {player['name']} with ID {saved_game.id}")
 
                 except Exception as e:
                     logger.error(f"Failed to auto-save game {game_id} for user {player.get('name', 'unknown')}: {e}")
@@ -254,7 +253,8 @@ class GameEngine:
             del self.finished_games[game_id]
             logger.info(f"Cleaned up finished game {game_id} after {delay_seconds} seconds")
 
-    async def create_game(self, game_id: str, game_type: str, players: List[Dict[str, Any]], time_control: TimeControl) -> GameState:
+    async def create_game(self, game_id: str, game_type: str, players: List[Dict[str, Any]],
+                          time_control: TimeControl) -> GameState:
         """Create a new game instance."""
         logic = GameFactory.create_game_logic(game_type)
         game_state = logic.initialize_game(game_id, players, time_control)
@@ -345,7 +345,8 @@ class GameEngine:
         """Timer loop for a game."""
         while game_id in self.active_games:
             game_state = self.active_games[game_id]
-            logger.info(f"Game {game_id} timer tick - status: {game_state.status}, game_type: {game_state.game_type}, current_player: {game_state.current_player}")
+            logger.info(
+                f"Game {game_id} timer tick - status: {game_state.status}, game_type: {game_state.game_type}, current_player: {game_state.current_player}")
 
             # Handle first move initialization
             if game_state.status == 'waiting' and len(game_state.players) == 2:
@@ -434,7 +435,8 @@ class GameEngine:
                         if game_state.time_control.increment > 0:
                             game_state.time_remaining[game_state.current_player] = game_state.time_control.increment
 
-                        logger.info(f"Game {game_id} piece placed, switching to player {next_player}, timer reset to {game_state.time_remaining[game_state.current_player]}")
+                        logger.info(
+                            f"Game {game_id} piece placed, switching to player {next_player}, timer reset to {game_state.time_remaining[game_state.current_player]}")
 
                         # Check if next player can place a piece
                         if not game_state.board_state.get('next_pieces'):
@@ -458,11 +460,11 @@ class GameEngine:
 
             # Handle disconnection timer (only for non-Tetris games)
             if (
-                game_state.status != 'finished'
-                and hasattr(game_state, 'disconnect_timer')
-                and game_state.disconnect_timer
-                and game_state.disconnect_timer > 0
-                and game_state.game_type != 'tetris'
+                    game_state.status != 'finished'
+                    and hasattr(game_state, 'disconnect_timer')
+                    and game_state.disconnect_timer
+                    and game_state.disconnect_timer > 0
+                    and game_state.game_type != 'tetris'
             ):
                 game_state.disconnect_timer -= 1
 

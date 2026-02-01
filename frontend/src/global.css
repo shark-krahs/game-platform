@@ -1,96 +1,96 @@
 html,
 body,
 #root {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow-x: hidden;
 }
 
 *,
 *::before,
 *::after {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 :root {
-  --game-padding: 20px;
-  --game-panel-gap: 16px;
-  --pentago-cell-size: 40px;
-  --pentago-quadrant-size: calc(var(--pentago-cell-size) * 4 + 12px);
-  --tetris-cell-size: 20px;
+    --game-padding: 20px;
+    --game-panel-gap: 16px;
+    --pentago-cell-size: 40px;
+    --pentago-quadrant-size: calc(var(--pentago-cell-size) * 4 + 12px);
+    --tetris-cell-size: 20px;
 }
 
 .game-client {
-  padding: clamp(8px, 2vw, var(--game-padding));
-  min-height: 100dvh;
+    padding: clamp(8px, 2vw, var(--game-padding));
+    min-height: 100dvh;
 }
 
 .game-mode-button {
-  white-space: normal;
-  height: auto;
-  line-height: 1.2;
-  text-align: center;
-  padding: 8px 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  font-size: clamp(12px, 2.6vw, 16px);
+    white-space: normal;
+    height: auto;
+    line-height: 1.2;
+    text-align: center;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    font-size: clamp(12px, 2.6vw, 16px);
 }
 
 .game-mode-button__label {
-  word-break: break-word;
+    word-break: break-word;
 }
 
 .custom-game-mode {
-  width: 100%;
+    width: 100%;
 }
 
 .custom-game-mode > .ant-space-item {
-  flex: 1 1 140px;
+    flex: 1 1 140px;
 }
 
 .custom-game-mode__join {
-  width: 100%;
+    width: 100%;
 }
 
 .pentago-board-grid {
-  padding: clamp(8px, 2vw, 20px);
-  gap: clamp(8px, 2vw, 16px);
-  max-width: min(100%, 400px);
+    padding: clamp(8px, 2vw, 20px);
+    gap: clamp(8px, 2vw, 16px);
+    max-width: min(100%, 400px);
 }
 
 .tetris-board {
-  padding: clamp(8px, 2vw, 20px);
-  display: flex;
-  gap: clamp(8px, 2vw, 20px);
-  flex-wrap: wrap;
-  justify-content: center;
+    padding: clamp(8px, 2vw, 20px);
+    display: flex;
+    gap: clamp(8px, 2vw, 20px);
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .tetris-board__grid {
-  display: grid;
-  grid-template-columns: repeat(var(--tetris-board-width), var(--tetris-cell-size));
-  gap: 1px;
-  border: 2px solid #333;
-  background-color: #111;
-  padding: clamp(6px, 1.5vw, 10px);
-  max-width: 100%;
+    display: grid;
+    grid-template-columns: repeat(var(--tetris-board-width), var(--tetris-cell-size));
+    gap: 1px;
+    border: 2px solid #333;
+    background-color: #111;
+    padding: clamp(6px, 1.5vw, 10px);
+    max-width: 100%;
 }
 
 @media (max-width: 768px) {
-  :root {
-    --game-padding: 12px;
-    --game-panel-gap: 12px;
-    --pentago-cell-size: clamp(24px, 8vw, 34px);
-    --pentago-quadrant-size: calc(var(--pentago-cell-size) * 4 + 10px);
-    --tetris-cell-size: clamp(14px, 4.6vw, 18px);
-  }
+    :root {
+        --game-padding: 12px;
+        --game-panel-gap: 12px;
+        --pentago-cell-size: clamp(24px, 8vw, 34px);
+        --pentago-quadrant-size: calc(var(--pentago-cell-size) * 4 + 10px);
+        --tetris-cell-size: clamp(14px, 4.6vw, 18px);
+    }
 
-  .tetris-board {
-    flex-direction: column;
-    align-items: center;
-  }
+    .tetris-board {
+        flex-direction: column;
+        align-items: center;
+    }
 }

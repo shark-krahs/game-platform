@@ -66,10 +66,10 @@ def select_bot_move(game_state: GameState, difficulty: int, think_budget: float)
 
 
 def _select_pentago_move(
-    game_state: GameState,
-    moves: list,
-    difficulty: int,
-    think_budget: float,
+        game_state: GameState,
+        moves: list,
+        difficulty: int,
+        think_budget: float,
 ) -> Dict[str, Any]:
     if difficulty <= 2:
         return random.choice(moves)
@@ -137,13 +137,13 @@ def _ordered_pentago_moves(board: PentagoBoard, board_state: Dict[str, Any], pla
 
 
 def _minimax_pentago(
-    board: PentagoBoard,
-    board_state: Dict[str, Any],
-    depth: int,
-    maximizing: bool,
-    root_player: int,
-    start_time: float,
-    think_budget: float,
+        board: PentagoBoard,
+        board_state: Dict[str, Any],
+        depth: int,
+        maximizing: bool,
+        root_player: int,
+        start_time: float,
+        think_budget: float,
 ) -> float:
     winner = board.check_winner(board_state)
     if winner is not None:
@@ -270,10 +270,10 @@ def _estimate_stack_height(grid: list) -> int:
 
 
 async def schedule_bot_move(
-    game_state: GameState,
-    game_id: str,
-    difficulty: int,
-    selected_engine: Any,
+        game_state: GameState,
+        game_id: str,
+        difficulty: int,
+        selected_engine: Any,
 ) -> None:
     """Schedule a bot move after a short delay."""
     await asyncio.sleep(random.uniform(*BOT_THINKING_RANGE))
@@ -311,10 +311,10 @@ async def schedule_bot_move(
 
 
 async def _play_tetris_turn(
-    game_state: GameState,
-    game_id: str,
-    difficulty: int,
-    selected_engine: Any,
+        game_state: GameState,
+        game_id: str,
+        difficulty: int,
+        selected_engine: Any,
 ) -> None:
     board_state = game_state.board_state or {}
     falling_piece = board_state.get("falling_piece")

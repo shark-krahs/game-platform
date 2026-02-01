@@ -1,15 +1,14 @@
 """
 Tetris-specific game engine implementation.
 """
-import logging
 import asyncio
-import json
+import logging
 from typing import Dict, Any, Optional, List
-from datetime import datetime
 
 from app.games import GameFactory
 from app.games.base import GameState, TimeControl
 from app.services.bot_manager import is_bot_player, schedule_bot_move
+
 from .game_engine import GameEngineInterface, broadcast_state
 
 logger = logging.getLogger(__name__)
@@ -158,10 +157,12 @@ class TetrisGameEngine(GameEngineInterface):
                             )
                             move_number += 1
 
-                    logger.info(f"Successfully auto-saved Tetris game {game_id} for user {player['name']} with ID {saved_game.id}")
+                    logger.info(
+                        f"Successfully auto-saved Tetris game {game_id} for user {player['name']} with ID {saved_game.id}")
 
                 except Exception as e:
-                    logger.error(f"Failed to auto-save Tetris game {game_id} for user {player.get('name', 'unknown')}: {e}")
+                    logger.error(
+                        f"Failed to auto-save Tetris game {game_id} for user {player.get('name', 'unknown')}: {e}")
                     import traceback
                     logger.error(traceback.format_exc())
             else:
@@ -174,7 +175,8 @@ class TetrisGameEngine(GameEngineInterface):
             del self.finished_games[game_id]
             logger.info(f"Cleaned up finished Tetris game {game_id} after {delay_seconds} seconds")
 
-    async def create_game(self, game_id: str, game_type: str, players: List[Dict[str, Any]], time_control: TimeControl) -> GameState:
+    async def create_game(self, game_id: str, game_type: str, players: List[Dict[str, Any]],
+                          time_control: TimeControl) -> GameState:
         """Create a new Tetris game instance."""
         logic = GameFactory.create_game_logic(game_type)
         game_state = logic.initialize_game(game_id, players, time_control)

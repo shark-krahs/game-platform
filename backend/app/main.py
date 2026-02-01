@@ -1,17 +1,16 @@
 import os
 import sys
-from pathlib import Path
 from contextlib import asynccontextmanager
+from pathlib import Path
 
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-
-from app.api import games
 from app.api import auth
+from app.api import games
+from app.core.config import setup_logging
+from app.db import database
 from app.db.database import init_db
 from app.matchmaking import matchmaking_loop
-from app.db import database
-from app.core.config import setup_logging
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 # Make sure backend package is importable when running from project root
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,17 +26,17 @@ async def lifespan(app: FastAPI):
     # startup
     try:
         await init_db()
-        
+
         # Register game types
         from app.games.base import GameFactory
         from app.games.pentago.logic import PentagoGame
         from app.games.tetris.logic import TetrisGame
-        
+
         GameFactory.register_game('pentago', PentagoGame)
         GameFactory.register_game('tetris', TetrisGame)
-        
+
         logger.info(f"Registered games: {GameFactory.get_available_games()}")
-        
+
         import asyncio
         asyncio.create_task(matchmaking_loop())
     except Exception as e:

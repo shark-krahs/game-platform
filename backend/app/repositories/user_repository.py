@@ -2,11 +2,12 @@
 User repository for database operations related to users.
 """
 from typing import Optional
-from datetime import datetime
-from sqlmodel import select
-from sqlalchemy.orm import selectinload
+
 from app.db.database import async_session
 from app.db.models import User
+from sqlalchemy.orm import selectinload
+from sqlmodel import select
+
 from .base import BaseRepository
 
 

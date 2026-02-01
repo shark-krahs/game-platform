@@ -5,11 +5,13 @@
 This project uses **TypeScript exclusively**. JavaScript files (`.js`/`.jsx`) are not allowed.
 
 ### ✅ What to Use
+
 - `.ts` - TypeScript files (utilities, constants, services)
 - `.tsx` - TypeScript React components
 - `.d.ts` - Type declarations
 
 ### ❌ What NOT to Use
+
 - `.js` - JavaScript files
 - `.jsx` - JavaScript React components
 
@@ -50,12 +52,14 @@ src/
 ## 📝 TypeScript Configuration
 
 ### Strict Mode Enabled
+
 - `strict: true` - All strict checks enabled
 - `noImplicitAny: true` - No implicit any types
 - `strictNullChecks: true` - Strict null checking
 - `noUnusedLocals` - No unused variables
 
 ### Path Aliases
+
 ```typescript
 import { User } from '@/types'          // src/types
 import { api } from '@/services/api'    // src/services/api
@@ -64,12 +68,15 @@ import { api } from '@/services/api'    // src/services/api
 ## 🔧 ESLint Rules
 
 ### JavaScript Files Forbidden
+
 ESLint will **block** any JavaScript files with error:
+
 ```
 JavaScript files are not allowed. Use TypeScript (.ts/.tsx) instead.
 ```
 
 ### TypeScript Best Practices
+
 - No `any` types (warning)
 - Prefer optional chaining (`?.`)
 - Prefer nullish coalescing (`??`)
@@ -87,6 +94,7 @@ JavaScript files are not allowed. Use TypeScript (.ts/.tsx) instead.
 ### Example Migration
 
 **Before (JavaScript):**
+
 ```javascript
 // utils.js
 export const formatTime = (seconds) => {
@@ -95,6 +103,7 @@ export const formatTime = (seconds) => {
 ```
 
 **After (TypeScript):**
+
 ```typescript
 // utils.ts
 export const formatTime = (seconds: number): string => {
@@ -105,6 +114,7 @@ export const formatTime = (seconds: number): string => {
 ## 🧪 Type Definitions
 
 ### Core Types
+
 ```typescript
 interface User {
   id: number
@@ -121,6 +131,7 @@ interface GameState {
 ```
 
 ### API Types
+
 ```typescript
 interface ApiResponse<T> {
   success: boolean

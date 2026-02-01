@@ -2,9 +2,9 @@
 Base classes and interfaces for game implementations.
 """
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Dict, Any, List, Optional, Tuple
 
 
 @dataclass

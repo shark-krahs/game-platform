@@ -1,8 +1,8 @@
 from __future__ import annotations
 
+import logging
 import secrets
 import smtplib
-import logging
 import socket
 from dataclasses import dataclass
 from email.message import EmailMessage
@@ -159,6 +159,7 @@ def send_email(payload: EmailPayload) -> None:
             settings.smtp_use_ssl,
             settings.smtp_use_tls,
         )
+
     def _attempt_send(force_ipv4: bool) -> None:
         host = settings.smtp_host
         port = settings.smtp_port

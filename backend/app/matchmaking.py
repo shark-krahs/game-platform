@@ -1,12 +1,13 @@
-import logging
-from typing import Dict, List, Optional, Any
-from pydantic import BaseModel
 import asyncio
+import logging
 import time
+from typing import Dict, List, Optional, Any
 
 from app.services.bot_manager import BOT_WAIT_SECONDS, build_bot_profile
+from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
+
 
 class JoinData(BaseModel):
     username: str
@@ -14,6 +15,7 @@ class JoinData(BaseModel):
     game_type: str  # e.g., 'tic-tac-toe'
     time_control: str  # e.g., '3+0', '5+3'
     rated: bool = True
+
 
 class WaitingPlayer(BaseModel):
     user_id: str
@@ -30,12 +32,15 @@ class WaitingPlayer(BaseModel):
         """Get rating as integer for display purposes."""
         return int(self.rating)
 
+
 # Pools: pool_key -> list of WaitingPlayer, sorted by rating (then joined_at)
 pools: Dict[str, List[WaitingPlayer]] = {}
+
 
 def make_pool_key(game_type: str, time_control: str, rated: bool) -> str:
     # Use exact time control for pool separation
     return f"{game_type}_{time_control}_{'rated' if rated else 'casual'}"
+
 
 async def join_pool(player: WaitingPlayer):
     pool_key = make_pool_key(player.game_type, player.time_control, player.rated)
@@ -50,10 +55,12 @@ async def join_pool(player: WaitingPlayer):
             break
     if not inserted:
         pools[pool_key].append(player)
-    logger.info(f"Player {player.username} (id: {player.user_id}, rating {player.rating:.1f}, joined_at: {player.joined_at}) joined pool {pool_key}, total players: {len(pools[pool_key])}")
+    logger.info(
+        f"Player {player.username} (id: {player.user_id}, rating {player.rating:.1f}, joined_at: {player.joined_at}) joined pool {pool_key}, total players: {len(pools[pool_key])}")
     # Try to match immediately if we have 2+ players
     await try_match_immediately(pool_key)
     return pool_key
+
 
 async def leave_pool(user_id: str):
     for pool_key, players in pools.items():
@@ -61,6 +68,7 @@ async def leave_pool(user_id: str):
         if not pools[pool_key]:
             del pools[pool_key]
             break
+
 
 async def try_match(pool_key: str):
     if pool_key not in pools or len(pools[pool_key]) < 2:
@@ -72,11 +80,12 @@ async def try_match(pool_key: str):
     min_diff = float('inf')
     pair = None
     for i in range(len(players) - 1):
-        diff = abs(players[i].rating - players[i+1].rating)
-        logger.debug(f"Pair {i}:{i+1} - {players[i].username}({players[i].rating}) vs {players[i+1].username}({players[i+1].rating}) diff={diff}")
+        diff = abs(players[i].rating - players[i + 1].rating)
+        logger.debug(
+            f"Pair {i}:{i + 1} - {players[i].username}({players[i].rating}) vs {players[i + 1].username}({players[i + 1].rating}) diff={diff}")
         if diff < min_diff:
             min_diff = diff
-            pair = (players[i], players[i+1])
+            pair = (players[i], players[i + 1])
     if pair and min_diff <= 150:  # threshold
         logger.info(f"Matching pair: {pair[0].username} vs {pair[1].username}, diff={min_diff}")
         # Remove them
@@ -87,6 +96,7 @@ async def try_match(pool_key: str):
         logger.debug(f"No pair found, min_diff={min_diff} >150")
     return None
 
+
 async def try_match_immediately(pool_key: str):
     pair = await try_match(pool_key)
     if pair:
@@ -95,6 +105,7 @@ async def try_match_immediately(pool_key: str):
         await create_matched_game(pair[0].game_type, pair[0].time_control, pair[0], pair[1])
     else:
         logger.debug(f"No match found in {pool_key}, players: {len(pools.get(pool_key, []))}")
+
 
 # Periodic matchmaking
 async def matchmaking_loop():

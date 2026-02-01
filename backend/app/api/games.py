@@ -1,24 +1,25 @@
-import logging
 import asyncio
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, HTTPException
-import json, random, uuid
-from jose import JWTError, jwt
-from typing import List, Optional
-from uuid import UUID
+import json
+import logging
 from datetime import datetime
+from typing import List
+from uuid import UUID
 
-from app.core.config import settings
 from app.api.auth import get_current_user, get_user_from_token, oauth2_scheme
+from app.core.config import settings
+from app.db.models import SavedGame
 from app.matchmaking import *
 from app.ratings import RatingCalculator, get_time_control_type
+from app.repositories.saved_game_repository import SavedGameRepository
 from app.services.game_config import get_settings, PRESET_IDS, generate_player_color
 from app.services.game_state import handle_player_join, handle_player_leave, create_matched_game
-from app.repositories.saved_game_repository import SavedGameRepository
-from app.db.models import SavedGame
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, HTTPException
+from jose import JWTError, jwt
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
 
 @router.get("/games/waiting")
 async def get_waiting_games():
@@ -33,6 +34,7 @@ async def get_waiting_games():
                 'increment': g['increment']
             })
     return result
+
 
 @router.post("/games/find")
 async def find_game(total_minutes: int, increment_seconds: int):
@@ -68,6 +70,7 @@ async def find_game(total_minutes: int, increment_seconds: int):
 
     return {"game_id": game_id}
 
+
 @router.websocket("/ws/game/{game_id}")
 async def websocket_endpoint(websocket: WebSocket, game_id: str):
     """WebSocket endpoint for game connections."""
@@ -86,7 +89,8 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
             username = user.username
 
     if not user_id:
-        await websocket.send_text(json.dumps({"type": "error", "code": "games.auth_required", "message": "Authentication required"}))
+        await websocket.send_text(
+            json.dumps({"type": "error", "code": "games.auth_required", "message": "Authentication required"}))
         return
 
     try:
@@ -101,7 +105,8 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
             try:
                 msg = json.loads(text)
             except Exception:
-                await websocket.send_text(json.dumps({'type':'error','code':'games.invalid_json','message':'invalid json'}))
+                await websocket.send_text(
+                    json.dumps({'type': 'error', 'code': 'games.invalid_json', 'message': 'invalid json'}))
                 continue
 
             action = msg.get('type')
@@ -124,7 +129,8 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
                         selected_engine = game_engine
 
                 if not game_state or game_state.status not in ['first_move', 'playing', 'disconnect_wait']:
-                    await websocket.send_text(json.dumps({'type':'error','code':'games.not_playing_state','message':'game not in playing state'}))
+                    await websocket.send_text(json.dumps(
+                        {'type': 'error', 'code': 'games.not_playing_state', 'message': 'game not in playing state'}))
                     continue
 
                 # Find player index
@@ -135,7 +141,8 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
                         break
 
                 if player_index is None:
-                    await websocket.send_text(json.dumps({'type':'error','code':'games.player_not_found','message':'player not found'}))
+                    await websocket.send_text(
+                        json.dumps({'type': 'error', 'code': 'games.player_not_found', 'message': 'player not found'}))
                     continue
 
                 # Process move
@@ -143,13 +150,15 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
                 valid = await selected_engine.process_move(game_id, player_index, move_data)
 
                 if not valid:
-                    await websocket.send_text(json.dumps({'type':'error','code':'games.invalid_move','message':'invalid move'}))
+                    await websocket.send_text(
+                        json.dumps({'type': 'error', 'code': 'games.invalid_move', 'message': 'invalid move'}))
 
             elif action == 'chat':
                 # Handle chat message during game
                 content = (msg.get('message') or '').strip()
                 if not content:
-                    await websocket.send_text(json.dumps({'type':'error','code':'games.chat_empty','message':'empty message'}))
+                    await websocket.send_text(
+                        json.dumps({'type': 'error', 'code': 'games.chat_empty', 'message': 'empty message'}))
                     continue
 
                 # Get game state from appropriate engine
@@ -169,7 +178,8 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
                         selected_engine = game_engine
 
                 if not game_state or game_state.status not in ['first_move', 'playing', 'disconnect_wait']:
-                    await websocket.send_text(json.dumps({'type':'error','code':'games.not_playing_state','message':'game not in playing state'}))
+                    await websocket.send_text(json.dumps(
+                        {'type': 'error', 'code': 'games.not_playing_state', 'message': 'game not in playing state'}))
                     continue
 
                 chat_entry = {
@@ -193,7 +203,8 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
                 break
 
             else:
-                await websocket.send_text(json.dumps({'type':'error','code':'games.unknown_action','message':'unknown action'}))
+                await websocket.send_text(
+                    json.dumps({'type': 'error', 'code': 'games.unknown_action', 'message': 'unknown action'}))
 
     except WebSocketDisconnect:
         # Handle disconnection
@@ -215,7 +226,8 @@ async def matchmaking_websocket(websocket: WebSocket):
             username = user.username
             is_anonymous = False
         else:
-            await websocket.send_text(json.dumps({"type": "error", "code": "games.invalid_token", "message": "Invalid token"}))
+            await websocket.send_text(
+                json.dumps({"type": "error", "code": "games.invalid_token", "message": "Invalid token"}))
             return
     else:
         # Anonymous user
@@ -244,9 +256,11 @@ async def matchmaking_websocket(websocket: WebSocket):
                     game_rating = await RatingCalculator.get_game_rating(UUID(user_id), categorized_game_type)
                     if game_rating:
                         rating = game_rating.rating
-                        logger.info(f"User {username} joining pool with rating {rating:.1f} for {categorized_game_type}")
+                        logger.info(
+                            f"User {username} joining pool with rating {rating:.1f} for {categorized_game_type}")
                     else:
-                        logger.info(f"User {username} joining pool with default rating {rating} (no game rating found for {categorized_game_type})")
+                        logger.info(
+                            f"User {username} joining pool with default rating {rating} (no game rating found for {categorized_game_type})")
 
                 player = WaitingPlayer(
                     user_id=user_id,
@@ -271,8 +285,9 @@ async def matchmaking_websocket(websocket: WebSocket):
 # Saved Games API endpoints
 saved_game_repo = SavedGameRepository()
 
+
 @router.get("/saved-games", response_model=List[dict])
-async def get_saved_games(current_user = Depends(get_current_user)):
+async def get_saved_games(current_user=Depends(get_current_user)):
     """Get all saved games for the authenticated user (for stats calculation)."""
     logger.info(f"Getting saved games for user {current_user.id}")
     saved_games = await saved_game_repo.get_by_user_id(current_user.id)
@@ -302,8 +317,9 @@ async def get_saved_games(current_user = Depends(get_current_user)):
 
     return result
 
+
 @router.get("/saved-games/{game_type}/{category}", response_model=List[dict])
-async def get_saved_games_by_category(game_type: str, category: str, current_user = Depends(get_current_user)):
+async def get_saved_games_by_category(game_type: str, category: str, current_user=Depends(get_current_user)):
     """Get saved games for the authenticated user by game type and category."""
     from app.ratings import get_time_control_category
 
@@ -345,8 +361,9 @@ async def get_saved_games_by_category(game_type: str, category: str, current_use
 
     return result
 
+
 @router.post("/saved-games")
-async def save_game(request: dict, current_user = Depends(get_current_user)):
+async def save_game(request: dict, current_user=Depends(get_current_user)):
     """Save a game for the authenticated user."""
     game_id = request.get('game_id')
     title = request.get('title', f'Game {datetime.now().strftime("%Y-%m-%d %H:%M")}')
@@ -437,8 +454,9 @@ async def save_game(request: dict, current_user = Depends(get_current_user)):
         'message': 'Game saved successfully'
     }
 
+
 @router.get("/saved-games/{game_id}")
-async def get_saved_game(game_id: str, current_user = Depends(get_current_user)):
+async def get_saved_game(game_id: str, current_user=Depends(get_current_user)):
     """Get a specific saved game with full details."""
     try:
         uuid_game_id = UUID(game_id)
@@ -496,7 +514,8 @@ async def get_saved_game(game_id: str, current_user = Depends(get_current_user))
                 'move_number': move.move_number,
                 'player_id': move.player_id,
                 'move_data': json.loads(move.move_data) if isinstance(move.move_data, str) else move.move_data,
-                'board_state_after': json.loads(move.board_state_after) if isinstance(move.board_state_after, str) else move.board_state_after,
+                'board_state_after': json.loads(move.board_state_after) if isinstance(move.board_state_after,
+                                                                                      str) else move.board_state_after,
                 'time_remaining_after': json.loads(move.time_remaining_after) if move.time_remaining_after else None,
                 'timestamp': move.timestamp.isoformat(),
                 'time_spent': move.time_spent

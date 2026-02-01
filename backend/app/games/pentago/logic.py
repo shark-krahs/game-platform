@@ -3,11 +3,11 @@ Pentago game logic implementation.
 """
 import logging
 import random
-from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime
+from typing import Dict, Any, List, Optional, Tuple
 
-from ..base import AbstractGameLogic, GameConfig, GameState, GameMove, TimeControl
 from .board import PentagoBoard
+from ..base import AbstractGameLogic, GameConfig, GameState, GameMove, TimeControl
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ class PentagoGame(AbstractGameLogic):
         for i, player in enumerate(players):
             game_players.append({
                 'id': player.get('id', i),
-                'name': player.get('name', f'Player {i+1}'),
+                'name': player.get('name', f'Player {i + 1}'),
                 'color': player.get('color', f'color_{i}'),
                 'user_id': player.get('user_id')
             })
@@ -120,7 +120,8 @@ class PentagoGame(AbstractGameLogic):
                 # First move made, set up second player's first move timer
                 new_state.first_move_player = (new_state.current_player + 1) % len(new_state.players)
                 new_state.first_move_timer = 30.0
-                logger.info(f"Game {new_state.game_id} first move made by player {player_id}, giving 30 seconds to player {new_state.first_move_player}")
+                logger.info(
+                    f"Game {new_state.game_id} first move made by player {player_id}, giving 30 seconds to player {new_state.first_move_player}")
             elif moves_made == len(new_state.players):
                 # Second move made, transition to playing
                 new_state.status = 'playing'

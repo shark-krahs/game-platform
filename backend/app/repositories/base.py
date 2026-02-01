@@ -2,8 +2,9 @@
 Base repository class with common database operations.
 """
 from typing import Generic, TypeVar, List, Optional, Any
-from sqlmodel import select, Session
+
 from app.db.database import async_session
+from sqlmodel import select, Session
 
 T = TypeVar('T')
 

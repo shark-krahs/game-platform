@@ -4,8 +4,8 @@ Game state management and broadcasting using GameEngine.
 import asyncio
 import json
 import logging
-from typing import Dict, Any, Optional, Set
 import uuid
+from typing import Dict, Any, Optional
 
 from app.games.base import GameState, TimeControl
 from app.services.bot_manager import is_bot_player, schedule_bot_move
@@ -123,11 +123,11 @@ async def broadcast_state(game_id: str, game_state: GameState):
 
 
 async def create_matched_game(
-    game_type: str,
-    time_control: str,
-    player1: Any,
-    player2: Any,
-    bot_difficulty: Optional[int] = None,
+        game_type: str,
+        time_control: str,
+        player1: Any,
+        player2: Any,
+        bot_difficulty: Optional[int] = None,
 ) -> str:
     """
     Create a matched game for two players.
