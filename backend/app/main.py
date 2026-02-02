@@ -22,7 +22,7 @@ logger = setup_logging()
 
 
 @asynccontextmanager
-async def lifespan():
+async def lifespan(app: FastAPI):
     # startup
     try:
         await init_db()
