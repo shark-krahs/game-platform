@@ -2,12 +2,16 @@ import logging
 from datetime import timedelta, datetime
 from typing import Optional
 
-from app.core.config import settings
-from app.core.security import verify_password, get_password_hash, create_access_token
-from app.db.database import async_session
-from app.db.models import User
-from app.repositories.user_repository import UserRepository
-from app.services.email_service import (
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError, jwt
+from pydantic import BaseModel
+
+from backend.app.core.config import settings
+from backend.app.core.security import verify_password, get_password_hash, create_access_token
+from backend.app.db.models import User
+from backend.app.repositories.user_repository import UserRepository
+from backend.app.services.email_service import (
     generate_token,
     build_confirm_link,
     build_password_reset_link,
@@ -18,10 +22,6 @@ from app.services.email_service import (
     send_email,
     mask_email,
 )
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
-from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
@@ -539,6 +539,6 @@ async def resend_email_change(payload: EmailChangeResendRequest):
 @router.get("/auth/me/active-game")
 async def get_active_game(current_user: User = Depends(get_current_user)):
     """Get user's active game ID if any."""
-    from app.repositories.user_active_game_repository import UserActiveGameRepository
+    from backend.app.repositories.user_active_game_repository import UserActiveGameRepository
     active_game_id = await UserActiveGameRepository.get_active_game(str(current_user.id))
     return {"active_game_id": active_game_id}

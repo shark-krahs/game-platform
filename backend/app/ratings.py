@@ -3,8 +3,9 @@ from typing import Tuple, Optional
 from uuid import UUID
 
 import glicko2
-from app.db.models import GameRating
-from app.repositories.game_rating_repository import GameRatingRepository
+
+from backend.app.db.models import GameRating
+from backend.app.repositories.game_rating_repository import GameRatingRepository
 
 logger = logging.getLogger(__name__)
 

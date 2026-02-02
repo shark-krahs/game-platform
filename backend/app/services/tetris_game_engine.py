@@ -5,10 +5,9 @@ import asyncio
 import logging
 from typing import Dict, Any, Optional, List
 
-from app.games import GameFactory
-from app.games.base import GameState, TimeControl
-from app.services.bot_manager import is_bot_player, schedule_bot_move
-
+from backend.app.games import GameFactory
+from backend.app.games.base import GameState, TimeControl
+from backend.app.services.bot_manager import is_bot_player, schedule_bot_move
 from .game_engine import GameEngineInterface, broadcast_state
 
 logger = logging.getLogger(__name__)
@@ -36,14 +35,14 @@ class TetrisGameEngine(GameEngineInterface):
         await self._auto_save_finished_game(game_id, game_state)
 
         # Clear active games for both players
-        from app.repositories.user_active_game_repository import UserActiveGameRepository
+        from backend.app.repositories.user_active_game_repository import UserActiveGameRepository
         for player in game_state.players:
             if player.get('user_id') and not is_bot_player(player):
                 await UserActiveGameRepository.clear_active_game(player['user_id'])
 
         # Update ratings if this was a rated game
         if game_state.rated and game_state.winner is not None:
-            from app.ratings import RatingCalculator
+            from backend.app.ratings import RatingCalculator
             from uuid import UUID
             player1_id_str = game_state.players[0]['user_id']
             player2_id_str = game_state.players[1]['user_id']
@@ -92,7 +91,7 @@ class TetrisGameEngine(GameEngineInterface):
 
     async def _auto_save_finished_game(self, game_id: str, game_state: GameState):
         """Auto-save finished game for all authenticated players."""
-        from app.repositories.saved_game_repository import SavedGameRepository
+        from backend.app.repositories.saved_game_repository import SavedGameRepository
         from uuid import UUID
         from datetime import datetime
 
@@ -188,7 +187,7 @@ class TetrisGameEngine(GameEngineInterface):
         game_state.time_remaining[game_state.current_player] = game_state.time_control.increment
 
         # Create initial falling piece
-        from app.games.tetris.board import TetrisBoard
+        from backend.app.games.tetris.board import TetrisBoard
         board = TetrisBoard()
         game_state.board_state = board.start_falling_piece(game_state.board_state)
 
@@ -218,7 +217,7 @@ class TetrisGameEngine(GameEngineInterface):
             # Check if player changed (turn switched)
             if new_state.current_player != game_state.current_player:
                 # Record the move in history
-                from app.games.base import GameMove
+                from backend.app.games.base import GameMove
                 from datetime import datetime
                 move = GameMove(
                     player_id=player_id,
@@ -269,14 +268,14 @@ class TetrisGameEngine(GameEngineInterface):
             if game_state.game_type == 'tetris' and game_state.status == 'playing':
                 # Start falling piece if none exists
                 if not game_state.board_state.get('falling_piece'):
-                    from app.games.tetris.board import TetrisBoard
+                    from backend.app.games.tetris.board import TetrisBoard
                     board = TetrisBoard()
                     game_state.board_state = board.start_falling_piece(game_state.board_state)
                     logger.info(f"Tetris game {game_id} started falling piece for player {game_state.current_player}")
 
                 # Move falling piece down automatically
                 if game_state.board_state.get('falling_piece'):
-                    from app.games.tetris.board import TetrisBoard
+                    from backend.app.games.tetris.board import TetrisBoard
                     board = TetrisBoard()
                     old_board_state = game_state.board_state
                     game_state.board_state = board.move_falling_piece(game_state.board_state, 'down')

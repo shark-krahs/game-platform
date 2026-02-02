@@ -1,20 +1,15 @@
-import asyncio
 import json
-import logging
 from datetime import datetime
-from typing import List
 from uuid import UUID
 
-from app.api.auth import get_current_user, get_user_from_token, oauth2_scheme
-from app.core.config import settings
-from app.db.models import SavedGame
-from app.matchmaking import *
-from app.ratings import RatingCalculator, get_time_control_type
-from app.repositories.saved_game_repository import SavedGameRepository
-from app.services.game_config import get_settings, PRESET_IDS, generate_player_color
-from app.services.game_state import handle_player_join, handle_player_leave, create_matched_game
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, HTTPException
-from jose import JWTError, jwt
+
+from backend.app.api.auth import get_current_user, get_user_from_token
+from backend.app.matchmaking import *
+from backend.app.ratings import RatingCalculator
+from backend.app.repositories.saved_game_repository import SavedGameRepository
+from backend.app.services.game_config import PRESET_IDS
+from backend.app.services.game_state import handle_player_join, handle_player_leave
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +19,7 @@ router = APIRouter()
 @router.get("/games/waiting")
 async def get_waiting_games():
     """Get list of waiting games."""
-    from app.services.game_state import games
+    from backend.app.services.game_state import games
     result = []
     for game_id, g in games.items():
         if g['status'] == 'waiting' and len(g['players']) == 1 and game_id not in PRESET_IDS:
@@ -39,9 +34,9 @@ async def get_waiting_games():
 @router.post("/games/find")
 async def find_game(total_minutes: int, increment_seconds: int):
     """Find or create a game with specified time controls."""
-    from app.services.game_state import games
-    from app.services.game_engine import game_engine
-    from app.games.base import TimeControl
+    from backend.app.services.game_state import games
+    from backend.app.services.game_engine import game_engine
+    from backend.app.games.base import TimeControl
 
     game_id = f"{total_minutes}+{increment_seconds}"
     if game_id not in games:
@@ -117,13 +112,13 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
                 selected_engine = None
 
                 # Try Tetris engine first
-                from app.services.tetris_game_engine import tetris_game_engine
+                from backend.app.services.tetris_game_engine import tetris_game_engine
                 game_state = tetris_game_engine.get_game_state(game_id)
                 if game_state:
                     selected_engine = tetris_game_engine
                 else:
                     # Try general game engine
-                    from app.services.game_engine import game_engine
+                    from backend.app.services.game_engine import game_engine
                     game_state = game_engine.get_game_state(game_id)
                     if game_state:
                         selected_engine = game_engine
@@ -166,13 +161,13 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
                 selected_engine = None
 
                 # Try Tetris engine first
-                from app.services.tetris_game_engine import tetris_game_engine
+                from backend.app.services.tetris_game_engine import tetris_game_engine
                 game_state = tetris_game_engine.get_game_state(game_id)
                 if game_state:
                     selected_engine = tetris_game_engine
                 else:
                     # Try general game engine
-                    from app.services.game_engine import game_engine
+                    from backend.app.services.game_engine import game_engine
                     game_state = game_engine.get_game_state(game_id)
                     if game_state:
                         selected_engine = game_engine
@@ -194,7 +189,7 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
 
                 game_state.chat_history.append(chat_entry)
 
-                from app.services.game_state import broadcast_to_game
+                from backend.app.services.game_state import broadcast_to_game
                 await broadcast_to_game(game_id, {'type': 'chat', 'chat': chat_entry})
 
             elif action == 'leave':
@@ -250,7 +245,7 @@ async def matchmaking_websocket(websocket: WebSocket):
                 if not is_anonymous:
                     # For authenticated users, try to get real rating
                     from uuid import UUID
-                    from app.ratings import get_time_control_type as categorize_time
+                    from backend.app.ratings import get_time_control_type as categorize_time
                     category = categorize_time(f"{data['game_type']}_{time_control}")
                     categorized_game_type = f"{data['game_type']}_{category}"
                     game_rating = await RatingCalculator.get_game_rating(UUID(user_id), categorized_game_type)
@@ -294,7 +289,7 @@ async def get_saved_games(current_user=Depends(get_current_user)):
     logger.info(f"Found {len(saved_games)} saved games for user {current_user.id}")
 
     result = []
-    from app.ratings import get_time_control_category
+    from backend.app.ratings import get_time_control_category
     for game in saved_games:
         category = get_time_control_category(game.game_type, game.get_time_control())
         result.append({
@@ -321,7 +316,7 @@ async def get_saved_games(current_user=Depends(get_current_user)):
 @router.get("/saved-games/{game_type}/{category}", response_model=List[dict])
 async def get_saved_games_by_category(game_type: str, category: str, current_user=Depends(get_current_user)):
     """Get saved games for the authenticated user by game type and category."""
-    from app.ratings import get_time_control_category
+    from backend.app.ratings import get_time_control_category
 
     logger.info(f"Getting {game_type} {category} games for user {current_user.id}")
 
@@ -379,13 +374,13 @@ async def save_game(request: dict, current_user=Depends(get_current_user)):
     selected_engine = None
 
     # Try Tetris engine first
-    from app.services.tetris_game_engine import tetris_game_engine
+    from backend.app.services.tetris_game_engine import tetris_game_engine
     game_state = tetris_game_engine.get_game_state(game_id)
     if game_state:
         selected_engine = tetris_game_engine
     else:
         # Try general game engine
-        from app.services.game_engine import game_engine
+        from backend.app.services.game_engine import game_engine
         game_state = game_engine.get_game_state(game_id)
         if game_state:
             selected_engine = game_engine

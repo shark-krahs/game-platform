@@ -7,8 +7,8 @@ import logging
 import uuid
 from typing import Dict, Any, Optional
 
-from app.games.base import GameState, TimeControl
-from app.services.bot_manager import is_bot_player, schedule_bot_move
+from backend.app.games.base import GameState, TimeControl
+from backend.app.services.bot_manager import is_bot_player, schedule_bot_move
 
 logger = logging.getLogger(__name__)
 
@@ -143,10 +143,10 @@ async def create_matched_game(
     """
     # Route to appropriate game engine based on game type
     if game_type == 'tetris':
-        from app.services.tetris_game_engine import tetris_game_engine
+        from backend.app.services.tetris_game_engine import tetris_game_engine
         game_engine = tetris_game_engine
     else:
-        from app.services.game_engine import game_engine
+        from backend.app.services.game_engine import game_engine
 
     game_id = f"match_{uuid.uuid4().hex}"
     total_time = int(time_control.split('+')[0]) * 60 if '+' in time_control else 5 * 60
@@ -187,7 +187,7 @@ async def create_matched_game(
     game_state = await game_engine.create_game(game_id, game_type, players, time_control_obj)
 
     # Set active game for both players (skip bots)
-    from app.repositories.user_active_game_repository import UserActiveGameRepository
+    from backend.app.repositories.user_active_game_repository import UserActiveGameRepository
     if not is_bot_player(players[0]):
         await UserActiveGameRepository.set_active_game(player1.user_id, game_id)
     if not is_bot_player(players[1]):
@@ -212,7 +212,7 @@ async def create_matched_game(
     if bot_difficulty is not None:
         selected_engine = game_engine
         if game_type == 'tetris':
-            from app.services.tetris_game_engine import tetris_game_engine
+            from backend.app.services.tetris_game_engine import tetris_game_engine
             selected_engine = tetris_game_engine
 
         if is_bot_player(players[0]) or is_bot_player(players[1]):
@@ -239,13 +239,13 @@ async def handle_player_join(game_id: str, user_id: str, username: str, websocke
     selected_engine = None
 
     # Try general game engine first
-    from app.services.game_engine import game_engine
+    from backend.app.services.game_engine import game_engine
     game_state = game_engine.get_game_state(game_id)
     if game_state:
         selected_engine = game_engine
     else:
         # Try Tetris game engine
-        from app.services.tetris_game_engine import tetris_game_engine
+        from backend.app.services.tetris_game_engine import tetris_game_engine
         game_state = tetris_game_engine.get_game_state(game_id)
         if game_state:
             selected_engine = tetris_game_engine
@@ -305,13 +305,13 @@ async def handle_player_leave(game_id: str, user_id: str):
     selected_engine = None
 
     # Try general game engine first
-    from app.services.game_engine import game_engine
+    from backend.app.services.game_engine import game_engine
     game_state = game_engine.get_game_state(game_id)
     if game_state:
         selected_engine = game_engine
     else:
         # Try Tetris game engine
-        from app.services.tetris_game_engine import tetris_game_engine
+        from backend.app.services.tetris_game_engine import tetris_game_engine
         game_state = tetris_game_engine.get_game_state(game_id)
         if game_state:
             selected_engine = tetris_game_engine
@@ -325,7 +325,7 @@ async def handle_player_leave(game_id: str, user_id: str):
             logger.info(f"Game {game_id} completely abandoned, ending game")
             await selected_engine.end_game(game_id)
             # Clear active games for all players
-            from app.repositories.user_active_game_repository import UserActiveGameRepository
+            from backend.app.repositories.user_active_game_repository import UserActiveGameRepository
             for player in game_state.players:
                 if player.get('user_id') and not is_bot_player(player):
                     await UserActiveGameRepository.clear_active_game(player['user_id'])
@@ -367,20 +367,20 @@ async def timeout_abandoned_game(game_id: str):
     selected_engine = None
 
     # Try general game engine first
-    from app.services.game_engine import game_engine
+    from backend.app.services.game_engine import game_engine
     game_state = game_engine.get_game_state(game_id)
     if game_state:
         selected_engine = game_engine
     else:
         # Try Tetris game engine
-        from app.services.tetris_game_engine import tetris_game_engine
+        from backend.app.services.tetris_game_engine import tetris_game_engine
         game_state = tetris_game_engine.get_game_state(game_id)
         if game_state:
             selected_engine = tetris_game_engine
 
     if game_state:
         # Clear active games for all players
-        from app.repositories.user_active_game_repository import UserActiveGameRepository
+        from backend.app.repositories.user_active_game_repository import UserActiveGameRepository
         for player in game_state.players:
             if player.get('user_id') and not is_bot_player(player):
                 await UserActiveGameRepository.clear_active_game(player['user_id'])

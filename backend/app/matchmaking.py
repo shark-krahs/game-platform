@@ -3,8 +3,9 @@ import logging
 import time
 from typing import Dict, List, Optional, Any
 
-from app.services.bot_manager import BOT_WAIT_SECONDS, build_bot_profile
 from pydantic import BaseModel
+
+from backend.app.services.bot_manager import BOT_WAIT_SECONDS, build_bot_profile
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +77,7 @@ async def try_match(pool_key: str):
         return None
     players = pools[pool_key]
     logger.debug(f"Checking {len(players)} players in {pool_key}")
-    # Find closest pair
+    # Find the closest pair
     min_diff = float('inf')
     pair = None
     for i in range(len(players) - 1):
@@ -101,7 +102,7 @@ async def try_match_immediately(pool_key: str):
     pair = await try_match(pool_key)
     if pair:
         logger.info(f"Match found: {pair[0].username} vs {pair[1].username} in {pool_key}")
-        from app.services.game_state import create_matched_game
+        from backend.app.services.game_state import create_matched_game
         await create_matched_game(pair[0].game_type, pair[0].time_control, pair[0], pair[1])
     else:
         logger.debug(f"No match found in {pool_key}, players: {len(pools.get(pool_key, []))}")
@@ -114,7 +115,7 @@ async def matchmaking_loop():
         for pool_key in list(pools.keys()):
             pair = await try_match(pool_key)
             if pair:
-                from app.services.game_state import create_matched_game
+                from backend.app.services.game_state import create_matched_game
                 await create_matched_game(pair[0].game_type, pair[0].time_control, pair[0], pair[1])
             else:
                 await try_match_with_bot(pool_key)
@@ -155,7 +156,7 @@ async def try_match_with_bot(pool_key: str):
         },
     )
 
-    from app.services.game_state import create_matched_game
+    from backend.app.services.game_state import create_matched_game
     await create_matched_game(
         waiting_player.game_type,
         waiting_player.time_control,
@@ -163,3 +164,4 @@ async def try_match_with_bot(pool_key: str):
         bot_player,
         bot_difficulty=bot_profile["difficulty"],
     )
+    return None

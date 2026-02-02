@@ -3,8 +3,9 @@ Base repository class with common database operations.
 """
 from typing import Generic, TypeVar, List, Optional, Any
 
-from app.db.database import async_session
-from sqlmodel import select, Session
+from sqlmodel import select
+
+from backend.app.db.database import async_session
 
 T = TypeVar('T')
 

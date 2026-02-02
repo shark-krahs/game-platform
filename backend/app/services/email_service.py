@@ -7,7 +7,7 @@ import socket
 from dataclasses import dataclass
 from email.message import EmailMessage
 
-from app.core.config import settings
+from backend.app.core.config import settings
 
 logger = logging.getLogger(__name__)
 

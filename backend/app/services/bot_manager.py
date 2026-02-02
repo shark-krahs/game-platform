@@ -7,10 +7,10 @@ import logging
 import random
 from typing import Any, Dict, Optional
 
-from app.games import GameFactory
-from app.games.base import GameState
-from app.games.pentago.board import PentagoBoard
-from app.services.bot_names import generate_bot_name
+from backend.app.games import GameFactory
+from backend.app.games.base import GameState
+from backend.app.games.pentago.board import PentagoBoard
+from backend.app.services.bot_names import generate_bot_name
 
 logger = logging.getLogger(__name__)
 
@@ -129,7 +129,7 @@ def _ordered_pentago_moves(board: PentagoBoard, board_state: Dict[str, Any], pla
     scored = []
     for move in moves:
         next_board = board.apply_move(board_state, move, player_id)
-        score = _evaluate_pentago(board, next_board, player_id)
+        score = _evaluate_pentago(next_board, player_id)
         scored.append((score, move))
 
     scored.sort(key=lambda item: item[0], reverse=True)
@@ -150,12 +150,12 @@ def _minimax_pentago(
         return 10000 if winner == root_player else -10000
 
     if depth <= 0 or asyncio.get_event_loop().time() - start_time >= think_budget:
-        return _evaluate_pentago(board, board_state, root_player)
+        return _evaluate_pentago(board_state, root_player)
 
     player = root_player if maximizing else (root_player + 1) % 2
     moves = _get_pentago_valid_moves(board_state)
     if not moves:
-        return _evaluate_pentago(board, board_state, root_player)
+        return _evaluate_pentago(board_state, root_player)
 
     if maximizing:
         best = float("-inf")
@@ -177,7 +177,7 @@ def _minimax_pentago(
     return best
 
 
-def _evaluate_pentago(board: PentagoBoard, board_state: Dict[str, Any], player_id: int) -> float:
+def _evaluate_pentago(board_state: Dict[str, Any], player_id: int) -> float:
     opponent = (player_id + 1) % 2
     player_score = _count_sequences(board_state, player_id)
     opponent_score = _count_sequences(board_state, opponent)

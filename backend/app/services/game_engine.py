@@ -5,9 +5,9 @@ import asyncio
 import logging
 from typing import Dict, Any, Optional, List, Protocol
 
-from app.games import GameFactory
-from app.games.base import GameState, TimeControl
-from app.services.bot_manager import is_bot_player, schedule_bot_move
+from backend.app.games import GameFactory
+from backend.app.games.base import GameState, TimeControl
+from backend.app.services.bot_manager import is_bot_player, schedule_bot_move
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ async def broadcast_state(game_id: str, game_state: GameState):
         game_id: The game identifier
         game_state: GameState object
     """
-    from app.services.game_state import broadcast_to_game
+    from backend.app.services.game_state import broadcast_to_game
 
     state = {
         'type': 'state',
@@ -111,7 +111,7 @@ class GameEngine:
         await self._auto_save_finished_game(game_id, game_state)
 
         # Clear active games for both players
-        from app.repositories.user_active_game_repository import UserActiveGameRepository
+        from backend.app.repositories.user_active_game_repository import UserActiveGameRepository
         for player in game_state.players:
             logger.info(f"Clearing active game for player {player['name']}")
             if player.get('user_id') and not is_bot_player(player):
@@ -122,7 +122,7 @@ class GameEngine:
 
         # Update ratings if this was a rated game
         if game_state.rated and game_state.winner is not None:
-            from app.ratings import RatingCalculator
+            from backend.app.ratings import RatingCalculator
             from uuid import UUID
             player1_id_str = game_state.players[0]['user_id']
             player2_id_str = game_state.players[1]['user_id']
@@ -171,7 +171,7 @@ class GameEngine:
 
     async def _auto_save_finished_game(self, game_id: str, game_state: GameState):
         """Auto-save finished game for all authenticated players."""
-        from app.repositories.saved_game_repository import SavedGameRepository
+        from backend.app.repositories.saved_game_repository import SavedGameRepository
         from uuid import UUID
         from datetime import datetime
 
@@ -301,7 +301,7 @@ class GameEngine:
 
             # Record move in history only when player changes (turn completed) - but not during first_move phase
             if new_state.current_player != old_current_player and new_state.status != 'first_move':
-                from app.games.base import GameMove
+                from backend.app.games.base import GameMove
                 from datetime import datetime
                 move = GameMove(
                     player_id=old_current_player,  # Use the player who completed the turn
@@ -413,14 +413,14 @@ class GameEngine:
             elif game_state.game_type == 'tetris' and game_state.status == 'playing':
                 # Start falling piece if none exists (when player's turn begins)
                 if not game_state.board_state.get('falling_piece'):
-                    from app.games.tetris.board import TetrisBoard
+                    from backend.app.games.tetris.board import TetrisBoard
                     board = TetrisBoard()
                     game_state.board_state = board.start_falling_piece(game_state.board_state)
                     logger.info(f"Game {game_id} started falling piece for player {game_state.current_player}")
 
                 # Move falling piece down automatically
                 if game_state.board_state.get('falling_piece'):
-                    from app.games.tetris.board import TetrisBoard
+                    from backend.app.games.tetris.board import TetrisBoard
                     board = TetrisBoard()
                     old_board_state = game_state.board_state
                     game_state.board_state = board.move_falling_piece(game_state.board_state, 'down')
