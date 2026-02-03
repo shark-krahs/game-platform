@@ -41,8 +41,8 @@ async def lifespan(app: FastAPI):
         import asyncio
 
         asyncio.create_task(matchmaking_loop())
-    except Exception as e:
-        logger.error(f"Startup error: {e}")
+    except Exception:
+        logger.exception("Startup error")
         # fail silently; DB may be managed externally
         pass
     yield

@@ -1,10 +1,10 @@
 import logging
 import os
 from pathlib import Path
-from urllib.parse import quote_plus
 
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
+from sqlalchemy.engine import URL
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 ROOT_DIR = BASE_DIR.parent
@@ -17,6 +17,10 @@ load_dotenv(BASE_DIR / ".env")
 
 
 def _build_db_url() -> str:
+    db_engine = os.getenv("DB_ENGINE", "postgres").lower()
+    if db_engine == "sqlite":
+        return "sqlite+aiosqlite:///./game-platform.db"
+
     explicit_url = os.getenv("DB_URL")
     if explicit_url:
         return explicit_url
@@ -25,15 +29,24 @@ def _build_db_url() -> str:
     user = os.getenv("DB_USER", "db_owner")
     password = os.getenv("DB_PASSWORD", "")
     host = os.getenv("DB_HOST", "localhost")
-    port = os.getenv("DB_PORT", "5432")
+    port = int(os.getenv("DB_PORT", "5432"))
     name = os.getenv("DB_NAME", "game_platform")
 
-    user_escaped = quote_plus(user)
-    if password:
-        password_escaped = quote_plus(password)
-        return f"{driver}://{user_escaped}:{password_escaped}@{host}:{port}/{name}"
+    query: dict[str, str] = {}
+    sslmode = os.getenv("DB_SSLMODE", "")
+    if sslmode:
+        query["sslmode"] = sslmode
 
-    return f"{driver}://{user_escaped}@{host}:{port}/{name}"
+    url = URL.create(
+        drivername=driver,
+        username=user,
+        password=password or None,
+        host=host,
+        port=port,
+        database=name,
+        query=query or None,
+    )
+    return url.render_as_string(hide_password=False)
 
 
 class Settings(BaseSettings):
