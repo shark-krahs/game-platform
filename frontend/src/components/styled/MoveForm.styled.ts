@@ -34,6 +34,7 @@ export const FormTitle = styled.h4`
 
 export const QuadrantButtonsContainer = styled.div`
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 16px;
 `;
@@ -54,14 +55,20 @@ export const QuadrantButton = styled.button<QuadrantButtonProps>`
   font-weight: bold;
   cursor: pointer;
   border-radius: 4px;
+  min-width: 64px;
 
   &:hover {
     opacity: 0.8;
+  }
+
+  @media (max-width: ${(props) => props.theme.breakpoints.tablet}) {
+    flex: 1 1 calc(50% - 8px);
   }
 `;
 
 export const DirectionButtonsContainer = styled.div`
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 16px;
 `;
@@ -81,10 +88,15 @@ export const DirectionButton = styled.button<DirectionButtonProps>`
   &:hover {
     opacity: 0.8;
   }
+
+  @media (max-width: ${(props) => props.theme.breakpoints.tablet}) {
+    flex: 1 1 calc(50% - 8px);
+  }
 `;
 
 export const ActionButtonsContainer = styled.div`
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 `;
 
