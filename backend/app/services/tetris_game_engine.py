@@ -346,6 +346,21 @@ class TetrisGameEngine(GameEngineInterface):
 
                     # Check for top-out
                     if game_state.board_state.get("top_out"):
+                        # Record the final placement leading to top-out for replay
+                        from backend.app.games.base import GameMove
+                        from datetime import datetime
+
+                        final_move = GameMove(
+                            player_id=game_state.current_player,
+                            move_data={"type": "piece_placed", "source": "auto_fall"},
+                            timestamp=datetime.now(),
+                        )
+                        final_move.board_state_after = game_state.board_state
+                        final_move.time_remaining_after = (
+                            game_state.time_remaining.copy()
+                        )
+                        game_state.moves_history.append(final_move)
+
                         # Current player loses due to top-out
                         opponent = (game_state.current_player + 1) % len(
                             game_state.players
@@ -362,12 +377,29 @@ class TetrisGameEngine(GameEngineInterface):
                     if not game_state.board_state.get(
                         "falling_piece"
                     ) and old_board_state.get("falling_piece"):
+                        placing_player = game_state.current_player
+
+                        # Record auto-fall placement for replay
+                        from backend.app.games.base import GameMove
+                        from datetime import datetime
+
+                        auto_move = GameMove(
+                            player_id=placing_player,
+                            move_data={"type": "piece_placed", "source": "auto_fall"},
+                            timestamp=datetime.now(),
+                        )
+                        auto_move.board_state_after = game_state.board_state
+                        auto_move.time_remaining_after = (
+                            game_state.time_remaining.copy()
+                        )
+                        game_state.moves_history.append(auto_move)
+
                         if "lines_cleared" in game_state.board_state:
                             lines_cleared = game_state.board_state["lines_cleared"]
                             if lines_cleared > 0:
                                 score = board._calculate_score(lines_cleared)
                                 game_state.board_state["scores"][
-                                    game_state.current_player
+                                    placing_player
                                 ] += score
 
                         # Switch to next player

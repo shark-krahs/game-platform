@@ -342,6 +342,7 @@ class GameEngine:
 
         logic = GameFactory.create_game_logic(game_state.game_type)
         old_current_player = game_state.current_player
+        old_moves_len = len(game_state.moves_history)
         new_state, valid = logic.process_move(game_state, move_data, player_id)
 
         if valid:
@@ -364,10 +365,12 @@ class GameEngine:
                         f"Game {game_id} both players made first moves, transitioned to playing mode"
                     )
 
-            # Record move in history only when player changes (turn completed) - but not during first_move phase
+            # Record move in history only if the game logic didn't already append it.
+            # This avoids double-recording for games (like Pentago) that track moves inside logic.
             if (
                 new_state.current_player != old_current_player
                 and new_state.status != "first_move"
+                and len(new_state.moves_history) == old_moves_len
             ):
                 from backend.app.games.base import GameMove
                 from datetime import datetime
