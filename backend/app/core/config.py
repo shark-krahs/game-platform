@@ -13,9 +13,27 @@ load_dotenv(ROOT_DIR / ".env")
 load_dotenv(BASE_DIR / ".env")
 
 
+def _build_db_url() -> str:
+    explicit_url = os.getenv("DB_URL")
+    if explicit_url:
+        return explicit_url
+
+    driver = os.getenv("DB_DRIVER", "postgresql+asyncpg")
+    user = os.getenv("DB_USER", "db_owner")
+    password = os.getenv("DB_PASSWORD", "")
+    host = os.getenv("DB_HOST", "localhost")
+    port = os.getenv("DB_PORT", "5432")
+    name = os.getenv("DB_NAME", "game_platform")
+
+    if password:
+        return f"{driver}://{user}:{password}@{host}:{port}/{name}"
+
+    return f"{driver}://{user}@{host}:{port}/{name}"
+
+
 class Settings(BaseSettings):
     app_name: str = "game-platform"
-    db_url: str = os.getenv("DB_URL", "sqlite+aiosqlite:///./game-platform.db")
+    db_url: str = _build_db_url()
     telegram_token: str = os.getenv("TELEGRAM_TOKEN", "")
     jwt_secret: str = os.getenv("JWT_SECRET", "replace-with-a-secure-secret")
     jwt_algorithm: str = os.getenv("JWT_ALGORITHM", "HS256")

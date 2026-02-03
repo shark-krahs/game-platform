@@ -1,20 +1,26 @@
+name: game-platform
 version: "3.8"
 
 services:
-  backend:
-    image: python:3.13-slim
-    working_dir: /app
+  game-platform-db:
+    image: postgres:18
+    container_name: game-platform-db
     env_file:
       - ./.env
+    environment:
+      POSTGRES_DB: ${DB_NAME:-game_platform}
+      POSTGRES_USER: ${DB_USER:-db_owner}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - ./:/app
+      - game-platform-db-data:/var/lib/postgresql
     ports:
-      - "${VITE_BACKEND_HOST:-0.0.0.0}:${VITE_BACKEND_PORT:-8000}:8000"
+      - "${DB_PORT:-5432}:5432"
     restart: unless-stopped
-    command: >
-      sh -c "
-        apt-get update &&
-        apt-get install -y build-essential gcc libpq-dev &&
-        python -m pip install --upgrade pip &&
-        pip install --no-cache-dir -r requirements.txt &&
-        uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-db_owner} -d ${DB_NAME:-game_platform}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  game-platform-db-data:

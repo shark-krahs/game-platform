@@ -18,8 +18,32 @@ cd frontend; npm install; npm run dev
 
 Дальнейшие шаги:
 - Реализовать игровые комнаты и протокол для WebSocket
-- Добавить Postgres + миграции (Alembic)
+- Добавить миграции (Alembic)
 - Реализовать бота Telegram и интеграцию платежей/внутренней валюты
+
+## Postgres (Docker)
+
+База и контейнер создаются через `backend/docker-compose.yml` с именем контейнера `game-platform-db`.
+
+1) Запустите Postgres:
+
+```sh
+cd backend
+docker compose up -d
+```
+
+2) Укажите параметры подключения к БД в `.env` (можно в корне проекта или в `backend/.env`):
+
+```
+DB_HOST=localhost            # или IP/hostname сервера с Postgres
+DB_PORT=5432
+DB_NAME=game_platform
+DB_USER=db_owner
+DB_PASSWORD=your_strong_password
+```
+
+Во время первого старта контейнер Postgres создаст базу `DB_NAME` и суперпользователя `DB_USER`
+с паролем `DB_PASSWORD` (это стандартное поведение официального Docker-образа Postgres).
 
 ## Настройка почты (SMTP)
 
