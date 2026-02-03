@@ -1,6 +1,7 @@
 """
 Saved game repository for database operations related to saved games.
 """
+
 import json
 from typing import List, Optional
 from uuid import UUID
@@ -40,21 +41,32 @@ class SavedGameRepository(BaseRepository[SavedGame]):
             )
             return result.first()
 
-    async def create_saved_game(self, user_id: UUID, game_id: str, game_type: str, title: str,
-                                game_state: dict, players: list, current_player: int,
-                                time_remaining: dict, winner: Optional[int], moves_history: list,
-                                time_control: dict, rated: bool = False,
-                                chat_history: Optional[list] = None) -> SavedGame:
+    async def create_saved_game(
+        self,
+        user_id: UUID,
+        game_id: str,
+        game_type: str,
+        title: str,
+        game_state: dict,
+        players: list,
+        current_player: int,
+        time_remaining: dict,
+        winner: Optional[int],
+        moves_history: list,
+        time_control: dict,
+        rated: bool = False,
+        chat_history: Optional[list] = None,
+    ) -> SavedGame:
         """Create a new saved game."""
         saved_game = SavedGame(
             user_id=user_id,
             game_id=game_id,
             game_type=game_type,
             title=title,
-            status='ongoing' if winner is None else 'finished',
+            status="ongoing" if winner is None else "finished",
             current_player=current_player,
             winner=winner,
-            rated=rated
+            rated=rated,
         )
 
         # Set JSON fields
@@ -74,9 +86,17 @@ class SavedGameRepository(BaseRepository[SavedGame]):
                 setattr(saved_game, key, value)
         return await self.update(saved_game)
 
-    async def add_game_move(self, saved_game_id: UUID, move_number: int, player_id: int,
-                            move_data: dict, board_state_after: dict, timestamp, time_spent: float,
-                            time_remaining_after: Optional[dict] = None) -> GameHistory:
+    async def add_game_move(
+        self,
+        saved_game_id: UUID,
+        move_number: int,
+        player_id: int,
+        move_data: dict,
+        board_state_after: dict,
+        timestamp,
+        time_spent: float,
+        time_remaining_after: Optional[dict] = None,
+    ) -> GameHistory:
         """Add a move to the game history."""
         move = GameHistory(
             saved_game_id=saved_game_id,
@@ -84,9 +104,13 @@ class SavedGameRepository(BaseRepository[SavedGame]):
             player_id=player_id,
             move_data=json.dumps(move_data),
             board_state_after=json.dumps(board_state_after),
-            time_remaining_after=json.dumps(time_remaining_after) if time_remaining_after is not None else None,
+            time_remaining_after=(
+                json.dumps(time_remaining_after)
+                if time_remaining_after is not None
+                else None
+            ),
             timestamp=timestamp,
-            time_spent=time_spent
+            time_spent=time_spent,
         )
         async with async_session() as session:
             session.add(move)

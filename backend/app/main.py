@@ -32,12 +32,13 @@ async def lifespan(app: FastAPI):
         from backend.app.games.pentago.logic import PentagoGame
         from backend.app.games.tetris.logic import TetrisGame
 
-        GameFactory.register_game('pentago', PentagoGame)
-        GameFactory.register_game('tetris', TetrisGame)
+        GameFactory.register_game("pentago", PentagoGame)
+        GameFactory.register_game("tetris", TetrisGame)
 
         logger.info(f"Registered games: {GameFactory.get_available_games()}")
 
         import asyncio
+
         asyncio.create_task(matchmaking_loop())
     except Exception as e:
         logger.error(f"Startup error: {e}")
@@ -51,7 +52,9 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Game Platform", lifespan=lifespan)
 
 # Настройка CORS
-allowed_origins_str = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://192.168.31.224:5173")
+allowed_origins_str = os.getenv(
+    "ALLOWED_ORIGINS", "http://localhost:5173,http://192.168.31.224:5173"
+)
 origins = [o.strip() for o in allowed_origins_str.split(",") if o.strip()]
 
 app.add_middleware(

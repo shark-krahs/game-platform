@@ -22,8 +22,8 @@ class User(SQLModel, table=True):
     pending_email_expires_at: Optional[datetime] = None
     pending_email_confirmed: bool = False
     stars: int = 0
-    preferred_color: str = '#4287f5'
-    language: str = 'en'
+    preferred_color: str = "#4287f5"
+    language: str = "en"
     active_game_id: Optional[str] = None  # ID of currently active game
     # Relationship to game ratings
     game_ratings: List["GameRating"] = Relationship(back_populates="user")
@@ -51,6 +51,7 @@ class GameRating(SQLModel, table=True):
 
 class SavedGame(SQLModel, table=True):
     """Model for saving game states for later analysis or continuation."""
+
     id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
     user_id: UUID = Field(foreign_key="user.id")
     game_id: str  # Original game ID
@@ -113,13 +114,16 @@ class SavedGame(SQLModel, table=True):
 
 class GameHistory(SQLModel, table=True):
     """Model for storing individual moves for game analysis."""
+
     id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
     saved_game_id: UUID = Field(foreign_key="savedgame.id")
     move_number: int
     player_id: int
     move_data: str  # JSON string of move data
     board_state_after: str  # JSON string of board state after move
-    time_remaining_after: Optional[str] = None  # JSON string of time remaining after move
+    time_remaining_after: Optional[str] = (
+        None  # JSON string of time remaining after move
+    )
     timestamp: datetime
     time_spent: float  # Time spent on this move in seconds
     # Back relationship to saved game

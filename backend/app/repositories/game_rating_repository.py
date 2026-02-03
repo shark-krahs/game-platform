@@ -1,6 +1,7 @@
 """
 Game rating repository for database operations related to game ratings.
 """
+
 from datetime import datetime
 from typing import Optional, List
 from uuid import UUID
@@ -36,7 +37,7 @@ class GameRatingRepository(BaseRepository[GameRating]):
                     rating=1500.0,
                     rd=350.0,
                     volatility=0.06,
-                    games_played=0
+                    games_played=0,
                 )
                 session.add(rating)
                 await session.commit()
@@ -44,7 +45,9 @@ class GameRatingRepository(BaseRepository[GameRating]):
 
             return rating
 
-    async def get_game_rating(self, user_id: UUID, game_type: str) -> Optional[GameRating]:
+    async def get_game_rating(
+        self, user_id: UUID, game_type: str
+    ) -> Optional[GameRating]:
         """Get game rating for user, returns None if not found."""
         async with async_session() as session:
             result = await session.exec(

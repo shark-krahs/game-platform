@@ -40,7 +40,9 @@ def calculate_bot_difficulty(player_rating: float) -> int:
 def build_bot_profile(player_rating: float, game_type: str) -> Dict[str, Any]:
     """Create bot profile metadata for a match."""
     difficulty = calculate_bot_difficulty(player_rating)
-    bot_user_id = f"{BOT_USER_ID_PREFIX}{game_type}_{difficulty}_{random.randint(1000, 9999)}"
+    bot_user_id = (
+        f"{BOT_USER_ID_PREFIX}{game_type}_{difficulty}_{random.randint(1000, 9999)}"
+    )
     return {
         "user_id": bot_user_id,
         "username": generate_bot_name(),
@@ -49,7 +51,9 @@ def build_bot_profile(player_rating: float, game_type: str) -> Dict[str, Any]:
     }
 
 
-def select_bot_move(game_state: GameState, difficulty: int, think_budget: float) -> Optional[Dict[str, Any]]:
+def select_bot_move(
+    game_state: GameState, difficulty: int, think_budget: float
+) -> Optional[Dict[str, Any]]:
     """Select a bot move based on game state and difficulty."""
     logic = GameFactory.create_game_logic(game_state.game_type)
     valid_moves = logic.get_valid_moves(game_state, game_state.current_player)
@@ -66,17 +70,19 @@ def select_bot_move(game_state: GameState, difficulty: int, think_budget: float)
 
 
 def _select_pentago_move(
-        game_state: GameState,
-        moves: list,
-        difficulty: int,
-        think_budget: float,
+    game_state: GameState,
+    moves: list,
+    difficulty: int,
+    think_budget: float,
 ) -> Dict[str, Any]:
     if difficulty <= 2:
         return random.choice(moves)
 
     board = PentagoBoard()
 
-    candidate_moves = _ordered_pentago_moves(board, game_state.board_state, game_state.current_player)
+    candidate_moves = _ordered_pentago_moves(
+        board, game_state.board_state, game_state.current_player
+    )
     if not candidate_moves:
         candidate_moves = moves
 
@@ -92,7 +98,9 @@ def _select_pentago_move(
     start_time = asyncio.get_event_loop().time()
 
     for move in candidate_moves:
-        next_board = board.apply_move(game_state.board_state, move, game_state.current_player)
+        next_board = board.apply_move(
+            game_state.board_state, move, game_state.current_player
+        )
         score = _minimax_pentago(
             board,
             next_board,
@@ -124,7 +132,9 @@ def _pentago_depth_for_rating(rating: float) -> int:
     return 9
 
 
-def _ordered_pentago_moves(board: PentagoBoard, board_state: Dict[str, Any], player_id: int) -> list:
+def _ordered_pentago_moves(
+    board: PentagoBoard, board_state: Dict[str, Any], player_id: int
+) -> list:
     moves = _get_pentago_valid_moves(board_state)
     scored = []
     for move in moves:
@@ -137,13 +147,13 @@ def _ordered_pentago_moves(board: PentagoBoard, board_state: Dict[str, Any], pla
 
 
 def _minimax_pentago(
-        board: PentagoBoard,
-        board_state: Dict[str, Any],
-        depth: int,
-        maximizing: bool,
-        root_player: int,
-        start_time: float,
-        think_budget: float,
+    board: PentagoBoard,
+    board_state: Dict[str, Any],
+    depth: int,
+    maximizing: bool,
+    root_player: int,
+    start_time: float,
+    think_budget: float,
 ) -> float:
     winner = board.check_winner(board_state)
     if winner is not None:
@@ -161,7 +171,15 @@ def _minimax_pentago(
         best = float("-inf")
         for move in moves:
             next_board = board.apply_move(board_state, move, player)
-            score = _minimax_pentago(board, next_board, depth - 1, False, root_player, start_time, think_budget)
+            score = _minimax_pentago(
+                board,
+                next_board,
+                depth - 1,
+                False,
+                root_player,
+                start_time,
+                think_budget,
+            )
             best = max(best, score)
             if asyncio.get_event_loop().time() - start_time >= think_budget:
                 break
@@ -170,7 +188,9 @@ def _minimax_pentago(
     best = float("inf")
     for move in moves:
         next_board = board.apply_move(board_state, move, player)
-        score = _minimax_pentago(board, next_board, depth - 1, True, root_player, start_time, think_budget)
+        score = _minimax_pentago(
+            board, next_board, depth - 1, True, root_player, start_time, think_budget
+        )
         best = min(best, score)
         if asyncio.get_event_loop().time() - start_time >= think_budget:
             break
@@ -195,8 +215,10 @@ def _count_sequences(board_state: Dict[str, Any], player_id: int) -> int:
     def score_line(line):
         total = 0
         for i in range(len(line) - 3):
-            window = line[i:i + 4]
-            if all(cell in (None, player_id) for cell in window) and any(cell == player_id for cell in window):
+            window = line[i : i + 4]
+            if all(cell in (None, player_id) for cell in window) and any(
+                cell == player_id for cell in window
+            ):
                 total += window.count(player_id)
         return total
 
@@ -225,17 +247,21 @@ def _get_pentago_valid_moves(board_state: Dict[str, Any]) -> list:
             if grid[y][x] is None:
                 for quadrant in range(4):
                     for direction in ["clockwise", "counterclockwise"]:
-                        moves.append({
-                            "x": x,
-                            "y": y,
-                            "quadrant": quadrant,
-                            "direction": direction,
-                        })
+                        moves.append(
+                            {
+                                "x": x,
+                                "y": y,
+                                "quadrant": quadrant,
+                                "direction": direction,
+                            }
+                        )
 
     return moves
 
 
-def _select_tetris_move(game_state: GameState, moves: list, difficulty: int) -> Dict[str, Any]:
+def _select_tetris_move(
+    game_state: GameState, moves: list, difficulty: int
+) -> Dict[str, Any]:
     if difficulty <= 2:
         return random.choice(moves)
 
@@ -270,10 +296,10 @@ def _estimate_stack_height(grid: list) -> int:
 
 
 async def schedule_bot_move(
-        game_state: GameState,
-        game_id: str,
-        difficulty: int,
-        selected_engine: Any,
+    game_state: GameState,
+    game_id: str,
+    difficulty: int,
+    selected_engine: Any,
 ) -> None:
     """Schedule a bot move after a short delay."""
     await asyncio.sleep(random.uniform(*BOT_THINKING_RANGE))
@@ -311,10 +337,10 @@ async def schedule_bot_move(
 
 
 async def _play_tetris_turn(
-        game_state: GameState,
-        game_id: str,
-        difficulty: int,
-        selected_engine: Any,
+    game_state: GameState,
+    game_id: str,
+    difficulty: int,
+    selected_engine: Any,
 ) -> None:
     board_state = game_state.board_state or {}
     falling_piece = board_state.get("falling_piece")

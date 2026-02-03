@@ -18,7 +18,9 @@ dp = Dispatcher()
 
 @dp.message_handler(commands=["start"])
 async def cmd_start(message: types.Message):
-    await message.reply("Привет! Я игровой бот. Здесь будут доступны покупки за звёзды.")
+    await message.reply(
+        "Привет! Я игровой бот. Здесь будут доступны покупки за звёзды."
+    )
 
 
 if __name__ == "__main__":

@@ -1,6 +1,7 @@
 """
 User repository for database operations related to users.
 """
+
 from typing import Optional
 
 from sqlalchemy.orm import selectinload
@@ -21,24 +22,22 @@ class UserRepository(BaseRepository[User]):
         """Get user by username with game ratings loaded."""
         async with async_session() as session:
             result = await session.exec(
-                select(User).options(selectinload(User.game_ratings)).where(User.username == username)
+                select(User)
+                .options(selectinload(User.game_ratings))
+                .where(User.username == username)
             )
             return result.one_or_none()
 
     async def get_by_username_without_ratings(self, username: str) -> Optional[User]:
         """Get user by username without loading game ratings."""
         async with async_session() as session:
-            result = await session.exec(
-                select(User).where(User.username == username)
-            )
+            result = await session.exec(select(User).where(User.username == username))
             return result.one_or_none()
 
     async def get_by_email(self, email: str) -> Optional[User]:
         """Get user by email."""
         async with async_session() as session:
-            result = await session.exec(
-                select(User).where(User.email == email)
-            )
+            result = await session.exec(select(User).where(User.email == email))
             return result.one_or_none()
 
     async def get_by_verification_token(self, token: str) -> Optional[User]:
@@ -65,7 +64,9 @@ class UserRepository(BaseRepository[User]):
             )
             return result.one_or_none()
 
-    async def authenticate_user(self, username: str, password_hash: str) -> Optional[User]:
+    async def authenticate_user(
+        self, username: str, password_hash: str
+    ) -> Optional[User]:
         """Authenticate user by username and password hash."""
         user = await self.get_by_username(username)
         if not user or not user.password_hash:
@@ -74,7 +75,13 @@ class UserRepository(BaseRepository[User]):
             return None
         return user
 
-    async def create_user(self, username: str, password_hash: str, email: str, language: Optional[str] = None) -> User:
+    async def create_user(
+        self,
+        username: str,
+        password_hash: str,
+        email: str,
+        language: Optional[str] = None,
+    ) -> User:
         """Create new user."""
         user = User(username=username, password_hash=password_hash, email=email)
         if language:

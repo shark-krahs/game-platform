@@ -1,6 +1,7 @@
 """
 Tetris-specific game engine implementation.
 """
+
 import asyncio
 import logging
 from typing import Dict, Any, Optional, List
@@ -35,43 +36,55 @@ class TetrisGameEngine(GameEngineInterface):
         await self._auto_save_finished_game(game_id, game_state)
 
         # Clear active games for both players
-        from backend.app.repositories.user_active_game_repository import UserActiveGameRepository
+        from backend.app.repositories.user_active_game_repository import (
+            UserActiveGameRepository,
+        )
+
         for player in game_state.players:
-            if player.get('user_id') and not is_bot_player(player):
-                await UserActiveGameRepository.clear_active_game(player['user_id'])
+            if player.get("user_id") and not is_bot_player(player):
+                await UserActiveGameRepository.clear_active_game(player["user_id"])
 
         # Update ratings if this was a rated game
         if game_state.rated and game_state.winner is not None:
             from backend.app.ratings import RatingCalculator
             from uuid import UUID
-            player1_id_str = game_state.players[0]['user_id']
-            player2_id_str = game_state.players[1]['user_id']
+
+            player1_id_str = game_state.players[0]["user_id"]
+            player2_id_str = game_state.players[1]["user_id"]
 
             winner_code = 0  # draw
-            if game_state.winner == game_state.players[0]['name']:
+            if game_state.winner == game_state.players[0]["name"]:
                 winner_code = 1  # player1 won
-            elif game_state.winner == game_state.players[1]['name']:
+            elif game_state.winner == game_state.players[1]["name"]:
                 winner_code = 2  # player2 won
 
             if player1_id_str and player2_id_str:
-                if is_bot_player(game_state.players[0]) or is_bot_player(game_state.players[1]):
+                if is_bot_player(game_state.players[0]) or is_bot_player(
+                    game_state.players[1]
+                ):
                     try:
                         human_player = (
                             game_state.players[0]
                             if not is_bot_player(game_state.players[0])
                             else game_state.players[1]
                         )
-                        human_player_id = UUID(human_player['user_id'])
-                        human_winner_code = 1 if game_state.winner == human_player['name'] else 2
+                        human_player_id = UUID(human_player["user_id"])
+                        human_winner_code = (
+                            1 if game_state.winner == human_player["name"] else 2
+                        )
                         await RatingCalculator.update_ratings_after_bot_game(
                             game_state.game_type,
                             game_state.time_control_str,
                             human_player_id,
                             human_winner_code,
                         )
-                        logger.info(f"Updated ratings for bot Tetris game {game_id}: winner={game_state.winner}")
+                        logger.info(
+                            f"Updated ratings for bot Tetris game {game_id}: winner={game_state.winner}"
+                        )
                     except Exception as e:
-                        logger.error(f"Failed to update ratings for bot Tetris game {game_id}: {e}")
+                        logger.error(
+                            f"Failed to update ratings for bot Tetris game {game_id}: {e}"
+                        )
                 else:
                     try:
                         player1_uuid = UUID(player1_id_str)
@@ -80,11 +93,17 @@ class TetrisGameEngine(GameEngineInterface):
                         await RatingCalculator.update_ratings_after_game(
                             game_state.game_type,
                             game_state.time_control_str,
-                            player1_uuid, player2_uuid, winner_code
+                            player1_uuid,
+                            player2_uuid,
+                            winner_code,
                         )
-                        logger.info(f"Updated ratings for Tetris game {game_id}: winner={game_state.winner}")
+                        logger.info(
+                            f"Updated ratings for Tetris game {game_id}: winner={game_state.winner}"
+                        )
                     except Exception as e:
-                        logger.error(f"Failed to convert user IDs to UUID for Tetris ratings update: {e}")
+                        logger.error(
+                            f"Failed to convert user IDs to UUID for Tetris ratings update: {e}"
+                        )
 
         # Clean up finished game after some time
         asyncio.create_task(self._cleanup_finished_game_after_delay(game_id))
@@ -99,9 +118,9 @@ class TetrisGameEngine(GameEngineInterface):
         logger.info(f"Auto-saving Tetris game {game_id} for all authenticated players")
 
         for player in game_state.players:
-            if player.get('user_id') and not is_bot_player(player):
+            if player.get("user_id") and not is_bot_player(player):
                 try:
-                    user_id = UUID(player['user_id'])
+                    user_id = UUID(player["user_id"])
                     title = f"{game_state.game_type.title()} - {datetime.now().strftime('%Y-%m-%d %H:%M')}"
 
                     # Convert time_remaining dict to proper format
@@ -113,11 +132,13 @@ class TetrisGameEngine(GameEngineInterface):
                     winner_index = None
                     if game_state.winner:
                         for i, player_info in enumerate(game_state.players):
-                            if player_info['name'] == game_state.winner:
+                            if player_info["name"] == game_state.winner:
                                 winner_index = i
                                 break
 
-                    logger.info(f"Saving Tetris game {game_id} for user {player['name']} (ID: {user_id})")
+                    logger.info(
+                        f"Saving Tetris game {game_id} for user {player['name']} (ID: {user_id})"
+                    )
 
                     # Create saved game
                     saved_game = await repo.create_saved_game(
@@ -132,16 +153,19 @@ class TetrisGameEngine(GameEngineInterface):
                         winner=winner_index,
                         moves_history=[],  # Will be populated from moves_history if available
                         time_control={
-                            'type': game_state.time_control.type,
-                            'initial_time': game_state.time_control.initial_time,
-                            'increment': game_state.time_control.increment
+                            "type": game_state.time_control.type,
+                            "initial_time": game_state.time_control.initial_time,
+                            "increment": game_state.time_control.increment,
                         },
                         rated=game_state.rated,
-                        chat_history=getattr(game_state, 'chat_history', [])
+                        chat_history=getattr(game_state, "chat_history", []),
                     )
 
                     # Add moves history if available - save board state after each move
-                    if hasattr(game_state, 'moves_history') and game_state.moves_history:
+                    if (
+                        hasattr(game_state, "moves_history")
+                        and game_state.moves_history
+                    ):
                         move_number = 1
                         for move in game_state.moves_history:
                             await repo.add_game_move(
@@ -149,45 +173,68 @@ class TetrisGameEngine(GameEngineInterface):
                                 move_number=move_number,
                                 player_id=move.player_id,
                                 move_data=move.move_data,
-                                board_state_after=getattr(move, 'board_state_after', game_state.board_state),
-                                time_remaining_after=getattr(move, 'time_remaining_after', game_state.time_remaining),
+                                board_state_after=getattr(
+                                    move, "board_state_after", game_state.board_state
+                                ),
+                                time_remaining_after=getattr(
+                                    move,
+                                    "time_remaining_after",
+                                    game_state.time_remaining,
+                                ),
                                 timestamp=move.timestamp,
-                                time_spent=0.0  # Not tracked currently
+                                time_spent=0.0,  # Not tracked currently
                             )
                             move_number += 1
 
                     logger.info(
-                        f"Successfully auto-saved Tetris game {game_id} for user {player['name']} with ID {saved_game.id}")
+                        f"Successfully auto-saved Tetris game {game_id} for user {player['name']} with ID {saved_game.id}"
+                    )
 
                 except Exception as e:
                     logger.error(
-                        f"Failed to auto-save Tetris game {game_id} for user {player.get('name', 'unknown')}: {e}")
+                        f"Failed to auto-save Tetris game {game_id} for user {player.get('name', 'unknown')}: {e}"
+                    )
                     import traceback
+
                     logger.error(traceback.format_exc())
             else:
-                logger.info(f"Skipping auto-save for anonymous player {player.get('name', 'unknown')}")
+                logger.info(
+                    f"Skipping auto-save for anonymous player {player.get('name', 'unknown')}"
+                )
 
-    async def _cleanup_finished_game_after_delay(self, game_id: str, delay_seconds: int = 300):
+    async def _cleanup_finished_game_after_delay(
+        self, game_id: str, delay_seconds: int = 300
+    ):
         """Clean up finished game after delay to allow saving."""
         await asyncio.sleep(delay_seconds)
         if game_id in self.finished_games:
             del self.finished_games[game_id]
-            logger.info(f"Cleaned up finished Tetris game {game_id} after {delay_seconds} seconds")
+            logger.info(
+                f"Cleaned up finished Tetris game {game_id} after {delay_seconds} seconds"
+            )
 
-    async def create_game(self, game_id: str, game_type: str, players: List[Dict[str, Any]],
-                          time_control: TimeControl) -> GameState:
+    async def create_game(
+        self,
+        game_id: str,
+        game_type: str,
+        players: List[Dict[str, Any]],
+        time_control: TimeControl,
+    ) -> GameState:
         """Create a new Tetris game instance."""
         logic = GameFactory.create_game_logic(game_type)
         game_state = logic.initialize_game(game_id, players, time_control)
 
         # For Tetris, start immediately in playing mode with falling piece
-        game_state.status = 'playing'
+        game_state.status = "playing"
 
         # Set initial time only for the starting player
-        game_state.time_remaining[game_state.current_player] = game_state.time_control.increment
+        game_state.time_remaining[game_state.current_player] = (
+            game_state.time_control.increment
+        )
 
         # Create initial falling piece
         from backend.app.games.tetris.board import TetrisBoard
+
         board = TetrisBoard()
         game_state.board_state = board.start_falling_piece(game_state.board_state)
 
@@ -201,10 +248,14 @@ class TetrisGameEngine(GameEngineInterface):
         task = asyncio.create_task(self._game_timer(game_id))
         self.game_tasks[game_id] = task
 
-        logger.info(f"Created Tetris game {game_id} with time control {time_control_str} and initial falling piece")
+        logger.info(
+            f"Created Tetris game {game_id} with time control {time_control_str} and initial falling piece"
+        )
         return game_state
 
-    async def process_move(self, game_id: str, player_id: int, move_data: Dict[str, Any]) -> bool:
+    async def process_move(
+        self, game_id: str, player_id: int, move_data: Dict[str, Any]
+    ) -> bool:
         """Process a Tetris move."""
         game_state = self.active_games.get(game_id)
         if not game_state:
@@ -219,18 +270,21 @@ class TetrisGameEngine(GameEngineInterface):
                 # Record the move in history
                 from backend.app.games.base import GameMove
                 from datetime import datetime
+
                 move = GameMove(
-                    player_id=player_id,
-                    move_data=move_data,
-                    timestamp=datetime.now()
+                    player_id=player_id, move_data=move_data, timestamp=datetime.now()
                 )
                 # Store board state after this completed turn
                 move.board_state_after = new_state.board_state
                 move.time_remaining_after = new_state.time_remaining.copy()
                 new_state.moves_history.append(move)
                 # Reset timer for the new current player
-                new_state.time_remaining[new_state.current_player] = new_state.time_control.increment
-                logger.info(f"Tetris game {game_id} turn switched to player {new_state.current_player}, timer reset")
+                new_state.time_remaining[new_state.current_player] = (
+                    new_state.time_control.increment
+                )
+                logger.info(
+                    f"Tetris game {game_id} turn switched to player {new_state.current_player}, timer reset"
+                )
 
             self.active_games[game_id] = new_state
             await broadcast_state(game_id, new_state)
@@ -240,7 +294,9 @@ class TetrisGameEngine(GameEngineInterface):
                 bot_player = new_state.players[new_state.current_player]
                 if is_bot_player(bot_player):
                     difficulty = bot_player.get("difficulty", 1)
-                    asyncio.create_task(schedule_bot_move(new_state, game_id, difficulty, self))
+                    asyncio.create_task(
+                        schedule_bot_move(new_state, game_id, difficulty, self)
+                    )
 
         return valid
 
@@ -265,51 +321,77 @@ class TetrisGameEngine(GameEngineInterface):
             game_state = self.active_games[game_id]
 
             # Handle Tetris gameplay
-            if game_state.game_type == 'tetris' and game_state.status == 'playing':
+            if game_state.game_type == "tetris" and game_state.status == "playing":
                 # Start falling piece if none exists
-                if not game_state.board_state.get('falling_piece'):
+                if not game_state.board_state.get("falling_piece"):
                     from backend.app.games.tetris.board import TetrisBoard
+
                     board = TetrisBoard()
-                    game_state.board_state = board.start_falling_piece(game_state.board_state)
-                    logger.info(f"Tetris game {game_id} started falling piece for player {game_state.current_player}")
+                    game_state.board_state = board.start_falling_piece(
+                        game_state.board_state
+                    )
+                    logger.info(
+                        f"Tetris game {game_id} started falling piece for player {game_state.current_player}"
+                    )
 
                 # Move falling piece down automatically
-                if game_state.board_state.get('falling_piece'):
+                if game_state.board_state.get("falling_piece"):
                     from backend.app.games.tetris.board import TetrisBoard
+
                     board = TetrisBoard()
                     old_board_state = game_state.board_state
-                    game_state.board_state = board.move_falling_piece(game_state.board_state, 'down')
+                    game_state.board_state = board.move_falling_piece(
+                        game_state.board_state, "down"
+                    )
 
                     # Check for top-out
-                    if game_state.board_state.get('top_out'):
+                    if game_state.board_state.get("top_out"):
                         # Current player loses due to top-out
-                        opponent = (game_state.current_player + 1) % len(game_state.players)
-                        game_state.winner = game_state.players[opponent]['name']
-                        game_state.status = 'finished'
-                        logger.info(f"Tetris game {game_id} top-out, player {game_state.current_player} loses")
+                        opponent = (game_state.current_player + 1) % len(
+                            game_state.players
+                        )
+                        game_state.winner = game_state.players[opponent]["name"]
+                        game_state.status = "finished"
+                        logger.info(
+                            f"Tetris game {game_id} top-out, player {game_state.current_player} loses"
+                        )
                         await broadcast_state(game_id, game_state)
                         await self._cleanup_finished_game(game_id, game_state)
                         break
 
-                    if not game_state.board_state.get('falling_piece') and old_board_state.get('falling_piece'):
-                        if 'lines_cleared' in game_state.board_state:
-                            lines_cleared = game_state.board_state['lines_cleared']
+                    if not game_state.board_state.get(
+                        "falling_piece"
+                    ) and old_board_state.get("falling_piece"):
+                        if "lines_cleared" in game_state.board_state:
+                            lines_cleared = game_state.board_state["lines_cleared"]
                             if lines_cleared > 0:
                                 score = board._calculate_score(lines_cleared)
-                                game_state.board_state['scores'][game_state.current_player] += score
+                                game_state.board_state["scores"][
+                                    game_state.current_player
+                                ] += score
 
                         # Switch to next player
-                        next_player = (game_state.current_player + 1) % len(game_state.players)
+                        next_player = (game_state.current_player + 1) % len(
+                            game_state.players
+                        )
                         game_state.current_player = next_player
 
                         # Reset timer only for the new current player
-                        game_state.time_remaining[game_state.current_player] = game_state.time_control.increment
+                        game_state.time_remaining[game_state.current_player] = (
+                            game_state.time_control.increment
+                        )
 
-                        logger.info(f"Tetris game {game_id} piece placed, switching to player {next_player}")
+                        logger.info(
+                            f"Tetris game {game_id} piece placed, switching to player {next_player}"
+                        )
 
                         # Start new falling piece for next player
-                        game_state.board_state = board.start_falling_piece(game_state.board_state)
-                        logger.info(f"Tetris game {game_id} started new piece for player {next_player}")
+                        game_state.board_state = board.start_falling_piece(
+                            game_state.board_state
+                        )
+                        logger.info(
+                            f"Tetris game {game_id} started new piece for player {next_player}"
+                        )
 
                         # Broadcast state immediately after turn change
                         await broadcast_state(game_id, game_state)
@@ -319,23 +401,31 @@ class TetrisGameEngine(GameEngineInterface):
                             bot_player = game_state.players[game_state.current_player]
                             if is_bot_player(bot_player):
                                 difficulty = bot_player.get("difficulty", 1)
-                                asyncio.create_task(schedule_bot_move(game_state, game_id, difficulty, self))
+                                asyncio.create_task(
+                                    schedule_bot_move(
+                                        game_state, game_id, difficulty, self
+                                    )
+                                )
 
                 # Update move timer only if player has a falling piece
-                if game_state.board_state.get('falling_piece'):
+                if game_state.board_state.get("falling_piece"):
                     game_state.time_remaining[game_state.current_player] -= 1
                     if game_state.time_remaining[game_state.current_player] <= 0:
-                        opponent = (game_state.current_player + 1) % len(game_state.players)
-                        game_state.winner = game_state.players[opponent]['name']
-                        game_state.status = 'finished'
-                        logger.info(f"Tetris game {game_id} timeout, player {game_state.current_player} loses")
+                        opponent = (game_state.current_player + 1) % len(
+                            game_state.players
+                        )
+                        game_state.winner = game_state.players[opponent]["name"]
+                        game_state.status = "finished"
+                        logger.info(
+                            f"Tetris game {game_id} timeout, player {game_state.current_player} loses"
+                        )
                         await broadcast_state(game_id, game_state)
                         await self._cleanup_finished_game(game_id, game_state)
                         break
 
             await broadcast_state(game_id, game_state)
 
-            if game_state.status == 'finished':
+            if game_state.status == "finished":
                 await self._cleanup_finished_game(game_id, game_state)
                 break
 

@@ -1,6 +1,7 @@
 """
 Repository for managing user active games.
 """
+
 import logging
 from typing import Optional
 from uuid import UUID

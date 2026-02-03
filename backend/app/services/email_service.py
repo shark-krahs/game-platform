@@ -111,8 +111,8 @@ EMAIL_TEMPLATES = {
 def _normalize_locale(locale: str | None) -> str:
     if not locale:
         return "en"
-    normalized = locale.replace('_', '-').lower()
-    base = normalized.split('-')[0]
+    normalized = locale.replace("_", "-").lower()
+    base = normalized.split("-")[0]
     return base if base in EMAIL_TEMPLATES else "en"
 
 
@@ -146,7 +146,9 @@ def mask_email(email: str) -> str:
 def send_email(payload: EmailPayload) -> None:
     message = EmailMessage()
     message["Subject"] = payload.subject
-    message["From"] = f"{settings.mail_from_name} <{settings.mail_from_address or settings.smtp_user}>"
+    message["From"] = (
+        f"{settings.mail_from_name} <{settings.mail_from_address or settings.smtp_user}>"
+    )
     message["To"] = payload.to_address
     message.set_content(payload.html_body, subtype="html")
 
@@ -198,7 +200,9 @@ def send_email(payload: EmailPayload) -> None:
         raise
 
 
-def build_verification_email(username: str, confirm_link: str, locale: str | None = None) -> EmailPayload:
+def build_verification_email(
+    username: str, confirm_link: str, locale: str | None = None
+) -> EmailPayload:
     template = EMAIL_TEMPLATES[_normalize_locale(locale)]
     return EmailPayload(
         to_address="",
@@ -212,7 +216,9 @@ def build_verification_email(username: str, confirm_link: str, locale: str | Non
     )
 
 
-def build_password_reset_email(username: str, reset_link: str, locale: str | None = None) -> EmailPayload:
+def build_password_reset_email(
+    username: str, reset_link: str, locale: str | None = None
+) -> EmailPayload:
     template = EMAIL_TEMPLATES[_normalize_locale(locale)]
     return EmailPayload(
         to_address="",
@@ -226,7 +232,9 @@ def build_password_reset_email(username: str, reset_link: str, locale: str | Non
     )
 
 
-def build_email_change_email(username: str, confirm_link: str, locale: str | None = None) -> EmailPayload:
+def build_email_change_email(
+    username: str, confirm_link: str, locale: str | None = None
+) -> EmailPayload:
     template = EMAIL_TEMPLATES[_normalize_locale(locale)]
     return EmailPayload(
         to_address="",
