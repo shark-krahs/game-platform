@@ -51,8 +51,8 @@ export const QuadrantContainer = styled.div<QuadrantContainerProps>`
     const colors = ["#dd1414", "#1414dd", "#14dd14", "#dddd14"];
     return colors[props.$quadrant] || "#888888";
   }};
-  border-radius: 12px;
-  border: 3px solid #000000;
+  border-radius: 0;
+  border: 0;
   width: var(--pentago-quadrant-size);
   height: var(--pentago-quadrant-size);
 `;

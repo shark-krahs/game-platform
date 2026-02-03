@@ -19,15 +19,14 @@ const PentagoBoard: React.FC<GameBoardProps> = ({
   };
 
   return (
-    <div>
+    <div className="pentago-board-frame">
       {/* Игровое поле — 2x2 квадранта */}
       <div
         className="pentago-board-grid"
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(2, 1fr)",
+          gridTemplateColumns: "repeat(2, var(--pentago-quadrant-size))",
           justifyContent: "center",
-          margin: "0 auto",
         }}
       >
         {[0, 1, 2, 3].map((quadrant) => (
