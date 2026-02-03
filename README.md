@@ -68,11 +68,32 @@ DB_ENGINE=sqlite
 В этом режиме используется файл `./game-platform.db` в папке `backend/`.
 Если у вас задан `DB_URL`, он будет проигнорирован при `DB_ENGINE=sqlite`.
 
-## Настройка почты (SMTP)
+## Настройка почты (Resend API)
 
-Добавьте в `.env` (можно в корне проекта или в `backend/.env`):
+1) Создайте API ключ в Resend Dashboard и сохраните его.
+2) Убедитесь, что домен/отправитель подтверждён в Resend.
+3) Добавьте переменные в `.env` (можно в корне проекта или в `backend/.env`):
 
 ```
+EMAIL_PROVIDER=resend
+RESEND_API_KEY=your_resend_api_key
+MAIL_FROM_NAME=Game Platform
+MAIL_FROM_ADDRESS=your@domain.com
+FRONTEND_BASE_URL=http://localhost:5173
+EMAIL_VERIFICATION_EXPIRE_MINUTES=60
+EMAIL_VERIFICATION_RESEND_COOLDOWN_SECONDS=60
+PASSWORD_RESET_EXPIRE_MINUTES=30
+EMAIL_CHANGE_EXPIRE_MINUTES=60
+```
+
+Проверка отправки: зарегистрируйтесь в приложении и убедитесь, что пришло письмо подтверждения.
+
+### SMTP (опционально, для локальной разработки)
+
+Если хотите использовать SMTP локально, укажите:
+
+```
+EMAIL_PROVIDER=smtp
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=your@gmail.com
@@ -84,11 +105,6 @@ SMTP_DEBUG=false
 SMTP_FORCE_IPV4=false
 MAIL_FROM_NAME=Game Platform
 MAIL_FROM_ADDRESS=your@gmail.com
-FRONTEND_BASE_URL=http://localhost:5173
-EMAIL_VERIFICATION_EXPIRE_MINUTES=60
-EMAIL_VERIFICATION_RESEND_COOLDOWN_SECONDS=60
-PASSWORD_RESET_EXPIRE_MINUTES=30
-EMAIL_CHANGE_EXPIRE_MINUTES=60
 ```
 
 Для Gmail рекомендуется использовать App Password (а не основной пароль).

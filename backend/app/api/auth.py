@@ -172,7 +172,7 @@ async def register(user_in: UserCreate):
     confirm_link = build_confirm_link(token)
     email_payload = build_verification_email(user.username, confirm_link, user.language)
     email_payload.to_address = user.email
-    send_email(email_payload)
+    await send_email(email_payload)
 
     return {"message": "verification sent"}
 
@@ -364,7 +364,7 @@ async def resend_confirmation(payload: EmailRequest):
     confirm_link = build_confirm_link(token)
     email_payload = build_verification_email(user.username, confirm_link, user.language)
     email_payload.to_address = user.email
-    send_email(email_payload)
+    await send_email(email_payload)
     return {"message": "confirmation sent"}
 
 
@@ -387,7 +387,7 @@ async def request_password_reset(payload: EmailRequest):
     reset_link = build_password_reset_link(token)
     email_payload = build_password_reset_email(user.username, reset_link, user.language)
     email_payload.to_address = user.email
-    send_email(email_payload)
+    await send_email(email_payload)
     return {"message": "reset sent", "masked_email": mask_email(user.email)}
 
 
@@ -410,7 +410,7 @@ async def resend_password_reset(payload: EmailRequest):
     reset_link = build_password_reset_link(token)
     email_payload = build_password_reset_email(user.username, reset_link, user.language)
     email_payload.to_address = user.email
-    send_email(email_payload)
+    await send_email(email_payload)
     return {"message": "reset resent", "masked_email": mask_email(user.email)}
 
 
@@ -433,7 +433,7 @@ async def request_email_change(
         current_user.username, confirm_link, current_user.language
     )
     email_payload.to_address = current_user.email
-    send_email(email_payload)
+    await send_email(email_payload)
     return {
         "message": "confirmation sent",
         "masked_email": mask_email(current_user.email),
@@ -533,7 +533,7 @@ async def confirm_email_change(payload: EmailChangeConfirmRequest):
             user.username, confirm_link, user.language
         )
         email_payload.to_address = user.pending_email
-        send_email(email_payload)
+        await send_email(email_payload)
         return {"message": "new email confirmation sent"}
 
     user.email = user.pending_email
@@ -583,7 +583,7 @@ async def resend_email_change(payload: EmailChangeResendRequest):
     confirm_link = build_email_change_link(payload.token)
     email_payload = build_email_change_email(user.username, confirm_link, user.language)
     email_payload.to_address = user.pending_email
-    send_email(email_payload)
+    await send_email(email_payload)
     return {
         "message": "email change resent",
         "masked_email": mask_email(user.pending_email),

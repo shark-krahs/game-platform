@@ -71,6 +71,8 @@ class Settings(BaseSettings):
     smtp_timeout_seconds: int = int(os.getenv("SMTP_TIMEOUT_SECONDS", "30"))
     smtp_debug: bool = os.getenv("SMTP_DEBUG", "false").lower() == "true"
     smtp_force_ipv4: bool = os.getenv("SMTP_FORCE_IPV4", "false").lower() == "true"
+    email_provider: str = os.getenv("EMAIL_PROVIDER", "resend")
+    resend_api_key: str = os.getenv("RESEND_API_KEY", "")
     mail_from_name: str = os.getenv("MAIL_FROM_NAME", "Game Platform")
     mail_from_address: str = os.getenv("MAIL_FROM_ADDRESS", "")
     frontend_base_url: str = os.getenv("FRONTEND_BASE_URL", "http://localhost:5173")

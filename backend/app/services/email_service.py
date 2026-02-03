@@ -2,12 +2,10 @@ from __future__ import annotations
 
 import logging
 import secrets
-import smtplib
-import socket
 from dataclasses import dataclass
-from email.message import EmailMessage
 
 from backend.app.core.config import settings
+from backend.app.services.email.provider import EmailProvider, EmailSendError, get_email_provider
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +15,8 @@ class EmailPayload:
     to_address: str
     subject: str
     html_body: str
+    text_body: str | None = None
+    reply_to: str | None = None
 
 
 EMAIL_TEMPLATES = {
@@ -143,60 +143,34 @@ def mask_email(email: str) -> str:
     return f"{masked_local}@{domain}"
 
 
-def send_email(payload: EmailPayload) -> None:
-    message = EmailMessage()
-    message["Subject"] = payload.subject
-    message["From"] = (
-        f"{settings.mail_from_name} <{settings.mail_from_address or settings.smtp_user}>"
-    )
-    message["To"] = payload.to_address
-    message.set_content(payload.html_body, subtype="html")
+_provider_instance: EmailProvider | None = None
 
-    smtp_class = smtplib.SMTP_SSL if settings.smtp_use_ssl else smtplib.SMTP
-    if settings.smtp_debug:
-        logger.info(
-            "SMTP connect host=%s port=%s ssl=%s tls=%s",
-            settings.smtp_host,
-            settings.smtp_port,
-            settings.smtp_use_ssl,
-            settings.smtp_use_tls,
-        )
 
-    def _attempt_send(force_ipv4: bool) -> None:
-        host = settings.smtp_host
-        port = settings.smtp_port
-        if force_ipv4:
-            infos = socket.getaddrinfo(host, port, socket.AF_INET, socket.SOCK_STREAM)
-            if infos:
-                host = infos[0][4][0]
-            logger.info("SMTP force IPv4 resolved host=%s", host)
-        with smtp_class(host, port, timeout=settings.smtp_timeout_seconds) as server:
-            if settings.smtp_debug:
-                server.set_debuglevel(1)
-                logger.info("SMTP connected: %s", server.noop())
-                server.ehlo()
-            if settings.smtp_use_tls and not settings.smtp_use_ssl:
-                if settings.smtp_debug:
-                    logger.info("SMTP starttls...")
-                server.starttls()
-                if settings.smtp_debug:
-                    server.ehlo()
-            if settings.smtp_user and settings.smtp_password:
-                if settings.smtp_debug:
-                    logger.info("SMTP login user=%s", settings.smtp_user)
-                server.login(settings.smtp_user, settings.smtp_password)
-            server.send_message(message)
-            if settings.smtp_debug:
-                logger.info("SMTP message sent to %s", payload.to_address)
+def _get_provider() -> EmailProvider:
+    global _provider_instance
+    if _provider_instance is None:
+        _provider_instance = get_email_provider()
+    return _provider_instance
 
+
+async def send_email(payload: EmailPayload) -> None:
+    provider = _get_provider()
     try:
-        _attempt_send(settings.smtp_force_ipv4)
-    except Exception as exc:
-        if not settings.smtp_force_ipv4:
-            logger.warning("SMTP send failed, retrying with IPv4: %s", exc)
-            _attempt_send(True)
-            return
-        logger.exception("SMTP send failed: %s", exc)
+        await provider.send_email(
+            to=payload.to_address,
+            subject=payload.subject,
+            html_body=payload.html_body,
+            text_body=payload.text_body,
+            reply_to=payload.reply_to,
+        )
+    except EmailSendError as exc:
+        logger.error(
+            "Email send failed provider=%s to=%s status=%s detail=%s",
+            provider.__class__.__name__,
+            payload.to_address,
+            getattr(exc, "status_code", None),
+            getattr(exc, "response_body", None),
+        )
         raise
 
 
