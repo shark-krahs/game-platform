@@ -7,6 +7,8 @@ import {
   Card,
   Col,
   Collapse,
+  List,
+  Modal,
   Row,
   Space,
   Spin,
@@ -35,6 +37,12 @@ const SavedGames: React.FC = () => {
 
   const [savedGames, setSavedGames] = useState<SavedGame[]>([]);
   const [loading, setLoading] = useState(true);
+  const [categoryGames, setCategoryGames] = useState<SavedGame[]>([]);
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+  const [categoryMeta, setCategoryMeta] = useState<{
+    gameType: string;
+    timeCategory: string;
+  } | null>(null);
 
   const getTimeControlValues = (timeControl: SavedGame["time_control"]) => {
     if (!timeControl) {
@@ -170,16 +178,21 @@ const SavedGames: React.FC = () => {
         return;
       }
 
-      // Navigate to a detailed view or show games directly
       if (games.length === 1 && games[0]) {
         navigate(`/replay/${games[0].id}`);
-      } else if (games.length > 1 && games[0]) {
-        // TODO: Show a list of games for this category
-        message.info(
-          t("foundGames", { count: games.length, gameType, timeCategory }),
-        );
-        // For now, show the most recent game
-        navigate(`/replay/${games[0].id}`);
+        return;
+      }
+
+      if (games.length > 1) {
+        const sortedGames = [...games].sort((a, b) => {
+          const aTime = new Date(a.updated_at).getTime();
+          const bTime = new Date(b.updated_at).getTime();
+          return bTime - aTime;
+        });
+
+        setCategoryGames(sortedGames);
+        setCategoryMeta({ gameType, timeCategory });
+        setCategoryModalOpen(true);
       }
     } catch (error) {
       console.error("Failed to load games by category:", error);
@@ -332,6 +345,86 @@ const SavedGames: React.FC = () => {
             </div>
           </div>
         )}
+
+      <Modal
+        open={categoryModalOpen}
+        title={
+          categoryMeta
+            ? t("selectReplayTitle", {
+                gameType: categoryMeta.gameType,
+                timeCategory: categoryMeta.timeCategory,
+              })
+            : t("selectReplayTitleFallback")
+        }
+        footer={null}
+        onCancel={() => {
+          setCategoryModalOpen(false);
+          setCategoryGames([]);
+          setCategoryMeta(null);
+        }}
+        destroyOnClose
+      >
+        {categoryMeta && (
+          <Typography.Paragraph style={{ marginBottom: 12 }}>
+            {t("foundGames", {
+              count: categoryGames.length,
+              gameType: categoryMeta.gameType,
+              timeCategory: categoryMeta.timeCategory,
+            })}
+          </Typography.Paragraph>
+        )}
+        <List
+          dataSource={categoryGames}
+          renderItem={(game) => {
+            const players = game.players?.map((player) => player.name).join(" vs ");
+            const title = game.title || t("untitledGame");
+            const createdAt = new Date(game.created_at).toLocaleString();
+            const updatedAt = new Date(game.updated_at).toLocaleString();
+
+            return (
+              <List.Item
+                key={game.id}
+                actions={[
+                  <Button
+                    key={`view-${game.id}`}
+                    type="primary"
+                    onClick={() => {
+                      setCategoryModalOpen(false);
+                      setCategoryGames([]);
+                      setCategoryMeta(null);
+                      navigate(`/replay/${game.id}`);
+                    }}
+                  >
+                    {t("viewReplay")}
+                  </Button>,
+                ]}
+              >
+                <List.Item.Meta
+                  title={title}
+                  description={
+                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                      {players && (
+                        <span>
+                          {t("playersLabel")}: {players}
+                        </span>
+                      )}
+                      <span>
+                        {t("createdAtLabel")}: {createdAt}
+                      </span>
+                      <span>
+                        {t("updatedAtLabel")}: {updatedAt}
+                      </span>
+                      <span>
+                        {t("movesLabel")}: {game.moves_count}
+                      </span>
+                    </div>
+                  }
+                />
+              </List.Item>
+            );
+          }}
+        />
+      </Modal>
     </Card>
   );
 };
