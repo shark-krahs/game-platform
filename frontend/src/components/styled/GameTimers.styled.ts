@@ -2,19 +2,19 @@
  * Styled components for GameTimers
  */
 
-import styled from 'styled-components';
+import styled from "styled-components";
 
 // Пропсы для компонентов
 interface FirstMoveTimerContainerProps {
-    $isPlayerTurn: boolean;
+  $isPlayerTurn: boolean;
 }
 
 interface PlayerTimerContainerProps {
-    $isActive: boolean;
+  $isActive: boolean;
 }
 
 interface PlayerColorIndicatorProps {
-    color?: string;
+  color?: string;
 }
 
 // Типизируем styled-компоненты с темой
@@ -27,7 +27,7 @@ export const FirstMoveTimerContainer = styled.div<FirstMoveTimerContainerProps>`
   margin-bottom: ${(props) => props.theme.layout.timer.height / 6}px;
   border: ${(props) => props.theme.layout.timer.borderWidth * 2}px solid
     ${(props) =>
-    props.$isPlayerTurn
+      props.$isPlayerTurn
         ? props.theme.colors.status.error
         : props.theme.colors.status.success};
   border-radius: ${(props) => props.theme.layout.timer.borderRadius};
@@ -44,8 +44,8 @@ export const FirstMoveTimerValue = styled.span<FirstMoveTimerContainerProps>`
   font-weight: bold;
   color: ${(props) =>
     props.$isPlayerTurn
-        ? props.theme.colors.status.error
-        : props.theme.colors.status.success};
+      ? props.theme.colors.status.error
+      : props.theme.colors.status.success};
 `;
 
 export const PlayerTimerContainer = styled.div<PlayerTimerContainerProps>`
@@ -56,8 +56,8 @@ export const PlayerTimerContainer = styled.div<PlayerTimerContainerProps>`
   border-radius: ${(props) => props.theme.layout.timer.borderRadius};
   background-color: ${(props) =>
     props.$isActive
-        ? props.theme.colors.backgroundElevated
-        : props.theme.colors.background};
+      ? props.theme.colors.backgroundElevated
+      : props.theme.colors.background};
 `;
 
 export const PlayerName = styled.div`
@@ -75,8 +75,7 @@ export const PlayerColorIndicator = styled.div<PlayerColorIndicatorProps>`
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background-color: ${(props) =>
-    props.color || props.theme.colors.border};
+  background-color: ${(props) => props.color || props.theme.colors.border};
 `;
 
 export const PlayerTime = styled.span`
