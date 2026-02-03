@@ -50,5 +50,59 @@
     "invalid_game_id": "Няправільны фармат ідэнтыфікатара гульні.",
     "saved_game_not_found": "Захаваная гульня не знойдзена.",
     "saved_game_access_denied": "У вас няма доступу да гэтай захаванай гульні."
+  },
+  "admin": {
+    "title": "Панэль адміністратара",
+    "null": "null",
+    "login": {
+      "subtitle": "Увядзіце лагін і пароль суперкарыстальніка БД. Сесія захоўваецца толькі ў памяці.",
+      "username": "Лагін",
+      "password": "Пароль",
+      "enterUsername": "Увядзіце лагін",
+      "signIn": "Увайсці"
+    },
+    "tables": {
+      "select": "Выберыце табліцу",
+      "refreshTables": "Абнавіць табліцы",
+      "refreshRows": "Абнавіць радкі",
+      "createRow": "Стварыць запіс",
+      "logOut": "Выйсці",
+      "singlePkWarning": "Рэдагаванне даступна толькі для табліц з адным слупком першаснага ключа."
+    },
+    "actions": {
+      "title": "Дзеянні",
+      "edit": "Рэдагаваць",
+      "delete": "Выдаліць",
+      "deleteConfirm": "Выдаліць запіс?"
+    },
+    "sql": {
+      "title": "SQL кансоль",
+      "subtitle": "Толькі чытанне (SELECT / WITH / EXPLAIN). Калі LIMIT не ўказаны, ён будзе дададзены.",
+      "placeholder": "SELECT * FROM user LIMIT 50",
+      "run": "Выканаць",
+      "clear": "Ачысціць",
+      "executed": "Выкананы запыт",
+      "enterQuery": "Увядзіце SQL-запыт"
+    },
+    "modal": {
+      "createTitle": "Стварэнне запісу",
+      "editTitle": "Рэдагаванне запісу",
+      "createOk": "Стварыць",
+      "saveOk": "Захаваць"
+    },
+    "messages": {
+      "accessGranted": "Доступ да адмін-панэлі атрыманы",
+      "rowCreated": "Запіс створаны",
+      "rowUpdated": "Запіс абноўлены",
+      "rowDeleted": "Запіс выдалены"
+    },
+    "fields": {
+      "default": "Па змаўчанні: {{value}}"
+    },
+    "validation": {
+      "required": "Абавязкова",
+      "invalidJson": "Некарэктны JSON",
+      "invalidJsonField": "Некарэктны JSON у полі {{field}}"
+    }
   }
 }

@@ -50,5 +50,59 @@
     "invalid_game_id": "Invalid game ID format.",
     "saved_game_not_found": "Saved game not found.",
     "saved_game_access_denied": "You don't have access to this saved game."
+  },
+  "admin": {
+    "title": "Admin Panel",
+    "null": "null",
+    "login": {
+      "subtitle": "Enter database superuser credentials. Session is stored in memory only.",
+      "username": "Username",
+      "password": "Password",
+      "enterUsername": "Enter username",
+      "signIn": "Sign in"
+    },
+    "tables": {
+      "select": "Select table",
+      "refreshTables": "Refresh tables",
+      "refreshRows": "Refresh rows",
+      "createRow": "Create row",
+      "logOut": "Log out",
+      "singlePkWarning": "Editing is limited to tables with a single primary key column."
+    },
+    "actions": {
+      "title": "Actions",
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteConfirm": "Delete row?"
+    },
+    "sql": {
+      "title": "SQL Console",
+      "subtitle": "Read-only SQL (SELECT / WITH / EXPLAIN). A limit is enforced if not provided.",
+      "placeholder": "SELECT * FROM user LIMIT 50",
+      "run": "Run query",
+      "clear": "Clear",
+      "executed": "Executed query",
+      "enterQuery": "Enter a SQL query"
+    },
+    "modal": {
+      "createTitle": "Create row",
+      "editTitle": "Edit row",
+      "createOk": "Create",
+      "saveOk": "Save"
+    },
+    "messages": {
+      "accessGranted": "Admin access granted",
+      "rowCreated": "Row created",
+      "rowUpdated": "Row updated",
+      "rowDeleted": "Row deleted"
+    },
+    "fields": {
+      "default": "Default: {{value}}"
+    },
+    "validation": {
+      "required": "Required",
+      "invalidJson": "Invalid JSON",
+      "invalidJsonField": "Invalid JSON in {{field}}"
+    }
   }
 }

@@ -23,6 +23,7 @@ import GameReplay from "./components/GameReplay";
 import SavedGames from "./components/SavedGames";
 import Profile from "./components/Profile";
 import Lobby from "./components/Lobby";
+import AdminPanel from "./components/AdminPanel";
 
 const { Content, Footer } = Layout;
 
@@ -31,6 +32,7 @@ function AppContent() {
   const { isDark, toggleTheme } = useTheme(); // аналогично
 
   const currentTheme = isDark ? theme.darkAlgorithm : theme.defaultAlgorithm;
+  const adminEnabled = import.meta.env.VITE_ADMIN_ENABLED !== "false";
 
   return (
     <ConfigProvider
@@ -93,6 +95,7 @@ function AppContent() {
                       path="/confirm-email-change"
                       element={<ConfirmEmailChange />}
                     />
+                    {adminEnabled && <Route path="/admin" element={<AdminPanel />} />}
                     <Route
                       path="*"
                       element={<Navigate to="/lobby" replace />}
@@ -116,6 +119,7 @@ function AppContent() {
                       path="/confirm-email-change"
                       element={<ConfirmEmailChange />}
                     />
+                    {adminEnabled && <Route path="/admin" element={<AdminPanel />} />}
                     <Route
                       path="*"
                       element={<Navigate to="/lobby" replace />}

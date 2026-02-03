@@ -6,6 +6,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from backend.app.api import admin
 from backend.app.api import auth
 from backend.app.api import games
 from backend.app.core.config import setup_logging
@@ -68,3 +69,4 @@ app.add_middleware(
 # Роутеры
 app.include_router(games.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
+app.include_router(admin.router, prefix="/api")

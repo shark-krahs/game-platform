@@ -50,5 +50,59 @@
     "invalid_game_id": "Невірний формат ідентифікатора гри.",
     "saved_game_not_found": "Збережену гру не знайдено.",
     "saved_game_access_denied": "У вас немає доступу до цієї збереженої гри."
+  },
+  "admin": {
+    "title": "Панель адміністратора",
+    "null": "null",
+    "login": {
+      "subtitle": "Введіть логін і пароль суперкористувача БД. Сесія зберігається лише в пам’яті.",
+      "username": "Логін",
+      "password": "Пароль",
+      "enterUsername": "Введіть логін",
+      "signIn": "Увійти"
+    },
+    "tables": {
+      "select": "Оберіть таблицю",
+      "refreshTables": "Оновити таблиці",
+      "refreshRows": "Оновити рядки",
+      "createRow": "Створити запис",
+      "logOut": "Вийти",
+      "singlePkWarning": "Редагування доступне лише для таблиць з одним стовпцем первинного ключа."
+    },
+    "actions": {
+      "title": "Дії",
+      "edit": "Редагувати",
+      "delete": "Видалити",
+      "deleteConfirm": "Видалити запис?"
+    },
+    "sql": {
+      "title": "SQL консоль",
+      "subtitle": "Лише читання (SELECT / WITH / EXPLAIN). Якщо LIMIT не вказано, його буде додано.",
+      "placeholder": "SELECT * FROM user LIMIT 50",
+      "run": "Виконати",
+      "clear": "Очистити",
+      "executed": "Виконаний запит",
+      "enterQuery": "Введіть SQL-запит"
+    },
+    "modal": {
+      "createTitle": "Створення запису",
+      "editTitle": "Редагування запису",
+      "createOk": "Створити",
+      "saveOk": "Зберегти"
+    },
+    "messages": {
+      "accessGranted": "Доступ до адмін-панелі отримано",
+      "rowCreated": "Запис створено",
+      "rowUpdated": "Запис оновлено",
+      "rowDeleted": "Запис видалено"
+    },
+    "fields": {
+      "default": "За замовчуванням: {{value}}"
+    },
+    "validation": {
+      "required": "Обов’язково",
+      "invalidJson": "Некоректний JSON",
+      "invalidJsonField": "Некоректний JSON у полі {{field}}"
+    }
   }
 }

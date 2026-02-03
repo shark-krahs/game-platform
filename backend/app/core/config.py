@@ -1,15 +1,18 @@
 import logging
 import os
 from pathlib import Path
+from urllib.parse import quote_plus
 
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 ROOT_DIR = BASE_DIR.parent
+PROJECT_ROOT = ROOT_DIR.parent
 
-# Load .env from backend/.env or root .env if present
+# Load .env (prefer backend/.env; fall back to project root .env if present)
 load_dotenv(ROOT_DIR / ".env")
+load_dotenv(PROJECT_ROOT / ".env")
 load_dotenv(BASE_DIR / ".env")
 
 
@@ -25,15 +28,20 @@ def _build_db_url() -> str:
     port = os.getenv("DB_PORT", "5432")
     name = os.getenv("DB_NAME", "game_platform")
 
+    user_escaped = quote_plus(user)
     if password:
-        return f"{driver}://{user}:{password}@{host}:{port}/{name}"
+        password_escaped = quote_plus(password)
+        return f"{driver}://{user_escaped}:{password_escaped}@{host}:{port}/{name}"
 
-    return f"{driver}://{user}@{host}:{port}/{name}"
+    return f"{driver}://{user_escaped}@{host}:{port}/{name}"
 
 
 class Settings(BaseSettings):
     app_name: str = "game-platform"
     db_url: str = _build_db_url()
+    db_user: str = os.getenv("DB_USER", "db_owner")
+    db_password: str = os.getenv("DB_PASSWORD", "")
+    admin_enabled: bool = os.getenv("ADMIN_ENABLED", "true").lower() == "true"
     telegram_token: str = os.getenv("TELEGRAM_TOKEN", "")
     jwt_secret: str = os.getenv("JWT_SECRET", "replace-with-a-secure-secret")
     jwt_algorithm: str = os.getenv("JWT_ALGORITHM", "HS256")

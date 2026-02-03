@@ -50,5 +50,59 @@
     "invalid_game_id": "Неверный формат идентификатора игры.",
     "saved_game_not_found": "Сохраненная игра не найдена.",
     "saved_game_access_denied": "У вас нет доступа к этой сохраненной игре."
+  },
+  "admin": {
+    "title": "Админ-панель",
+    "null": "null",
+    "login": {
+      "subtitle": "Введите логин и пароль суперпользователя БД. Сессия хранится только в памяти.",
+      "username": "Логин",
+      "password": "Пароль",
+      "enterUsername": "Введите логин",
+      "signIn": "Войти"
+    },
+    "tables": {
+      "select": "Выберите таблицу",
+      "refreshTables": "Обновить таблицы",
+      "refreshRows": "Обновить строки",
+      "createRow": "Создать запись",
+      "logOut": "Выйти",
+      "singlePkWarning": "Редактирование доступно только для таблиц с одним столбцом первичного ключа."
+    },
+    "actions": {
+      "title": "Действия",
+      "edit": "Редактировать",
+      "delete": "Удалить",
+      "deleteConfirm": "Удалить запись?"
+    },
+    "sql": {
+      "title": "SQL консоль",
+      "subtitle": "Только чтение (SELECT / WITH / EXPLAIN). Если LIMIT не указан, он будет добавлен.",
+      "placeholder": "SELECT * FROM user LIMIT 50",
+      "run": "Выполнить",
+      "clear": "Очистить",
+      "executed": "Выполненный запрос",
+      "enterQuery": "Введите SQL-запрос"
+    },
+    "modal": {
+      "createTitle": "Создание записи",
+      "editTitle": "Редактирование записи",
+      "createOk": "Создать",
+      "saveOk": "Сохранить"
+    },
+    "messages": {
+      "accessGranted": "Доступ к админ-панели получен",
+      "rowCreated": "Запись создана",
+      "rowUpdated": "Запись обновлена",
+      "rowDeleted": "Запись удалена"
+    },
+    "fields": {
+      "default": "По умолчанию: {{value}}"
+    },
+    "validation": {
+      "required": "Обязательно",
+      "invalidJson": "Некорректный JSON",
+      "invalidJsonField": "Некорректный JSON в поле {{field}}"
+    }
   }
 }
