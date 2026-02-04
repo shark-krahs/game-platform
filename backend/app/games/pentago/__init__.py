@@ -1,7 +1,7 @@
 """
 Pentago game module.
 """
-from .logic import PentagoGame
 from .board import PentagoBoard
+from .logic import PentagoGame
 
 __all__ = ['PentagoGame', 'PentagoBoard']

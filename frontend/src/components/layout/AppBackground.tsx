@@ -3,14 +3,14 @@
  * Provides a flexible background system that works with AppHeader overlay
  */
 
-import React from 'react';
-import styled from 'styled-components';
+import React from "react";
+import styled from "styled-components";
 
 interface AppBackgroundProps {
-  $backgroundImage?: string;    // URL изображения фона
-  $backgroundColor?: string;    // Цвет фона, если нет изображения
-  $hasOverlay?: boolean;        // Добавить полупрозрачный оверлей
-  $hasBlur?: boolean;           // Добавить лёгкий блюр
+  $backgroundImage?: string; // URL изображения фона
+  $backgroundColor?: string; // Цвет фона, если нет изображения
+  $hasOverlay?: boolean; // Добавить полупрозрачный оверлей
+  $hasBlur?: boolean; // Добавить лёгкий блюр
 }
 
 const BackgroundContainer = styled.div<AppBackgroundProps>`
@@ -28,7 +28,7 @@ const BackgroundContainer = styled.div<AppBackgroundProps>`
         url(${$backgroundImage})
       `;
     }
-    return $backgroundColor || '#888888';
+    return $backgroundColor || "#888888";
   }};
 
   background-size: cover;
@@ -43,7 +43,9 @@ const BackgroundContainer = styled.div<AppBackgroundProps>`
   }
 `;
 
-const BackgroundOverlay = styled.div<Pick<AppBackgroundProps, '$hasOverlay' | '$hasBlur'>>`
+const BackgroundOverlay = styled.div<
+  Pick<AppBackgroundProps, "$hasOverlay" | "$hasBlur">
+>`
   position: absolute;
   top: 0;
   left: 0;
@@ -51,9 +53,9 @@ const BackgroundOverlay = styled.div<Pick<AppBackgroundProps, '$hasOverlay' | '$
   height: 100%;
 
   background: ${({ $hasOverlay }) =>
-    $hasOverlay ? 'rgba(0, 0, 0, 0.2)' : 'transparent'};
+    $hasOverlay ? "rgba(0, 0, 0, 0.2)" : "transparent"};
 
-  backdrop-filter: ${({ $hasBlur }) => ($hasBlur ? 'blur(1px)' : 'none')};
+  backdrop-filter: ${({ $hasBlur }) => ($hasBlur ? "blur(1px)" : "none")};
 `;
 
 const AppBackground: React.FC<AppBackgroundProps> = ({

@@ -1,10 +1,101 @@
 {
-    "gamePlatform": "Game Platform",
-    "welcome": "Welcome",
-    "anonymous": "Anonymous",
-    "loginOrRegister": "Login or register",
-    "profile": "Profile",
-    "game": "Game",
-    "lobby": "Lobby",
-    "logout": "Logout"
+  "gamePlatform": "Game Platform",
+  "welcome": "Welcome",
+  "anonymous": "Anonymous",
+  "loginOrRegister": "Login or register",
+  "profile": "Profile",
+  "game": "Game",
+  "lobby": "Lobby",
+  "logout": "Logout",
+  "darkMode": "Dark mode",
+  "lightMode": "Light mode",
+  "menu": "Menu",
+  "loading": "Loading...",
+  "footer": "Game Platform ©{{year}}",
+  "networkError": "Network error. Check your connection.",
+  "errorBoundary": {
+    "title": "Oops! Something went wrong",
+    "subtitle": "We apologize for the inconvenience. Please try again or go back to the home page.",
+    "retry": "Try Again",
+    "goHome": "Go Home"
+  },
+  "auth": {
+    "username_taken": "Username already registered.",
+    "invalid_credentials": "Incorrect username or password.",
+    "old_password_required": "Old password is required to change password.",
+    "old_password_incorrect": "Old password is incorrect.",
+    "invalid_token": "Invalid token.",
+    "token_expired": "Token expired.",
+    "user_not_found": "User not found.",
+    "recovery_setup_required": "Please save your recovery codes to continue."
+  },
+  "games": {
+    "auth_required": "Authentication required.",
+    "invalid_token": "Invalid token.",
+    "invalid_json": "Invalid data format.",
+    "not_playing_state": "Game is not in a playable state.",
+    "player_not_found": "Player not found in this game.",
+    "invalid_move": "Invalid move.",
+    "unknown_action": "Unknown action.",
+    "game_id_required": "Game ID is required.",
+    "game_not_found": "Game not found.",
+    "not_a_player": "You are not a player in this game.",
+    "invalid_game_id": "Invalid game ID format.",
+    "saved_game_not_found": "Saved game not found.",
+    "saved_game_access_denied": "You don't have access to this saved game."
+  },
+  "admin": {
+    "title": "Admin Panel",
+    "null": "null",
+    "login": {
+      "subtitle": "Enter database superuser credentials. Session is stored in memory only.",
+      "username": "Username",
+      "password": "Password",
+      "enterUsername": "Enter username",
+      "signIn": "Sign in"
+    },
+    "tables": {
+      "select": "Select table",
+      "refreshTables": "Refresh tables",
+      "refreshRows": "Refresh rows",
+      "createRow": "Create row",
+      "logOut": "Log out",
+      "singlePkWarning": "Editing is limited to tables with a single primary key column."
+    },
+    "actions": {
+      "title": "Actions",
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteConfirm": "Delete row?"
+    },
+    "sql": {
+      "title": "SQL Console",
+      "subtitle": "Read-only SQL (SELECT / WITH / EXPLAIN). A limit is enforced if not provided.",
+      "placeholder": "SELECT * FROM user LIMIT 50",
+      "run": "Run query",
+      "clear": "Clear",
+      "executed": "Executed query",
+      "enterQuery": "Enter a SQL query"
+    },
+    "modal": {
+      "createTitle": "Create row",
+      "editTitle": "Edit row",
+      "createOk": "Create",
+      "saveOk": "Save"
+    },
+    "messages": {
+      "accessGranted": "Admin access granted",
+      "rowCreated": "Row created",
+      "rowUpdated": "Row updated",
+      "rowDeleted": "Row deleted"
+    },
+    "fields": {
+      "default": "Default: {{value}}"
+    },
+    "validation": {
+      "required": "Required",
+      "invalidJson": "Invalid JSON",
+      "invalidJsonField": "Invalid JSON in {{field}}"
+    }
+  }
 }

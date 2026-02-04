@@ -1,7 +1,6 @@
-import React from 'react';
-import Quadrant from '../../components/game/Quadrant';
-import { GameBoardProps, Position } from '../../types';
-import { BOARD_SIZE } from '../../constants';
+import React from "react";
+import Quadrant from "../../components/game/Quadrant";
+import { GameBoardProps } from "../../types";
 
 const PentagoBoard: React.FC<GameBoardProps> = ({
   gameState,
@@ -20,15 +19,14 @@ const PentagoBoard: React.FC<GameBoardProps> = ({
   };
 
   return (
-    <div>
+    <div className="pentago-board-frame">
       {/* Игровое поле — 2x2 квадранта */}
       <div
         className="pentago-board-grid"
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(2, 1fr)',
-          justifyContent: 'center',
-          margin: '0 auto',
+          display: "grid",
+          gridTemplateColumns: "repeat(2, var(--pentago-quadrant-size))",
+          justifyContent: "center",
         }}
       >
         {[0, 1, 2, 3].map((quadrant) => (

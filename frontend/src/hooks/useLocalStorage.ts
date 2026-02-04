@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback } from 'react';
+import {useCallback, useEffect, useState} from "react";
 
 /**
  * Custom hook for localStorage operations with error handling and type safety
  */
 export function useLocalStorage<T>(
   key: string,
-  defaultValue: T | null = null
+  defaultValue: T | null = null,
 ): [T | null, (value: T | ((val: T | null) => T | null)) => void, () => void] {
   const [storedValue, setStoredValue] = useState<T | null>(() => {
     try {
@@ -34,7 +34,7 @@ export function useLocalStorage<T>(
         console.warn(`Failed to save to localStorage key "${key}":`, error);
       }
     },
-    [key, storedValue]
+    [key, storedValue],
   );
 
   const removeValue = useCallback(() => {
@@ -51,16 +51,21 @@ export function useLocalStorage<T>(
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === key) {
         try {
-          const newValue = e.newValue ? (JSON.parse(e.newValue) as T) : defaultValue;
+          const newValue = e.newValue
+            ? (JSON.parse(e.newValue) as T)
+            : defaultValue;
           setStoredValue(newValue);
         } catch (error) {
-          console.warn(`Failed to parse localStorage value for key "${key}":`, error);
+          console.warn(
+            `Failed to parse localStorage value for key "${key}":`,
+            error,
+          );
         }
       }
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, [key, defaultValue]);
 
   return [storedValue, setValue, removeValue];

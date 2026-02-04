@@ -1,17 +1,17 @@
 import os
 import sys
-from pathlib import Path
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import games
-from app.api import auth
-from app.db.database import init_db
-from app.matchmaking import matchmaking_loop
-from app.db import database
-from app.core.config import setup_logging
+from backend.app.api import admin
+from backend.app.api import auth
+from backend.app.api import games
+from backend.app.core.config import setup_logging
+from backend.app.db.database import init_db
+from backend.app.matchmaking import matchmaking_loop
 
 # Make sure backend package is importable when running from project root
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,21 +27,22 @@ async def lifespan(app: FastAPI):
     # startup
     try:
         await init_db()
-        
+
         # Register game types
-        from app.games.base import GameFactory
-        from app.games.pentago.logic import PentagoGame
-        from app.games.tetris.logic import TetrisGame
-        
-        GameFactory.register_game('pentago', PentagoGame)
-        GameFactory.register_game('tetris', TetrisGame)
-        
+        from backend.app.games.base import GameFactory
+        from backend.app.games.pentago.logic import PentagoGame
+        from backend.app.games.tetris.logic import TetrisGame
+
+        GameFactory.register_game("pentago", PentagoGame)
+        GameFactory.register_game("tetris", TetrisGame)
+
         logger.info(f"Registered games: {GameFactory.get_available_games()}")
-        
+
         import asyncio
+
         asyncio.create_task(matchmaking_loop())
-    except Exception as e:
-        logger.error(f"Startup error: {e}")
+    except Exception:
+        logger.exception("Startup error")
         # fail silently; DB may be managed externally
         pass
     yield
@@ -52,7 +53,9 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Game Platform", lifespan=lifespan)
 
 # Настройка CORS
-allowed_origins_str = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://192.168.31.224:5173")
+allowed_origins_str = os.getenv(
+    "ALLOWED_ORIGINS", "http://localhost:5173,http://192.168.31.224:5173"
+)
 origins = [o.strip() for o in allowed_origins_str.split(",") if o.strip()]
 
 app.add_middleware(
@@ -66,3 +69,4 @@ app.add_middleware(
 # Роутеры
 app.include_router(games.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
+app.include_router(admin.router, prefix="/api")

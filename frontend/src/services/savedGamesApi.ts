@@ -1,8 +1,8 @@
 /**
  * API service for saved games functionality
  */
-import apiService from './api';
-import { SavedGame, SavedGameDetail } from '../types';
+import apiService from "./api";
+import { SavedGame, SavedGameDetail } from "../types";
 
 export interface SaveGameRequest {
   game_id: string;
@@ -19,7 +19,7 @@ class SavedGamesApi {
    * Get all saved games for the authenticated user
    */
   async getSavedGames(): Promise<SavedGame[]> {
-    return apiService.get<SavedGame[]>('/saved-games');
+    return apiService.get<SavedGame[]>("/saved-games");
   }
 
   /**
@@ -33,13 +33,16 @@ class SavedGamesApi {
    * Save a game
    */
   async saveGame(request: SaveGameRequest): Promise<SaveGameResponse> {
-    return apiService.post<SaveGameResponse>('/saved-games', request);
+    return apiService.post<SaveGameResponse>("/saved-games", request);
   }
 
   /**
    * Get saved games by game type and category
    */
-  async getSavedGamesByCategory(gameType: string, category: string): Promise<SavedGame[]> {
+  async getSavedGamesByCategory(
+    gameType: string,
+    category: string,
+  ): Promise<SavedGame[]> {
     return apiService.get<SavedGame[]>(`/saved-games/${gameType}/${category}`);
   }
 

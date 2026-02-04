@@ -2,7 +2,7 @@
  * Styled components for Quadrant
  */
 
-import styled, { keyframes } from 'styled-components';
+import styled, { keyframes } from "styled-components";
 
 // Анимация появления фишки
 const piecePlaceAnimation = keyframes`
@@ -48,11 +48,11 @@ export const QuadrantContainer = styled.div<QuadrantContainerProps>`
   gap: 1px;
   padding: 4px;
   background-color: ${(props) => {
-    const colors = ['#dd1414', '#1414dd', '#14dd14', '#dddd14'];
-    return colors[props.$quadrant] || '#888888';
+    const colors = ["#dd1414", "#1414dd", "#14dd14", "#dddd14"];
+    return colors[props.$quadrant] || "#888888";
   }};
-  border-radius: 12px;
-  border: 3px solid #000000;
+  border-radius: 0;
+  border: 0;
   width: var(--pentago-quadrant-size);
   height: var(--pentago-quadrant-size);
 `;
@@ -64,14 +64,17 @@ export const Cell = styled.div<CellProps>`
   align-items: center;
   justify-content: center;
   border: 1px solid #000000;
-  cursor: ${(props) => (props.value !== null && props.value !== undefined ? 'default' : 'pointer')};
+  cursor: ${(props) =>
+    props.value !== null && props.value !== undefined ? "default" : "pointer"};
   background-color: ${(props) =>
-    props.$isSelected ? '#ffe6e6' : 'transparent'};
+    props.$isSelected ? "#ffe6e6" : "transparent"};
   border-radius: 4px;
 
   &:hover {
     background-color: ${(props) =>
-      props.value !== null && props.value !== undefined ? 'transparent' : '#f0f0f0'};
+      props.value !== null && props.value !== undefined
+        ? "transparent"
+        : "#f0f0f0"};
   }
 `;
 
@@ -79,7 +82,9 @@ export const Piece = styled.svg<PieceProps>`
   width: calc(var(--pentago-cell-size) - 4px);
   height: calc(var(--pentago-cell-size) - 4px);
   animation: ${(props) =>
-      props.value !== null && props.value !== undefined ? piecePlaceAnimation : 'none'}
+      props.value !== null && props.value !== undefined
+        ? piecePlaceAnimation
+        : "none"}
     0.5s ease-out;
 `;
 

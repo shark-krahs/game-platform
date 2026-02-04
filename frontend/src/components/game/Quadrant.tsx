@@ -1,17 +1,13 @@
-import React from 'react';
+import React from "react";
+import { BOARD_SIZE, GAME_STATUS, QUADRANT_SIZE } from "../../constants";
+import { PLAYER_COLORS } from "../../constants/colors";
 import {
-  BOARD_SIZE,
-  QUADRANT_SIZE,
-  GAME_STATUS,
-} from '../../constants';
-import { PLAYER_COLORS } from '../../constants/colors';
-import {
-  QuadrantContainer,
   Cell,
   Piece,
   PieceCircle,
-} from '../styled/Quadrant.styled';
-import { Position } from '../../types';
+  QuadrantContainer,
+} from "../styled/Quadrant.styled";
+import { Position } from "../../types";
 
 interface QuadrantCellProps {
   value: number | null | undefined;
@@ -25,14 +21,21 @@ const QuadrantCell: React.FC<QuadrantCellProps> = ({
   isSelected,
 }) => {
   // Получаем цвет для игрока (value - индекс игрока 0, 1, 2...)
-  const getPlayerColor = (playerValue: number | string | null | undefined): string => {
-    if (typeof playerValue === 'string') {
+  const getPlayerColor = (
+    playerValue: number | string | null | undefined,
+  ): string => {
+    if (typeof playerValue === "string") {
       return playerValue; // Если value - строка, используем её как цвет
     }
-    if (typeof playerValue === 'number' && !isNaN(playerValue) && playerValue >= 0 && playerValue < PLAYER_COLORS.length) {
+    if (
+      typeof playerValue === "number" &&
+      !isNaN(playerValue) &&
+      playerValue >= 0 &&
+      playerValue < PLAYER_COLORS.length
+    ) {
       return PLAYER_COLORS[playerValue]!;
     }
-    return '#cccccc'; // Fallback color
+    return "#cccccc"; // Fallback color
   };
 
   return (
@@ -54,7 +57,7 @@ interface QuadrantProps {
     x: number,
     y: number,
     board: (number | null)[][],
-    status: string
+    status: string,
   ) => void;
   status: string;
 }
@@ -78,13 +81,13 @@ const Quadrant: React.FC<QuadrantProps> = ({
       const y = startY + dy;
 
       const isCellSelected =
-        selectedCell !== null &&
-        selectedCell.x === x &&
-        selectedCell.y === y;
+        selectedCell !== null && selectedCell.x === x && selectedCell.y === y;
 
       const canClick =
         board[y]![x] === null &&
-        (status === GAME_STATUS.PLAYING || status === GAME_STATUS.FIRST_MOVE);
+        (status === GAME_STATUS.PLAYING ||
+          status === GAME_STATUS.FIRST_MOVE ||
+          status === GAME_STATUS.DISCONNECT_WAIT);
 
       quadrantCells.push(
         <QuadrantCell
@@ -92,15 +95,13 @@ const Quadrant: React.FC<QuadrantProps> = ({
           value={board[y]![x]}
           isSelected={isCellSelected}
           onClick={() => canClick && handleCell(x, y, board, status)}
-        />
+        />,
       );
     }
   }
 
   return (
-    <QuadrantContainer $quadrant={quadrant}>
-      {quadrantCells}
-    </QuadrantContainer>
+    <QuadrantContainer $quadrant={quadrant}>{quadrantCells}</QuadrantContainer>
   );
 };
 

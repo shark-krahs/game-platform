@@ -1,6 +1,6 @@
-import { GameEngine } from '../types';
-import { PentagoEngine } from './pentago/PentagoEngine';
-import { TetrisEngine } from './tetris/TetrisEngine';
+import { GameEngine } from "../types";
+import { PentagoEngine } from "./pentago/PentagoEngine";
+import { TetrisEngine } from "./tetris/TetrisEngine";
 
 // Registry for all game engines
 export const gameEngines: Record<string, GameEngine> = {};

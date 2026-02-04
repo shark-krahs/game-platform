@@ -3,15 +3,11 @@
  * Displays a fallback UI instead of crashing the whole application
  */
 
-import React from 'react';
-import { Result, Button, Typography, Space } from 'antd';
-import {
-  BugOutlined,
-  ReloadOutlined,
-  HomeOutlined,
-} from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
-import { useTheme } from '../../hooks/useTheme';
+import React from "react";
+import { Button, Result, Space, Typography } from "antd";
+import { BugOutlined, HomeOutlined, ReloadOutlined } from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
+import { useTheme } from "../../hooks/useTheme";
 
 interface ErrorBoundaryState {
   hasError: boolean;
@@ -25,7 +21,10 @@ interface ErrorBoundaryProps {
   isDark: boolean;
 }
 
-class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null, errorInfo: null };
@@ -36,7 +35,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
   }
 
   override componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error Boundary caught an error:', error, errorInfo);
+    console.error("Error Boundary caught an error:", error, errorInfo);
 
     this.setState({
       error,
@@ -51,7 +50,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
   };
 
   handleGoHome = () => {
-    window.location.href = '/';
+    window.location.href = "/";
   };
 
   override render() {
@@ -62,31 +61,33 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
       return (
         <div
           style={{
-            padding: '40px 20px',
-            textAlign: 'center',
-            minHeight: '100vh',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: isDark ? '#141414' : '#f0f2f5',
+            padding: "40px 20px",
+            textAlign: "center",
+            minHeight: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: isDark ? "#141414" : "#f0f2f5",
           }}
         >
           <Result
             status="error"
-            icon={<BugOutlined style={{ color: '#ff4d4f', fontSize: 64 }} />}
+            icon={<BugOutlined style={{ color: "#ff4d4f", fontSize: 64 }} />}
             title={
               <Typography.Title
                 level={3}
-                style={{ color: isDark ? '#ffffff' : '#000000d9' }}
+                style={{ color: isDark ? "#ffffff" : "#000000d9" }}
               >
-                {t('errorBoundary.title', 'Oops! Something went wrong')}
+                {t("errorBoundary.title", "Oops! Something went wrong")}
               </Typography.Title>
             }
             subTitle={
-              <Typography.Text style={{ color: isDark ? '#cccccc' : '#666666', fontSize: 16 }}>
+              <Typography.Text
+                style={{ color: isDark ? "#cccccc" : "#666666", fontSize: 16 }}
+              >
                 {t(
-                  'errorBoundary.subtitle',
-                  'We apologize for the inconvenience. Please try again or go back to the home page.'
+                  "errorBoundary.subtitle",
+                  "We apologize for the inconvenience. Please try again or go back to the home page.",
                 )}
               </Typography.Text>
             }
@@ -98,14 +99,14 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
                   icon={<ReloadOutlined />}
                   onClick={this.handleRetry}
                 >
-                  {t('errorBoundary.retry', 'Try Again')}
+                  {t("errorBoundary.retry", "Try Again")}
                 </Button>
                 <Button
                   size="large"
                   icon={<HomeOutlined />}
                   onClick={this.handleGoHome}
                 >
-                  {t('errorBoundary.goHome', 'Go Home')}
+                  {t("errorBoundary.goHome", "Go Home")}
                 </Button>
               </Space>
             }
@@ -115,38 +116,38 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
           {import.meta.env.DEV && error && (
             <details
               style={{
-                marginTop: '40px',
-                textAlign: 'left' as const,
-                maxWidth: '800px',
-                padding: '20px',
-                border: `1px solid ${isDark ? '#434343' : '#d9d9d9'}`,
-                borderRadius: '8px',
-                backgroundColor: isDark ? '#1f1f1f' : '#ffffff',
+                marginTop: "40px",
+                textAlign: "left" as const,
+                maxWidth: "800px",
+                padding: "20px",
+                border: `1px solid ${isDark ? "#434343" : "#d9d9d9"}`,
+                borderRadius: "8px",
+                backgroundColor: isDark ? "#1f1f1f" : "#ffffff",
               }}
             >
               <summary
                 style={{
-                  cursor: 'pointer',
-                  fontWeight: 'bold',
-                  color: isDark ? '#ffffff' : '#000000d9',
-                  marginBottom: '10px',
+                  cursor: "pointer",
+                  fontWeight: "bold",
+                  color: isDark ? "#ffffff" : "#000000d9",
+                  marginBottom: "10px",
                 }}
               >
                 Error Details (Development Mode)
               </summary>
               <pre
                 style={{
-                  color: '#ff4d4f',
-                  fontSize: '13px',
-                  overflow: 'auto',
-                  whiteSpace: 'pre-wrap',
-                  backgroundColor: isDark ? '#000000' : '#f5f5f5',
-                  padding: '10px',
-                  borderRadius: '4px',
+                  color: "#ff4d4f",
+                  fontSize: "13px",
+                  overflow: "auto",
+                  whiteSpace: "pre-wrap",
+                  backgroundColor: isDark ? "#000000" : "#f5f5f5",
+                  padding: "10px",
+                  borderRadius: "4px",
                 }}
               >
                 {error.toString()}
-                {'\n\n'}
+                {"\n\n"}
                 {errorInfo?.componentStack}
               </pre>
             </details>
@@ -160,12 +161,17 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
 }
 
 // Функциональный wrapper для использования хуков
-const ErrorBoundaryWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { t } = useTranslation('app');
+const ErrorBoundaryWrapper: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const { t } = useTranslation("app");
   const { isDark } = useTheme();
 
   return (
-    <ErrorBoundary t={(key, defaultValue) => t(key, defaultValue || '')} isDark={isDark}>
+    <ErrorBoundary
+      t={(key, defaultValue) => t(key, defaultValue || "")}
+      isDark={isDark}
+    >
       {children}
     </ErrorBoundary>
   );

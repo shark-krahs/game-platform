@@ -1,33 +1,33 @@
-import React, { useState } from 'react';
-import Login from './Login';
-import Register from './Register';
-import { useTranslation } from 'react-i18next';
-import { Card, Tabs, Typography, Space, type TabsProps } from 'antd';
-import { LoginOutlined, UserAddOutlined } from '@ant-design/icons';
+import React, { useState } from "react";
+import Login from "./Login";
+import Register from "./Register";
+import { useTranslation } from "react-i18next";
+import { Card, Space, Tabs, type TabsProps, Typography } from "antd";
+import { LoginOutlined, UserAddOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
 
 const AuthSelector: React.FC = () => {
-  const { t } = useTranslation('authSelector');
-  const [activeTab, setActiveTab] = useState<string>('1');
+  const { t } = useTranslation("authSelector");
+  const [activeTab, setActiveTab] = useState<string>("1");
 
-  const items: TabsProps['items'] = [
+  const items: TabsProps["items"] = [
     {
-      key: '1',
+      key: "1",
       label: (
         <span>
           <LoginOutlined />
-          {t('login')}
+          {t("login")}
         </span>
       ),
       children: <Login />,
     },
     {
-      key: '2',
+      key: "2",
       label: (
         <span>
           <UserAddOutlined />
-          {t('register')}
+          {t("register")}
         </span>
       ),
       children: <Register />,
@@ -38,11 +38,15 @@ const AuthSelector: React.FC = () => {
     <Space
       orientation="vertical"
       size="large"
-      style={{ width: '100%', maxWidth: 400, margin: '0 auto' }}
+      style={{ width: "100%", maxWidth: 400, margin: "0 auto" }}
     >
       <Card>
-        <Space orientation="vertical" size="large" style={{ width: '100%', textAlign: 'center' }}>
-          <Title level={2}>Game Platform</Title>
+        <Space
+          orientation="vertical"
+          size="large"
+          style={{ width: "100%", textAlign: "center" }}
+        >
+          <Title level={2}>{t("title" as any)}</Title>
 
           <Tabs
             activeKey={activeTab}

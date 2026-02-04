@@ -1,20 +1,22 @@
-import { GameEngine, Move, GameState, Position, MoveFormProps } from '../../types';
-import PentagoBoard from './PentagoBoard';
-import MoveForm from '../../components/game/MoveForm';
-import { BOARD_SIZE, MOVE_TYPES, QUADRANT_INFO, ROTATION_DIRECTIONS } from './constants';
+import { GameEngine, GameState, Move, MoveFormProps } from "../../types";
+import PentagoBoard from "./PentagoBoard";
+import MoveForm from "../../components/game/MoveForm";
+import { BOARD_SIZE, QUADRANT_INFO } from "./constants";
 
 export class PentagoEngine implements GameEngine {
-  id = 'pentago';
-  name = 'Pentago';
+  id = "pentago";
+  name = "Pentago";
   boardComponent = PentagoBoard;
   moveFormComponent = MoveForm;
 
   getInitialBoard(): number[][] {
-    return Array(BOARD_SIZE).fill(null).map(() => Array(BOARD_SIZE).fill(null));
+    return Array(BOARD_SIZE)
+      .fill(null)
+      .map(() => Array(BOARD_SIZE).fill(null));
   }
 
   moveValidator(move: Move, state: GameState): boolean {
-    if (move.type !== 'pentago_move') return false;
+    if (move.type !== "pentago_move") return false;
 
     const { x, y, quadrant, direction } = move.data;
 
@@ -28,7 +30,8 @@ export class PentagoEngine implements GameEngine {
     if (quadrant < 0 || quadrant > 3) return false;
 
     // Check if direction is valid
-    if (direction !== 'clockwise' && direction !== 'counterclockwise') return false;
+    if (direction !== "clockwise" && direction !== "counterclockwise")
+      return false;
 
     return true;
   }
@@ -43,9 +46,9 @@ export class PentagoEngine implements GameEngine {
         if (state.board[y]![x] === null) {
           // For each quadrant and direction
           for (let quadrant = 0; quadrant < 4; quadrant++) {
-            ['clockwise', 'counterclockwise'].forEach(direction => {
+            ["clockwise", "counterclockwise"].forEach((direction) => {
               moves.push({
-                type: 'pentago_move',
+                type: "pentago_move",
                 data: { x, y, quadrant, direction },
               });
             });
@@ -65,7 +68,7 @@ export class PentagoEngine implements GameEngine {
     }
 
     return {
-      type: 'pentago_move',
+      type: "pentago_move",
       data: {
         x: selectedCell.x,
         y: selectedCell.y,
@@ -75,9 +78,14 @@ export class PentagoEngine implements GameEngine {
     };
   }
 
-  getMoveFormProps(gameState: GameState, selectedData: any, handlers: any): MoveFormProps {
+  getMoveFormProps(
+    gameState: GameState,
+    selectedData: any,
+    handlers: any,
+  ): MoveFormProps {
     const { selectedCell, selectedQuadrant, selectedDirection } = selectedData;
-    const { onQuadrantSelect, onDirectionSelect, onMoveSubmit, onMoveCancel } = handlers;
+    const { onQuadrantSelect, onDirectionSelect, onMoveSubmit, onMoveCancel } =
+      handlers;
 
     return {
       selectedCell,
@@ -87,7 +95,9 @@ export class PentagoEngine implements GameEngine {
       handleDirectionSelect: onDirectionSelect,
       sendMove: onMoveSubmit,
       cancelMove: onMoveCancel,
-      getQuadrantName: (quadrant: number) => QUADRANT_INFO[quadrant as keyof typeof QUADRANT_INFO]?.name || 'Unknown',
+      getQuadrantName: (quadrant: number) =>
+        QUADRANT_INFO[quadrant as keyof typeof QUADRANT_INFO]?.name ||
+        "unknownQuadrant",
     };
   }
 }

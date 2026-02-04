@@ -1,24 +1,24 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
+import React from "react";
+import { useTranslation } from "react-i18next";
 import {
+  ActionButtonsContainer,
+  CancelButton,
+  ConfirmButton,
+  DirectionButton,
+  DirectionButtonsContainer,
   FormContainer,
   FormTitle,
-  QuadrantButtonsContainer,
   QuadrantButton,
-  DirectionButtonsContainer,
-  DirectionButton,
-  ActionButtonsContainer,
-  ConfirmButton,
-  CancelButton,
-} from '../styled/MoveForm.styled';
-import { Position } from '../../types';
+  QuadrantButtonsContainer,
+} from "../styled/MoveForm.styled";
+import { Position } from "../../types";
 
 interface MoveFormProps {
   selectedCell: Position | null;
   selectedQuadrant: number | null;
-  selectedDirection: 'clockwise' | 'counterclockwise' | null;
+  selectedDirection: "clockwise" | "counterclockwise" | null;
   handleQuadrantSelect: (quadrant: number) => void;
-  handleDirectionSelect: (direction: 'clockwise' | 'counterclockwise') => void;
+  handleDirectionSelect: (direction: "clockwise" | "counterclockwise") => void;
   sendMove: () => void;
   cancelMove: () => void;
   getQuadrantName: (quadrant: number) => string;
@@ -35,7 +35,7 @@ const MoveForm: React.FC<MoveFormProps> = ({
   cancelMove,
   getQuadrantName,
 }) => {
-  const { t } = useTranslation('gameClient');
+  const { t } = useTranslation("gameClient");
 
   if (!selectedCell) return null;
 
@@ -44,7 +44,7 @@ const MoveForm: React.FC<MoveFormProps> = ({
 
   return (
     <FormContainer>
-      <FormTitle>{t('selectQuadrant')}</FormTitle>
+      <FormTitle>{t("selectQuadrant")}</FormTitle>
       <QuadrantButtonsContainer>
         {[0, 1, 2, 3].map((quadrant) => (
           <QuadrantButton
@@ -53,37 +53,32 @@ const MoveForm: React.FC<MoveFormProps> = ({
             selected={selectedQuadrant === quadrant}
             onClick={() => handleQuadrantSelect(quadrant)}
           >
-            {getQuadrantName(quadrant)}
+            {String(t(getQuadrantName(quadrant) as any))}
           </QuadrantButton>
         ))}
       </QuadrantButtonsContainer>
 
-      <FormTitle>{t('selectDirection')}</FormTitle>
+      <FormTitle>{t("selectDirection")}</FormTitle>
       <DirectionButtonsContainer>
         <DirectionButton
-          selected={selectedDirection === 'clockwise'}
-          onClick={() => handleDirectionSelect('clockwise')}
+          selected={selectedDirection === "clockwise"}
+          onClick={() => handleDirectionSelect("clockwise")}
         >
-          {t('clockwise')}
+          {t("clockwise")}
         </DirectionButton>
         <DirectionButton
-          selected={selectedDirection === 'counterclockwise'}
-          onClick={() => handleDirectionSelect('counterclockwise')}
+          selected={selectedDirection === "counterclockwise"}
+          onClick={() => handleDirectionSelect("counterclockwise")}
         >
-          {t('counterclockwise')}
+          {t("counterclockwise")}
         </DirectionButton>
       </DirectionButtonsContainer>
 
       <ActionButtonsContainer>
-        <ConfirmButton
-          onClick={sendMove}
-          disabled={isConfirmDisabled}
-        >
-          {t('confirmMove')}
+        <ConfirmButton onClick={sendMove} disabled={isConfirmDisabled}>
+          {t("confirmMove")}
         </ConfirmButton>
-        <CancelButton onClick={cancelMove}>
-          {t('cancel')}
-        </CancelButton>
+        <CancelButton onClick={cancelMove}>{t("cancel")}</CancelButton>
       </ActionButtonsContainer>
     </FormContainer>
   );

@@ -1,10 +1,14 @@
-import logging
-from typing import Dict, List, Optional, Any
-from pydantic import BaseModel
 import asyncio
+import logging
 import time
+from typing import Dict, List, Optional, Any
+
+from pydantic import BaseModel
+
+from backend.app.services.bot_manager import BOT_WAIT_SECONDS, build_bot_profile
 
 logger = logging.getLogger(__name__)
+
 
 class JoinData(BaseModel):
     username: str
@@ -12,6 +16,7 @@ class JoinData(BaseModel):
     game_type: str  # e.g., 'tic-tac-toe'
     time_control: str  # e.g., '3+0', '5+3'
     rated: bool = True
+
 
 class WaitingPlayer(BaseModel):
     user_id: str
@@ -28,12 +33,15 @@ class WaitingPlayer(BaseModel):
         """Get rating as integer for display purposes."""
         return int(self.rating)
 
+
 # Pools: pool_key -> list of WaitingPlayer, sorted by rating (then joined_at)
 pools: Dict[str, List[WaitingPlayer]] = {}
+
 
 def make_pool_key(game_type: str, time_control: str, rated: bool) -> str:
     # Use exact time control for pool separation
     return f"{game_type}_{time_control}_{'rated' if rated else 'casual'}"
+
 
 async def join_pool(player: WaitingPlayer):
     pool_key = make_pool_key(player.game_type, player.time_control, player.rated)
@@ -42,16 +50,21 @@ async def join_pool(player: WaitingPlayer):
     # Insert sorted by rating, then joined_at
     inserted = False
     for i, p in enumerate(pools[pool_key]):
-        if p.rating > player.rating or (p.rating == player.rating and p.joined_at > player.joined_at):
+        if p.rating > player.rating or (
+            p.rating == player.rating and p.joined_at > player.joined_at
+        ):
             pools[pool_key].insert(i, player)
             inserted = True
             break
     if not inserted:
         pools[pool_key].append(player)
-    logger.info(f"Player {player.username} (id: {player.user_id}, rating {player.rating:.1f}, joined_at: {player.joined_at}) joined pool {pool_key}, total players: {len(pools[pool_key])}")
+    logger.info(
+        f"Player {player.username} (id: {player.user_id}, rating {player.rating:.1f}, joined_at: {player.joined_at}) joined pool {pool_key}, total players: {len(pools[pool_key])}"
+    )
     # Try to match immediately if we have 2+ players
     await try_match_immediately(pool_key)
     return pool_key
+
 
 async def leave_pool(user_id: str):
     for pool_key, players in pools.items():
@@ -60,23 +73,28 @@ async def leave_pool(user_id: str):
             del pools[pool_key]
             break
 
+
 async def try_match(pool_key: str):
     if pool_key not in pools or len(pools[pool_key]) < 2:
         logger.debug(f"Pool {pool_key} has <2 players or doesn't exist")
         return None
     players = pools[pool_key]
     logger.debug(f"Checking {len(players)} players in {pool_key}")
-    # Find closest pair
-    min_diff = float('inf')
+    # Find the closest pair
+    min_diff = float("inf")
     pair = None
     for i in range(len(players) - 1):
-        diff = abs(players[i].rating - players[i+1].rating)
-        logger.debug(f"Pair {i}:{i+1} - {players[i].username}({players[i].rating}) vs {players[i+1].username}({players[i+1].rating}) diff={diff}")
+        diff = abs(players[i].rating - players[i + 1].rating)
+        logger.debug(
+            f"Pair {i}:{i + 1} - {players[i].username}({players[i].rating}) vs {players[i + 1].username}({players[i + 1].rating}) diff={diff}"
+        )
         if diff < min_diff:
             min_diff = diff
-            pair = (players[i], players[i+1])
+            pair = (players[i], players[i + 1])
     if pair and min_diff <= 150:  # threshold
-        logger.info(f"Matching pair: {pair[0].username} vs {pair[1].username}, diff={min_diff}")
+        logger.info(
+            f"Matching pair: {pair[0].username} vs {pair[1].username}, diff={min_diff}"
+        )
         # Remove them
         pools[pool_key] = [p for p in players if p not in pair]
         logger.debug(f"Players removed from pool, remaining: {len(pools[pool_key])}")
@@ -85,14 +103,23 @@ async def try_match(pool_key: str):
         logger.debug(f"No pair found, min_diff={min_diff} >150")
     return None
 
+
 async def try_match_immediately(pool_key: str):
     pair = await try_match(pool_key)
     if pair:
-        logger.info(f"Match found: {pair[0].username} vs {pair[1].username} in {pool_key}")
-        from app.services.game_state import create_matched_game
-        await create_matched_game(pair[0].game_type, pair[0].time_control, pair[0], pair[1])
+        logger.info(
+            f"Match found: {pair[0].username} vs {pair[1].username} in {pool_key}"
+        )
+        from backend.app.services.game_state import create_matched_game
+
+        await create_matched_game(
+            pair[0].game_type, pair[0].time_control, pair[0], pair[1]
+        )
     else:
-        logger.debug(f"No match found in {pool_key}, players: {len(pools.get(pool_key, []))}")
+        logger.debug(
+            f"No match found in {pool_key}, players: {len(pools.get(pool_key, []))}"
+        )
+
 
 # Periodic matchmaking
 async def matchmaking_loop():
@@ -101,5 +128,57 @@ async def matchmaking_loop():
         for pool_key in list(pools.keys()):
             pair = await try_match(pool_key)
             if pair:
-                from app.services.game_state import create_matched_game
-                await create_matched_game(pair[0].game_type, pair[0].time_control, pair[0], pair[1])
+                from backend.app.services.game_state import create_matched_game
+
+                await create_matched_game(
+                    pair[0].game_type, pair[0].time_control, pair[0], pair[1]
+                )
+            else:
+                await try_match_with_bot(pool_key)
+
+
+async def try_match_with_bot(pool_key: str):
+    if pool_key not in pools:
+        return None
+
+    players = pools[pool_key]
+    if len(players) != 1:
+        return None
+
+    waiting_player = players[0]
+    if time.time() - waiting_player.joined_at < BOT_WAIT_SECONDS:
+        return None
+
+    bot_profile = build_bot_profile(waiting_player.rating, waiting_player.game_type)
+    bot_player = WaitingPlayer(
+        user_id=bot_profile["user_id"],
+        username=bot_profile["username"],
+        rating=float(waiting_player.rating),
+        game_type=waiting_player.game_type,
+        time_control=waiting_player.time_control,
+        rated=waiting_player.rated,
+        is_anonymous=True,
+        joined_at=time.time(),
+        ws=None,
+    )
+
+    pools[pool_key] = []
+    logger.info(
+        "Matching player with bot",
+        extra={
+            "player": waiting_player.username,
+            "game_type": waiting_player.game_type,
+            "difficulty": bot_profile["difficulty"],
+        },
+    )
+
+    from backend.app.services.game_state import create_matched_game
+
+    await create_matched_game(
+        waiting_player.game_type,
+        waiting_player.time_control,
+        waiting_player,
+        bot_player,
+        bot_difficulty=bot_profile["difficulty"],
+    )
+    return None

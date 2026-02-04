@@ -53,9 +53,10 @@ def check_winner(board):
     Returns:
         str: Color of the winner, 'draw', or None if game continues
     """
+
     def check_line(line):
         for i in range(len(line) - 3):
-            if line[i] is not None and line[i] == line[i+1] == line[i+2] == line[i+3]:
+            if line[i] is not None and line[i] == line[i + 1] == line[i + 2] == line[i + 3]:
                 return line[i]
         return None
 

@@ -2,8 +2,7 @@
  * Styled components for GameTimers
  */
 
-import styled from 'styled-components';
-import { Theme } from '../../types';
+import styled from "styled-components";
 
 // Пропсы для компонентов
 interface FirstMoveTimerContainerProps {
@@ -76,8 +75,7 @@ export const PlayerColorIndicator = styled.div<PlayerColorIndicatorProps>`
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background-color: ${(props) =>
-    props.color || props.theme.colors.border};
+  background-color: ${(props) => props.color || props.theme.colors.border};
 `;
 
 export const PlayerTime = styled.span`

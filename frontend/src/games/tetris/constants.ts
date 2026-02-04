@@ -50,7 +50,7 @@ export type TetrominoType = keyof typeof TETROMINOES;
 
 // Move types
 export const MOVE_TYPES = {
-  PLACE_PIECE: 'tetris_move'
+  PLACE_PIECE: "tetris_move",
 } as const;
 
 // Game configuration
@@ -66,16 +66,16 @@ export const SCORE_VALUES = {
   TRIPLE: 500,
   TETRIS: 800,
   SOFT_DROP: 1,
-  HARD_DROP: 2
+  HARD_DROP: 2,
 } as const;
 
 // Colors for pieces (can be used for visualization)
 export const PIECE_COLORS = {
-  I: '#00f5ff', // Cyan
-  O: '#ffff00', // Yellow
-  T: '#800080', // Purple
-  S: '#00ff00', // Green
-  Z: '#ff0000', // Red
-  J: '#0000ff', // Blue
-  L: '#ffa500'  // Orange
+  I: "#00f5ff", // Cyan
+  O: "#ffff00", // Yellow
+  T: "#800080", // Purple
+  S: "#00ff00", // Green
+  Z: "#ff0000", // Red
+  J: "#0000ff", // Blue
+  L: "#ffa500", // Orange
 } as const;

@@ -1,4 +1,5 @@
 {
-    "login": "Login",
-    "register": "Register"
+  "login": "Login",
+  "register": "Register",
+  "title": "Game Platform"
 }

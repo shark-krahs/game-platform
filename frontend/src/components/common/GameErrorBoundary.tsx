@@ -3,15 +3,15 @@
  * Provides game-specific error recovery options
  */
 
-import React from 'react';
-import { Result, Button, Typography, Space, Alert } from 'antd';
+import React from "react";
+import { Alert, Button, Result, Space, Typography } from "antd";
 import {
-  WarningOutlined,
-  ReloadOutlined,
   LogoutOutlined,
-} from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
-import { useTheme } from '../../hooks/useTheme';
+  ReloadOutlined,
+  WarningOutlined,
+} from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
+import { useTheme } from "../../hooks/useTheme";
 
 interface GameErrorBoundaryState {
   hasError: boolean;
@@ -40,12 +40,14 @@ class GameErrorBoundary extends React.Component<
     };
   }
 
-  static getDerivedStateFromError(_error: Error): Partial<GameErrorBoundaryState> {
+  static getDerivedStateFromError(
+    _error: Error,
+  ): Partial<GameErrorBoundaryState> {
     return { hasError: true };
   }
 
   override componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Game Error Boundary caught an error:', error, errorInfo);
+    console.error("Game Error Boundary caught an error:", error, errorInfo);
 
     this.setState((prevState) => ({
       error,
@@ -54,7 +56,7 @@ class GameErrorBoundary extends React.Component<
     }));
 
     if (this.state.retryCount + 1 >= 2) {
-      console.warn('Multiple game errors detected, suggesting user to leave');
+      console.warn("Multiple game errors detected, suggesting user to leave");
     }
   }
 
@@ -67,7 +69,7 @@ class GameErrorBoundary extends React.Component<
   };
 
   handleLeaveGame = () => {
-    window.location.href = '/lobby';
+    window.location.href = "/lobby";
   };
 
   override render() {
@@ -81,48 +83,59 @@ class GameErrorBoundary extends React.Component<
       return (
         <div
           style={{
-            padding: '40px 20px',
-            textAlign: 'center',
-            minHeight: '100vh',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '24px',
-            backgroundColor: isDark ? '#141414' : '#f0f2f5',
+            padding: "40px 20px",
+            textAlign: "center",
+            minHeight: "100vh",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "24px",
+            backgroundColor: isDark ? "#141414" : "#f0f2f5",
           }}
         >
           <Result
             status="warning"
-            icon={<WarningOutlined style={{ color: '#faad14', fontSize: 64 }} />}
+            icon={
+              <WarningOutlined style={{ color: "#faad14", fontSize: 64 }} />
+            }
             title={
               <Typography.Title
                 level={3}
-                style={{ color: isDark ? '#ffffff' : '#000000d9' }}
+                style={{ color: isDark ? "#ffffff" : "#000000d9" }}
               >
-                {t('gameErrorBoundary.title', 'Game Error')}
+                {t("gameErrorBoundary.title", "Game Error")}
               </Typography.Title>
             }
             subTitle={
-              <Typography.Text style={{ color: isDark ? '#cccccc' : '#666666', fontSize: 16 }}>
+              <Typography.Text
+                style={{ color: isDark ? "#cccccc" : "#666666", fontSize: 16 }}
+              >
                 {t(
-                  'gameErrorBoundary.subtitle',
-                  'Something went wrong with the game. You can try again or leave the game.'
+                  "gameErrorBoundary.subtitle",
+                  "Something went wrong with the game. You can try again or leave the game.",
                 )}
               </Typography.Text>
             }
             extra={
-              <Space orientation="vertical" size="large" style={{ width: '100%' }}>
+              <Space
+                orientation="vertical"
+                size="large"
+                style={{ width: "100%" }}
+              >
                 {showPersistentWarning && (
                   <Alert
-                    title={t('gameErrorBoundary.persistentError', 'This error keeps happening')}
+                    title={t(
+                      "gameErrorBoundary.persistentError",
+                      "This error keeps happening",
+                    )}
                     description={t(
-                      'gameErrorBoundary.suggestLeave',
-                      'Consider leaving the game and trying again later.'
+                      "gameErrorBoundary.suggestLeave",
+                      "Consider leaving the game and trying again later.",
                     )}
                     type="warning"
                     showIcon
-                    style={{ textAlign: 'left' }}
+                    style={{ textAlign: "left" }}
                   />
                 )}
                 <Space size="middle">
@@ -133,7 +146,7 @@ class GameErrorBoundary extends React.Component<
                     onClick={this.handleRetry}
                     disabled={disableRetry}
                   >
-                    {t('gameErrorBoundary.retry', 'Retry Game')}
+                    {t("gameErrorBoundary.retry", "Retry Game")}
                   </Button>
                   <Button
                     danger
@@ -141,7 +154,7 @@ class GameErrorBoundary extends React.Component<
                     icon={<LogoutOutlined />}
                     onClick={this.handleLeaveGame}
                   >
-                    {t('gameErrorBoundary.leaveGame', 'Leave Game')}
+                    {t("gameErrorBoundary.leaveGame", "Leave Game")}
                   </Button>
                 </Space>
               </Space>
@@ -159,11 +172,14 @@ class GameErrorBoundary extends React.Component<
 const GameErrorBoundaryWrapper: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { t } = useTranslation('gameClient');
+  const { t } = useTranslation("gameClient");
   const { isDark } = useTheme();
 
   return (
-    <GameErrorBoundary t={(key, defaultValue) => t(key, defaultValue || '')} isDark={isDark}>
+    <GameErrorBoundary
+      t={(key, defaultValue) => t(key, defaultValue || "")}
+      isDark={isDark}
+    >
       {children}
     </GameErrorBoundary>
   );

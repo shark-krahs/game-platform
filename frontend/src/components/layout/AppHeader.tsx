@@ -3,29 +3,22 @@
  * Designed to work with background images by using transparent/semi-transparent styling
  */
 
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Button, Dropdown, type MenuProps, Switch, Typography } from "antd";
 import {
-  Button,
-  Switch,
-  Dropdown,
-  Typography,
-  type MenuProps,
-} from 'antd';
-import {
-  SunOutlined,
-  MoonOutlined,
+  DashboardOutlined,
   LoginOutlined,
   LogoutOutlined,
-  DashboardOutlined,
-  TrophyOutlined,
-  ProfileOutlined,
   MenuOutlined,
-} from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
-import { useAuth } from '../../AuthContext';
-import styled from 'styled-components';
-import { User } from '../../types'; // Импортируем тип User
+  MoonOutlined,
+  ProfileOutlined,
+  SunOutlined,
+  TrophyOutlined,
+} from "@ant-design/icons";
+import { useTranslation } from "react-i18next";
+import { useAuth } from "../../AuthContext";
+import styled from "styled-components";
 
 const { Title } = Typography;
 
@@ -46,19 +39,20 @@ const HeaderContainer = styled.header<AppHeaderProps>`
 
   background: ${({ $hasBackgroundImage, $isDark }) => {
     if ($hasBackgroundImage) {
-      return 'rgba(0, 0, 0, 0.3)';
+      return "rgba(0, 0, 0, 0.3)";
     }
-    return $isDark ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.95)';
+    return $isDark ? "rgba(0, 0, 0, 0.8)" : "rgba(255, 255, 255, 0.95)";
   }};
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 
-  border-bottom: 1px solid ${({ $hasBackgroundImage, $isDark }) => {
-    if ($hasBackgroundImage) {
-      return 'rgba(255, 255, 255, 0.2)';
-    }
-    return $isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-  }};
+  border-bottom: 1px solid
+    ${({ $hasBackgroundImage, $isDark }) => {
+      if ($hasBackgroundImage) {
+        return "rgba(255, 255, 255, 0.2)";
+      }
+      return $isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)";
+    }};
 
   @media (max-width: 768px) {
     padding: 0 12px;
@@ -75,14 +69,23 @@ const LogoContainer = styled.div<AppHeaderProps>`
   align-items: center;
   gap: 12px;
 
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
   h2 {
     margin: 0;
     color: ${({ $hasBackgroundImage, $isDark }) => {
-      if ($hasBackgroundImage) return '#fff';
-      return $isDark ? '#fff' : '#000000d9';
+      if ($hasBackgroundImage) return "#fff";
+      return $isDark ? "#fff" : "#000000d9";
     }};
     text-shadow: ${({ $hasBackgroundImage }) =>
-      $hasBackgroundImage ? '0 2px 4px rgba(0, 0, 0, 0.5)' : 'none'};
+      $hasBackgroundImage ? "0 2px 4px rgba(0, 0, 0, 0.5)" : "none"};
   }
 
   @media (max-width: 768px) {
@@ -99,35 +102,36 @@ const ControlsContainer = styled.div<AppHeaderProps>`
 
   .ant-typography {
     color: ${({ $hasBackgroundImage, $isDark }) => {
-      if ($hasBackgroundImage) return '#fff';
-      return $isDark ? '#fff' : '#000000d9';
+      if ($hasBackgroundImage) return "#fff";
+      return $isDark ? "#fff" : "#000000d9";
     }};
     text-shadow: ${({ $hasBackgroundImage }) =>
-      $hasBackgroundImage ? '0 2px 4px rgba(0, 0, 0, 0.5)' : 'none'};
+      $hasBackgroundImage ? "0 2px 4px rgba(0, 0, 0, 0.5)" : "none"};
   }
 
   .ant-dropdown-menu {
     background: ${({ $hasBackgroundImage, $isDark }) => {
-      if ($hasBackgroundImage) return 'rgba(0, 0, 0, 0.9)';
-      return $isDark ? '#1f1f1f' : '#fff';
+      if ($hasBackgroundImage) return "rgba(0, 0, 0, 0.9)";
+      return $isDark ? "#1f1f1f" : "#fff";
     }};
-    border: 1px solid ${({ $hasBackgroundImage, $isDark }) => {
-      if ($hasBackgroundImage) return 'rgba(255, 255, 255, 0.2)';
-      return $isDark ? '#434343' : '#d9d9d9';
-    }};
+    border: 1px solid
+      ${({ $hasBackgroundImage, $isDark }) => {
+        if ($hasBackgroundImage) return "rgba(255, 255, 255, 0.2)";
+        return $isDark ? "#434343" : "#d9d9d9";
+      }};
   }
 
   .ant-dropdown-menu-item {
     color: ${({ $hasBackgroundImage, $isDark }) => {
-      if ($hasBackgroundImage) return '#fff';
-      return $isDark ? '#fff' : '#000000d9';
+      if ($hasBackgroundImage) return "#fff";
+      return $isDark ? "#fff" : "#000000d9";
     }};
   }
 
   .ant-dropdown-menu-item:hover {
     background: ${({ $hasBackgroundImage, $isDark }) => {
-      if ($hasBackgroundImage) return 'rgba(255, 255, 255, 0.1)';
-      return $isDark ? '#262626' : '#f5f5f5';
+      if ($hasBackgroundImage) return "rgba(255, 255, 255, 0.1)";
+      return $isDark ? "#262626" : "#f5f5f5";
     }};
   }
 
@@ -140,24 +144,24 @@ const ControlsContainer = styled.div<AppHeaderProps>`
 
 const StyledButton = styled(Button)<AppHeaderProps>`
   color: ${({ $hasBackgroundImage, $isDark }) => {
-    if ($hasBackgroundImage) return '#fff !important';
-    return $isDark ? '#fff !important' : 'inherit';
+    if ($hasBackgroundImage) return "#fff !important";
+    return $isDark ? "#fff !important" : "inherit";
   }} !important;
 
   border-color: ${({ $hasBackgroundImage, $isDark }) => {
-    if ($hasBackgroundImage) return 'rgba(255, 255, 255, 0.3) !important';
-    return $isDark ? '#434343 !important' : 'inherit';
+    if ($hasBackgroundImage) return "rgba(255, 255, 255, 0.3) !important";
+    return $isDark ? "#434343 !important" : "inherit";
   }} !important;
 
   &:hover {
     color: ${({ $hasBackgroundImage, $isDark }) => {
-      if ($hasBackgroundImage) return '#fff !important';
-      return $isDark ? '#fff !important' : 'inherit';
+      if ($hasBackgroundImage) return "#fff !important";
+      return $isDark ? "#fff !important" : "inherit";
     }} !important;
 
     border-color: ${({ $hasBackgroundImage, $isDark }) => {
-      if ($hasBackgroundImage) return 'rgba(255, 255, 255, 0.5) !important';
-      return $isDark ? '#595959 !important' : 'inherit';
+      if ($hasBackgroundImage) return "rgba(255, 255, 255, 0.5) !important";
+      return $isDark ? "#595959 !important" : "inherit";
     }} !important;
   }
 `;
@@ -169,73 +173,78 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 }) => {
   const toggleTheme = $toggleTheme;
   const { user, logout } = useAuth();
-  const { t } = useTranslation('app');
+  const { t } = useTranslation("app");
   const navigate = useNavigate();
 
-  const menuItems: MenuProps['items'] = user
+  const menuItems: MenuProps["items"] = user
     ? [
         {
-          key: 'profile',
+          key: "profile",
           icon: <ProfileOutlined />,
-          label: t('profile'),
-          onClick: () => navigate('/profile'),
+          label: t("profile"),
+          onClick: () => navigate("/profile"),
         },
         {
-          key: 'game',
+          key: "game",
           icon: <DashboardOutlined />,
-          label: t('game'),
-          onClick: () => navigate('/game'),
+          label: t("game"),
+          onClick: () => navigate("/game"),
         },
         {
-          key: 'lobby',
+          key: "lobby",
           icon: <TrophyOutlined />,
-          label: t('lobby'),
-          onClick: () => navigate('/lobby'),
+          label: t("lobby"),
+          onClick: () => navigate("/lobby"),
         },
-        { key: 'divider', type: 'divider' },
+        { key: "divider", type: "divider" },
         {
-          key: 'logout',
+          key: "logout",
           icon: <LogoutOutlined />,
-          label: t('logout'),
+          label: t("logout"),
           onClick: logout,
         },
       ]
     : [
         {
-          key: 'game',
+          key: "game",
           icon: <DashboardOutlined />,
-          label: t('game'),
-          onClick: () => navigate('/game'),
+          label: t("game"),
+          onClick: () => navigate("/game"),
         },
         {
-          key: 'lobby',
+          key: "lobby",
           icon: <TrophyOutlined />,
-          label: t('lobby'),
-          onClick: () => navigate('/lobby'),
+          label: t("lobby"),
+          onClick: () => navigate("/lobby"),
         },
         {
-          key: 'auth',
+          key: "auth",
           icon: <LoginOutlined />,
-          label: t('loginOrRegister'),
-          onClick: () => navigate('/login'),
+          label: t("loginOrRegister"),
+          onClick: () => navigate("/login"),
         },
       ];
 
   return (
     <HeaderContainer
       $hasBackgroundImage={$hasBackgroundImage}
-      $isDark={$isDark}>
+      $isDark={$isDark}
+    >
       <LogoContainer
         $hasBackgroundImage={$hasBackgroundImage}
-        $isDark={$isDark}>
-        <Title level={2} style={{ margin: 0 }}>
-          {t('gamePlatform')}
-        </Title>
+        $isDark={$isDark}
+      >
+        <Link to="/lobby" aria-label={t("lobby")}>
+          <Title level={2} style={{ margin: 0 }}>
+            {t("gamePlatform")}
+          </Title>
+        </Link>
       </LogoContainer>
 
       <ControlsContainer
         $hasBackgroundImage={$hasBackgroundImage}
-        $isDark={$isDark}>
+        $isDark={$isDark}
+      >
         <Switch
           checked={$isDark}
           onChange={toggleTheme}
@@ -245,11 +254,15 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 
         {user && (
           <Typography.Text style={{ margin: 0 }}>
-            {t('welcome')}, {user.username}
+            {t("welcome")}, {user.username}
           </Typography.Text>
         )}
 
-        <Dropdown menu={{ items: menuItems }} placement="bottomRight" trigger={['click']}>
+        <Dropdown
+          menu={{ items: menuItems }}
+          placement="bottomRight"
+          trigger={["click"]}
+        >
           <StyledButton
             icon={<MenuOutlined />}
             $hasBackgroundImage={$hasBackgroundImage}
@@ -260,11 +273,11 @@ const AppHeader: React.FC<AppHeaderProps> = ({
         {!user && (
           <StyledButton
             icon={<LoginOutlined />}
-            onClick={() => navigate('/login')}
+            onClick={() => navigate("/login")}
             $hasBackgroundImage={$hasBackgroundImage}
             $isDark={$isDark}
           >
-            {t('loginOrRegister')}
+            {t("loginOrRegister")}
           </StyledButton>
         )}
       </ControlsContainer>

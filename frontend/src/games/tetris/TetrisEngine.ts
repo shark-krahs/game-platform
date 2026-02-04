@@ -1,27 +1,30 @@
-import { GameEngine, Move, GameState } from '../../types';
-import TetrisBoard from './TetrisBoard';
-import { TETROMINOES, BOARD_WIDTH, BOARD_HEIGHT, MOVE_TYPES } from './constants';
+import { GameEngine, GameState, Move } from "../../types";
+import TetrisBoard from "./TetrisBoard";
+import { BOARD_HEIGHT, BOARD_WIDTH, TETROMINOES } from "./constants";
 
 export class TetrisEngine implements GameEngine {
-  id = 'tetris';
-  name = 'Tetris for Two';
+  id = "tetris";
+  name = "Tetris for Two";
   boardComponent = TetrisBoard;
 
   getInitialBoard(): number[][] {
-    return Array(BOARD_HEIGHT).fill(null).map(() => Array(BOARD_WIDTH).fill(null));
+    return Array(BOARD_HEIGHT)
+      .fill(null)
+      .map(() => Array(BOARD_WIDTH).fill(null));
   }
 
   moveValidator(move: Move, state: GameState): boolean {
-    if (move.type !== 'tetris_move') return false;
+    if (move.type !== "tetris_move") return false;
 
     const { action } = move.data;
 
     // Validate action type
-    if (!['move', 'lock'].includes(action)) return false;
+    if (!["move", "lock"].includes(action)) return false;
 
-    if (action === 'move') {
+    if (action === "move") {
       const { direction } = move.data;
-      if (!['left', 'right', 'down', 'rotate'].includes(direction)) return false;
+      if (!["left", "right", "down", "rotate"].includes(direction))
+        return false;
     }
 
     return true;
@@ -33,13 +36,21 @@ export class TetrisEngine implements GameEngine {
     const moves: Move[] = [];
     const pieces = Object.keys(TETROMINOES);
 
-    pieces.forEach(piece => {
+    pieces.forEach((piece) => {
       for (let rotation = 0; rotation < 4; rotation++) {
         for (let x = 0; x < BOARD_WIDTH; x++) {
           for (let y = 0; y < BOARD_HEIGHT; y++) {
-            if (this.canPlacePiece(state.board_state?.grid || [], piece, rotation, x, y)) {
+            if (
+              this.canPlacePiece(
+                state.board_state?.grid || [],
+                piece,
+                rotation,
+                x,
+                y,
+              )
+            ) {
               moves.push({
-                type: 'tetris_move',
+                type: "tetris_move",
                 data: { piece, rotation, x, y, playerId: state.currentPlayer },
               });
             }
@@ -51,12 +62,32 @@ export class TetrisEngine implements GameEngine {
     return moves;
   }
 
-  private canPlacePiece(board: (number | null)[][], piece: string, rotation: number, x: number, y: number): boolean {
+  createMove(gameState: GameState, selectedData: any): Move | null {
+    // Tetris doesn't use manual move creation like Pentago
+    return null;
+  }
+
+  getMoveFormProps(
+    gameState: GameState,
+    selectedData: any,
+    handlers: any,
+  ): any {
+    // Tetris doesn't use move form like Pentago
+    return {};
+  }
+
+  private canPlacePiece(
+    board: (number | null)[][],
+    piece: string,
+    rotation: number,
+    x: number,
+    y: number,
+  ): boolean {
     const tetromino = TETROMINOES[piece as keyof typeof TETROMINOES];
     if (!tetromino) return false;
 
     // Convert readonly array to mutable for rotation
-    const mutableTetromino = tetromino.map(row => [...row]);
+    const mutableTetromino = tetromino.map((row) => [...row]);
 
     // Rotate the piece
     const rotatedPiece = this.rotatePiece(mutableTetromino, rotation);
@@ -95,7 +126,9 @@ export class TetrisEngine implements GameEngine {
 
   private rotate90Clockwise(piece: number[][]): number[][] {
     const size = piece.length;
-    const rotated = Array(size).fill(null).map(() => Array(size).fill(0));
+    const rotated = Array(size)
+      .fill(null)
+      .map(() => Array(size).fill(0));
 
     for (let y = 0; y < size; y++) {
       if (!piece[y]) continue;
@@ -107,15 +140,5 @@ export class TetrisEngine implements GameEngine {
     }
 
     return rotated;
-  }
-
-  createMove(gameState: GameState, selectedData: any): Move | null {
-    // Tetris doesn't use manual move creation like Pentago
-    return null;
-  }
-
-  getMoveFormProps(gameState: GameState, selectedData: any, handlers: any): any {
-    // Tetris doesn't use move form like Pentago
-    return {};
   }
 }

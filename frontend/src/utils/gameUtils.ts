@@ -1,8 +1,4 @@
-import {
-  BOARD_SIZE,
-  QUADRANT_SIZE,
-  MOVE_CONSTRAINTS,
-} from '../constants';
+import {BOARD_SIZE, MOVE_CONSTRAINTS, QUADRANT_SIZE,} from '../constants';
 
 /**
  * Check if coordinates are within board bounds
@@ -19,7 +15,9 @@ export const isValidCoordinate = (x: number, y: number): boolean => {
 /**
  * Check if direction is valid
  */
-export const isValidDirection = (direction: 'clockwise' | 'counterclockwise'): boolean => {
+export const isValidDirection = (
+  direction: "clockwise" | "counterclockwise",
+): boolean => {
   return MOVE_CONSTRAINTS.VALID_DIRECTIONS.includes(direction);
 };
 
@@ -36,16 +34,16 @@ export const getQuadrantFromCoords = (x: number, y: number): number => {
  * Get quadrant name for display
  */
 export const getQuadrantName = (quadrant: number): string => {
-  const names = ['Top-Left', 'Top-Right', 'Bottom-Left', 'Bottom-Right'];
-  return names[quadrant] ?? 'Unknown';
+  const names = ["Top-Left", "Top-Right", "Bottom-Left", "Bottom-Right"];
+  return names[quadrant] ?? "Unknown";
 };
 
 /**
  * Get quadrant color
  */
 export const getQuadrantColor = (quadrant: number): string => {
-  const colors = ['#dd1414', '#1414dd', '#14dd14', '#dddd14'];
-  return colors[quadrant] ?? '#cccccc';
+  const colors = ["#dd1414", "#1414dd", "#14dd14", "#dddd14"];
+  return colors[quadrant] ?? "#cccccc";
 };
 
 /**
@@ -54,7 +52,7 @@ export const getQuadrantColor = (quadrant: number): string => {
 export const isPositionEmpty = (
   board: (number | null)[][],
   x: number,
-  y: number
+  y: number,
 ): boolean => {
   if (!isValidCoordinate(x, y)) return false;
   // Защита от undefined
@@ -65,7 +63,7 @@ export const isPositionEmpty = (
  * Get all empty positions on board
  */
 export const getEmptyPositions = (
-  board: (number | null)[][]
+  board: (number | null)[][],
 ): [number, number][] => {
   const emptyPositions: [number, number][] = [];
   for (let y = 0; y < BOARD_SIZE; y++) {
@@ -90,22 +88,24 @@ export const isBoardFull = (board: (number | null)[][]): boolean => {
  */
 export const getPlayerColor = (playerIndex: number): string => {
   const colors = [
-    '#ff0000',
-    '#0000ff',
-    '#00ff00',
-    '#ffff00',
-    '#ff00ff',
-    '#00ffff',
-    '#ffa500',
-    '#800080',
+    "#ff0000",
+    "#0000ff",
+    "#00ff00",
+    "#ffff00",
+    "#ff00ff",
+    "#00ffff",
+    "#ffa500",
+    "#800080",
   ];
-  return colors[playerIndex % colors.length] ?? '#cccccc';
+  return colors[playerIndex % colors.length] ?? "#cccccc";
 };
 
 /**
  * Check if game has winner (4 in a row)
  */
-export const checkWinner = (board: (number | null)[][]): number | null | undefined => {
+export const checkWinner = (
+  board: (number | null)[][],
+): number | null | undefined => {
   const size = BOARD_SIZE;
 
   // Horizontal
@@ -176,18 +176,19 @@ export const checkWinner = (board: (number | null)[][]): number | null | undefin
  */
 export const rotateQuadrant = (
   quadrant: (number | null)[][],
-  direction: 'clockwise' | 'counterclockwise'
+  direction: "clockwise" | "counterclockwise",
 ): (number | null | undefined)[][] => {
   const size = quadrant.length;
-  const rotated: (number | null | undefined)[][] = Array.from({ length: size }, () =>
-    Array(size).fill(null)
+  const rotated: (number | null | undefined)[][] = Array.from(
+    { length: size },
+    () => Array(size).fill(null),
   );
 
   for (let y = 0; y < size; y++) {
     const row = quadrant[y];
     if (!row) continue;
     for (let x = 0; x < size; x++) {
-      if (direction === 'clockwise') {
+      if (direction === "clockwise") {
         rotated[x]![size - 1 - y] = row[x];
       } else {
         rotated[size - 1 - x]![y] = row[x];
@@ -203,7 +204,7 @@ export const rotateQuadrant = (
  */
 export const extractQuadrant = (
   board: (number | null)[][],
-  quadrantIndex: number
+  quadrantIndex: number,
 ): (number | null | undefined)[][] => {
   const startY = quadrantIndex >= 2 ? QUADRANT_SIZE : 0;
   const startX = quadrantIndex % 2 === 1 ? QUADRANT_SIZE : 0;
@@ -228,7 +229,7 @@ export const extractQuadrant = (
 export const placeRotatedQuadrant = (
   board: (number | null | undefined)[][],
   quadrantIndex: number,
-  rotatedQuadrant: (number | null | undefined)[][]
+  rotatedQuadrant: (number | null | undefined)[][],
 ): (number | null | undefined)[][] => {
   const startY = quadrantIndex >= 2 ? QUADRANT_SIZE : 0;
   const startX = quadrantIndex % 2 === 1 ? QUADRANT_SIZE : 0;
