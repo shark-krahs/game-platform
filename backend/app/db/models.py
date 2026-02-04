@@ -4,23 +4,19 @@ from typing import Optional, List
 from uuid import UUID, uuid4
 
 from sqlmodel import SQLModel, Field, Relationship
+from sqlalchemy import Index
 
 
 class User(SQLModel, table=True):
     id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
     username: str
     password_hash: Optional[str] = None
-    email: Optional[str] = None
-    email_verified: bool = False
-    email_verification_token: Optional[str] = None
-    email_verification_expires_at: Optional[datetime] = None
-    email_verification_sent_at: Optional[datetime] = None
-    password_reset_token: Optional[str] = None
-    password_reset_expires_at: Optional[datetime] = None
-    pending_email: Optional[str] = None
-    pending_email_token: Optional[str] = None
-    pending_email_expires_at: Optional[datetime] = None
-    pending_email_confirmed: bool = False
+    recovery_codes_generated_at: Optional[datetime] = None
+    recovery_codes_viewed_at: Optional[datetime] = None
+    recovery_last_used_at: Optional[datetime] = None
+    recovery_lock_until: Optional[datetime] = None
+    recovery_failed_attempts: int = 0
+    recovery_last_attempt_at: Optional[datetime] = None
     stars: int = 0
     preferred_color: str = "#4287f5"
     language: str = "en"
@@ -28,6 +24,44 @@ class User(SQLModel, table=True):
     # Relationship to game ratings
     game_ratings: List["GameRating"] = Relationship(back_populates="user")
     saved_games: List["SavedGame"] = Relationship(back_populates="user")
+
+
+class RecoveryCode(SQLModel, table=True):
+    __table_args__ = (
+        Index("ix_recovery_codes_user_batch", "user_id", "batch_id"),
+        Index("ix_recovery_codes_user_used", "user_id", "used_at"),
+    )
+
+    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    user_id: UUID = Field(foreign_key="user.id", index=True)
+    batch_id: UUID = Field(index=True)
+    code_hash: str
+    used_at: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
+
+
+class RecoveryIPAttempt(SQLModel, table=True):
+    __table_args__ = (Index("ix_recovery_ip_attempts_ip_time", "ip", "attempted_at"),)
+
+    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    ip: str = Field(index=True)
+    attempted_at: datetime = Field(default_factory=datetime.utcnow, index=True)
+    username_hint: Optional[str] = None
+    success: bool = False
+    attempt_count: int = 0
+    lock_until: Optional[datetime] = None
+    last_attempt_at: Optional[datetime] = None
+
+
+class RecoveryResetToken(SQLModel, table=True):
+    __table_args__ = (Index("ix_recovery_reset_tokens_jti", "jti"),)
+
+    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    user_id: UUID = Field(foreign_key="user.id", index=True)
+    jti: str
+    created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
+    expires_at: datetime
+    used_at: Optional[datetime] = None
 
 
 class Game(SQLModel, table=True):

@@ -31,6 +31,25 @@ const GameClient: React.FC = () => {
     urlGameId || (location.state as { gameId?: string } | null)?.gameId;
   const initialGameType =
     (location.state as { gameType?: string } | null)?.gameType || "pentago";
+  const storedAnon = gameId
+    ? sessionStorage.getItem(`anon_game_${gameId}`)
+    : null;
+  let parsedAnon: { anonId?: string; anonName?: string } | null = null;
+  if (storedAnon) {
+    try {
+      parsedAnon = JSON.parse(storedAnon);
+    } catch {
+      parsedAnon = null;
+    }
+  }
+  const anonId =
+    (location.state as { anonId?: string } | null)?.anonId ||
+    parsedAnon?.anonId ||
+    null;
+  const anonName =
+    (location.state as { anonName?: string } | null)?.anonName ||
+    parsedAnon?.anonName ||
+    null;
 
   // Хуки игры
   const {
@@ -52,7 +71,7 @@ const GameClient: React.FC = () => {
     chatMessages,
     error,
     sendMessage,
-  } = useWebSocket(gameId, authToken, user, navigate, location);
+  } = useWebSocket(gameId, authToken, anonId, anonName, user, navigate, location);
 
   // State for dynamic engine selection
   const [currentGameType, setCurrentGameType] =
@@ -159,15 +178,20 @@ const GameClient: React.FC = () => {
       return { me: null, opponent: null };
     }
 
-    const me = players.find((p) => p?.name === user?.username) || null;
-    const opponent = players.find((p) => p?.name !== user?.username) || null;
+    const displayName = user?.username || anonName || null;
+    const me = displayName
+      ? players.find((p) => p?.name === displayName) || null
+      : null;
+    const opponent = displayName
+      ? players.find((p) => p?.name !== displayName) || null
+      : players[1] || null;
 
     return { me, opponent };
   };
 
   const isResetPending = (resetVotes: (number | string)[]): boolean => {
-    if (!user?.id) return false;
-    const myUserId = user.id.toString();
+    const myUserId = user?.id?.toString() || anonId;
+    if (!myUserId) return false;
     return resetVotes.includes(myUserId);
   };
 

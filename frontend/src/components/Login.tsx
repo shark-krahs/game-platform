@@ -1,16 +1,8 @@
 import React, { useState } from "react";
-import {
-  Alert,
-  Button,
-  Form,
-  type FormProps,
-  Input,
-  Space,
-  Typography,
-} from "antd";
+import { Alert, Button, Form, type FormProps, Input } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useAuth } from "../AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 type LoginFormValues = {
@@ -81,11 +73,6 @@ const Login: React.FC = () => {
         </Button>
       </Form.Item>
 
-      <Space direction="vertical" style={{ width: "100%" }}>
-        <Typography.Text>
-          <Link to="/forgot-password">{t("forgotPassword")}</Link>
-        </Typography.Text>
-      </Space>
       {localMessage && (
         <Alert
           message={localMessage}

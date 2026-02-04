@@ -68,58 +68,32 @@ DB_ENGINE=sqlite
 В этом режиме используется файл `./game-platform.db` в папке `backend/`.
 Если у вас задан `DB_URL`, он будет проигнорирован при `DB_ENGINE=sqlite`.
 
-## Настройка почты (Resend API)
+## Восстановление доступа
 
-1) Создайте API ключ в Resend Dashboard и сохраните его.
-2) Убедитесь, что домен/отправитель подтверждён в Resend.
-3) Добавьте переменные в `.env` (можно в корне проекта или в `backend/.env`):
+Проект использует recovery-коды как единственный механизм восстановления доступа.
 
-```
-EMAIL_PROVIDER=resend
-RESEND_API_KEY=your_resend_api_key
-MAIL_FROM_NAME=Game Platform
-MAIL_FROM_ADDRESS=your@domain.com
-FRONTEND_BASE_URL=http://localhost:5173
-EMAIL_VERIFICATION_EXPIRE_MINUTES=60
-EMAIL_VERIFICATION_RESEND_COOLDOWN_SECONDS=60
-PASSWORD_RESET_EXPIRE_MINUTES=30
-EMAIL_CHANGE_EXPIRE_MINUTES=60
-```
+1) После входа сгенерируйте recovery-коды в профиле.
+2) Сохраните коды в безопасном месте — они показываются только один раз.
+3) Потеря recovery-кодов = потеря аккаунта. Других способов восстановления нет.
+4) Для восстановления используйте `/auth/recovery/verify` и `/auth/recovery/reset-password`.
+5) После генерации подтвердите сохранение: `/me/security/recovery/confirm-viewed`.
 
-Проверка отправки: зарегистрируйтесь в приложении и убедитесь, что пришло письмо подтверждения.
+### Account recovery
 
-### SMTP (опционально, для локальной разработки)
+How it works:
+- Generate a new batch of recovery codes in your profile.
+- Codes are shown once and expire from the one-time display after 10 minutes.
+- Confirm that you saved them via `/me/security/recovery/confirm-viewed`.
+- If you lose the codes, the account cannot be recovered.
 
-Если хотите использовать SMTP локально, укажите:
+### HTTP endpoints (recovery)
 
-```
-EMAIL_PROVIDER=smtp
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your@gmail.com
-SMTP_PASSWORD=your_app_password
-SMTP_USE_TLS=true
-SMTP_USE_SSL=false
-SMTP_TIMEOUT_SECONDS=30
-SMTP_DEBUG=false
-SMTP_FORCE_IPV4=false
-MAIL_FROM_NAME=Game Platform
-MAIL_FROM_ADDRESS=your@gmail.com
-```
-
-Для Gmail рекомендуется использовать App Password (а не основной пароль).
-
-Если 587/TLS не работает, попробуйте:
-
-```
-SMTP_PORT=465
-SMTP_USE_TLS=false
-SMTP_USE_SSL=true
-```
-
-Для диагностики можно включить:
-
-```
-SMTP_DEBUG=true
-SMTP_FORCE_IPV4=true
-```
+| Method | Endpoint | Example |
+| --- | --- | --- |
+| POST | `/api/auth/recovery/verify` | `{"username":"alice","code":"ABCDE-FGHIJ"}` |
+| POST | `/api/auth/recovery/reset-password` | `{"reset_token":"<token>","new_password":"NewPass123"}` |
+| POST | `/api/auth/recovery/confirm-setup` | `{"setup_token":"<token>"}` |
+| POST | `/api/me/security/recovery/regenerate` | `{"password":"current-password"}` |
+| GET | `/api/me/security/recovery/status` | `{}` |
+| GET | `/api/me/security/recovery/codes` | `{}` |
+| POST | `/api/me/security/recovery/confirm-viewed` | `{}` |

@@ -189,14 +189,14 @@ async def create_matched_game(
         game_id, game_type, players, time_control_obj
     )
 
-    # Set active game for both players (skip bots)
+    # Set active game for both players (skip bots and anonymous players)
     from backend.app.repositories.user_active_game_repository import (
         UserActiveGameRepository,
     )
 
-    if not is_bot_player(players[0]):
+    if not is_bot_player(players[0]) and not getattr(player1, "is_anonymous", False):
         await UserActiveGameRepository.set_active_game(player1.user_id, game_id)
-    if not is_bot_player(players[1]):
+    if not is_bot_player(players[1]) and not getattr(player2, "is_anonymous", False):
         await UserActiveGameRepository.set_active_game(player2.user_id, game_id)
 
     # Initialize connections dict for this game
@@ -207,17 +207,17 @@ async def create_matched_game(
     # Notify both players with their assigned colors
     try:
         if player1.ws:
-            await player1.ws.send_text(
-                json.dumps(
-                    {"type": "match_found", "game_id": game_id, "color": "#007bff"}
-                )
-            )
+            payload = {"type": "match_found", "game_id": game_id, "color": "#007bff"}
+            if player1.is_anonymous:
+                payload["anon_id"] = player1.user_id
+                payload["username"] = player1.username
+            await player1.ws.send_text(json.dumps(payload))
         if player2.ws:
-            await player2.ws.send_text(
-                json.dumps(
-                    {"type": "match_found", "game_id": game_id, "color": "#dc3545"}
-                )
-            )
+            payload = {"type": "match_found", "game_id": game_id, "color": "#dc3545"}
+            if player2.is_anonymous:
+                payload["anon_id"] = player2.user_id
+                payload["username"] = player2.username
+            await player2.ws.send_text(json.dumps(payload))
         logger.info(
             f"Match notifications sent to {player1.username} and {player2.username}"
         )
@@ -364,7 +364,11 @@ async def handle_player_leave(game_id: str, user_id: str):
             )
 
             for player in game_state.players:
-                if player.get("user_id") and not is_bot_player(player):
+                if (
+                    player.get("user_id")
+                    and not is_bot_player(player)
+                    and not str(player["user_id"]).startswith("anon_")
+                ):
                     await UserActiveGameRepository.clear_active_game(player["user_id"])
         elif connected_count == 1 and game_state.status != "finished":
             # One player left, find which one and start disconnection timer
@@ -426,7 +430,11 @@ async def timeout_abandoned_game(game_id: str):
         )
 
         for player in game_state.players:
-            if player.get("user_id") and not is_bot_player(player):
+            if (
+                player.get("user_id")
+                and not is_bot_player(player)
+                and not str(player["user_id"]).startswith("anon_")
+            ):
                 await UserActiveGameRepository.clear_active_game(player["user_id"])
 
     # End the game

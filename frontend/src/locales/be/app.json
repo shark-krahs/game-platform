@@ -21,20 +21,13 @@
   },
   "auth": {
     "username_taken": "Імя карыстальніка ўжо зарэгістравана.",
-    "email_unverified_pending": "Пошта ўжо зарэгістравана, але не пацверджана.",
-    "email_taken": "Пошта ўжо зарэгістравана.",
     "invalid_credentials": "Няправільнае імя карыстальніка або пароль.",
-    "email_not_verified": "Пошта не пацверджана.",
     "old_password_required": "Для змены пароля патрэбны стары пароль.",
     "old_password_incorrect": "Стары пароль няправільны.",
     "invalid_token": "Няправільны токен.",
     "token_expired": "Тэрмін дзеяння токена скончыўся.",
     "user_not_found": "Карыстальнік не знойдзены.",
-    "resend_cooldown": "Пачакайце перад паўторнай адпраўкай.",
-    "new_email_required": "Патрэбны новы адрас пошты.",
-    "email_already_set": "Пошта ўжо ўсталявана.",
-    "pending_email_missing": "Няма чаканага адраса пошты.",
-    "new_email_not_confirmed": "Новая пошта яшчэ не пацверджана."
+    "recovery_setup_required": "Спачатку захавайце коды аднаўлення."
   },
   "games": {
     "auth_required": "Патрэбна аўтэнтыфікацыя.",

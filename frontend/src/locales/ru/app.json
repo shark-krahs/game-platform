@@ -21,20 +21,13 @@
   },
   "auth": {
     "username_taken": "Имя пользователя уже зарегистрировано.",
-    "email_unverified_pending": "Почта уже зарегистрирована, но не подтверждена.",
-    "email_taken": "Почта уже зарегистрирована.",
     "invalid_credentials": "Неверное имя пользователя или пароль.",
-    "email_not_verified": "Почта не подтверждена.",
     "old_password_required": "Для смены пароля требуется старый пароль.",
     "old_password_incorrect": "Старый пароль неверный.",
     "invalid_token": "Неверный токен.",
     "token_expired": "Срок действия токена истёк.",
     "user_not_found": "Пользователь не найден.",
-    "resend_cooldown": "Подождите перед повторной отправкой.",
-    "new_email_required": "Требуется новый адрес почты.",
-    "email_already_set": "Почта уже установлена.",
-    "pending_email_missing": "Не указан ожидающий адрес почты.",
-    "new_email_not_confirmed": "Новая почта еще не подтверждена."
+    "recovery_setup_required": "Сначала сохраните recovery-коды."
   },
   "games": {
     "auth_required": "Требуется аутентификация.",

@@ -40,6 +40,8 @@ interface UseWebSocketReturn {
 export function useWebSocket(
   gameId: string | undefined,
   authToken: string | null,
+  anonId: string | null,
+  anonName: string | null,
   user: User | null,
   navigate: NavigateFunction,
   location: Location,
@@ -81,7 +83,17 @@ export function useWebSocket(
       connectedRef.current = true;
 
       const wsBaseUrl = buildWsApiBaseUrl();
-      const wsUrl = `${wsBaseUrl}/ws/game/${game_id}${authToken ? `?token=${authToken}` : ""}`;
+      const params = new URLSearchParams();
+      if (authToken) {
+        params.set("token", authToken);
+      } else if (anonId) {
+        params.set("anon_id", anonId);
+        if (anonName) {
+          params.set("anon_name", anonName);
+        }
+      }
+      const qs = params.toString();
+      const wsUrl = `${wsBaseUrl}/ws/game/${game_id}${qs ? `?${qs}` : ""}`;
 
       const socket = new WebSocket(wsUrl);
 
@@ -166,7 +178,7 @@ export function useWebSocket(
 
       setWs(socket);
     },
-    [authToken, user, navigate, t],
+    [authToken, anonId, anonName, user, navigate, t],
   );
 
   const sendMessage = useCallback(

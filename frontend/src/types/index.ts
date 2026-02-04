@@ -6,8 +6,6 @@
 export interface User {
   id: string;
   username: string;
-  email?: string;
-  email_verified?: boolean;
   ratings?: Record<string, GameRating>;
   created_at?: string;
   language?: string;

@@ -21,20 +21,13 @@
   },
   "auth": {
     "username_taken": "Username already registered.",
-    "email_unverified_pending": "Email is already registered but not verified.",
-    "email_taken": "Email already registered.",
     "invalid_credentials": "Incorrect username or password.",
-    "email_not_verified": "Email not verified.",
     "old_password_required": "Old password is required to change password.",
     "old_password_incorrect": "Old password is incorrect.",
     "invalid_token": "Invalid token.",
     "token_expired": "Token expired.",
     "user_not_found": "User not found.",
-    "resend_cooldown": "Please wait before resending.",
-    "new_email_required": "New email is required.",
-    "email_already_set": "Email is already set.",
-    "pending_email_missing": "Pending email is missing.",
-    "new_email_not_confirmed": "New email is not confirmed yet."
+    "recovery_setup_required": "Please save your recovery codes to continue."
   },
   "games": {
     "auth_required": "Authentication required.",

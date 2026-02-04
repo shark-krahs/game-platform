@@ -21,20 +21,13 @@
   },
   "auth": {
     "username_taken": "Ім’я користувача вже зареєстровано.",
-    "email_unverified_pending": "Пошта вже зареєстрована, але не підтверджена.",
-    "email_taken": "Пошта вже зареєстрована.",
     "invalid_credentials": "Невірне ім’я користувача або пароль.",
-    "email_not_verified": "Пошта не підтверджена.",
     "old_password_required": "Для зміни пароля потрібен старий пароль.",
     "old_password_incorrect": "Старий пароль неправильний.",
     "invalid_token": "Невірний токен.",
     "token_expired": "Термін дії токена минув.",
     "user_not_found": "Користувача не знайдено.",
-    "resend_cooldown": "Зачекайте перед повторним надсиланням.",
-    "new_email_required": "Потрібна нова адреса пошти.",
-    "email_already_set": "Пошта вже встановлена.",
-    "pending_email_missing": "Немає очікуваної адреси пошти.",
-    "new_email_not_confirmed": "Нова пошта ще не підтверджена."
+    "recovery_setup_required": "Спочатку збережіть коди відновлення."
   },
   "games": {
     "auth_required": "Потрібна автентифікація.",

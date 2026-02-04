@@ -21,20 +21,13 @@
   },
   "auth": {
     "username_taken": "Пайдаланушы аты бұрын тіркелген.",
-    "email_unverified_pending": "Пошта тіркелген, бірақ расталмаған.",
-    "email_taken": "Пошта бұрын тіркелген.",
     "invalid_credentials": "Пайдаланушы аты немесе құпиясөз қате.",
-    "email_not_verified": "Пошта расталмаған.",
     "old_password_required": "Құпиясөзді өзгерту үшін ескі құпиясөз қажет.",
     "old_password_incorrect": "Ескі құпиясөз қате.",
     "invalid_token": "Жарамсыз токен.",
     "token_expired": "Токеннің мерзімі аяқталды.",
     "user_not_found": "Пайдаланушы табылмады.",
-    "resend_cooldown": "Қайта жібермес бұрын күтіңіз.",
-    "new_email_required": "Жаңа пошта қажет.",
-    "email_already_set": "Пошта бұрыннан орнатылған.",
-    "pending_email_missing": "Күтілетін пошта көрсетілмеген.",
-    "new_email_not_confirmed": "Жаңа пошта әлі расталмаған."
+    "recovery_setup_required": "Алдымен қалпына келтіру кодтарын сақтаңыз."
   },
   "games": {
     "auth_required": "Аутентификация қажет.",

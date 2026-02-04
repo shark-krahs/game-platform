@@ -20,25 +20,13 @@ interface AuthContextValue {
   register: (
     username: string,
     password: string,
-    email: string,
     language: string,
-  ) => Promise<void>;
-  confirmEmail: (token: string) => Promise<string>;
-  resendConfirmation: (
-    username: string,
-  ) => Promise<{ message: string; seconds_remaining?: number }>;
-  requestPasswordReset: (
-    username: string,
-  ) => Promise<{ message: string; masked_email?: string }>;
-  resendPasswordReset: (
-    username: string,
-  ) => Promise<{ message: string; masked_email?: string }>;
-  resetPassword: (token: string, newPassword: string) => Promise<string>;
-  requestEmailChange: () => Promise<{ message: string; masked_email?: string }>;
-  confirmEmailChange: (token: string, newEmail?: string) => Promise<string>;
-  resendEmailChange: (
-    token: string,
-  ) => Promise<{ message: string; masked_email?: string }>;
+  ) => Promise<{
+    recovery_codes?: string[];
+    recovery_setup_token?: string;
+    codes_available_until?: string;
+  }>;
+  confirmRecoverySetup: (setupToken: string) => Promise<void>;
   logout: () => void;
   updateProfile: (updates: Partial<User>) => Promise<User>;
   refreshUser: () => Promise<void>;
@@ -118,13 +106,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const register = async (
     username: string,
     password: string,
-    email: string,
     language: string,
   ) => {
     setLoading(true);
     setError(null);
     try {
-      await authService.register(username, password, email, language);
+      return await authService.register(username, password, language);
     } catch (err: any) {
       setError(err.message || "Registration failed");
       throw err;
@@ -133,113 +120,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  const confirmEmail = async (token: string) => {
+  const confirmRecoverySetup = async (setupToken: string) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await authService.confirmEmail(token);
-      return response.message;
+      await authService.confirmRecoverySetup(setupToken);
     } catch (err: any) {
-      setError(err.message || "Email confirmation failed");
+      setError(err.message || "Recovery setup confirmation failed");
       throw err;
     } finally {
       setLoading(false);
     }
   };
 
-  const resendConfirmation = async (username: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await authService.resendConfirmation(username);
-      return response;
-    } catch (err: any) {
-      setError(err.message || "Resend failed");
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const requestPasswordReset = async (username: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      return await authService.requestPasswordReset(username);
-    } catch (err: any) {
-      setError(err.message || "Reset request failed");
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const resendPasswordReset = async (username: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      return await authService.resendPasswordReset(username);
-    } catch (err: any) {
-      setError(err.message || "Reset resend failed");
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const resetPassword = async (token: string, newPassword: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await authService.resetPassword(token, newPassword);
-      return response.message;
-    } catch (err: any) {
-      setError(err.message || "Reset failed");
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const requestEmailChange = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      return await authService.requestEmailChange();
-    } catch (err: any) {
-      setError(err.message || "Email change request failed");
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const confirmEmailChange = async (token: string, newEmail?: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await authService.confirmEmailChange(token, newEmail);
-      return response.message;
-    } catch (err: any) {
-      setError(err.message || "Email change confirmation failed");
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const resendEmailChange = async (token: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      return await authService.resendEmailChange(token);
-    } catch (err: any) {
-      setError(err.message || "Email change resend failed");
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const logout = () => {
     authService.logout();
@@ -270,14 +163,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     error,
     login,
     register,
-    confirmEmail,
-    resendConfirmation,
-    requestPasswordReset,
-    resendPasswordReset,
-    resetPassword,
-    requestEmailChange,
-    confirmEmailChange,
-    resendEmailChange,
+    confirmRecoverySetup,
     logout,
     updateProfile,
     refreshUser: fetchUserInfo,

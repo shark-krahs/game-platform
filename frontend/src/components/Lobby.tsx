@@ -14,6 +14,8 @@ interface WsMessage {
   pool?: string;
   game_id?: string;
   color?: "white" | "black";
+  anon_id?: string;
+  username?: string;
   message?: string;
 }
 
@@ -133,8 +135,22 @@ const Lobby: React.FC = () => {
           });
           setStatus(t("matchFound"));
           setInQueue(false);
+          if (msg.game_id && msg.anon_id) {
+            sessionStorage.setItem(
+              `anon_game_${msg.game_id}`,
+              JSON.stringify({
+                anonId: msg.anon_id,
+                anonName: msg.username || "",
+              }),
+            );
+          }
           navigate(`/game/${msg.game_id}`, {
-            state: { color: msg.color, gameType: currentGameType },
+            state: {
+              color: msg.color,
+              gameType: currentGameType,
+              anonId: msg.anon_id,
+              anonName: msg.username,
+            },
           });
           wsRef.current?.close();
           break;

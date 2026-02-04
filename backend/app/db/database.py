@@ -101,5 +101,15 @@ async def init_db():
 
     logger = logging.getLogger(__name__)
     logger.info("DB connect: %s", _safe_url_for_logs(settings.db_url))
+    url = make_url(settings.db_url)
+    if url.drivername.startswith("sqlite"):
+        db_path = url.database or ""
+        if db_path and not os.path.isabs(db_path):
+            db_path = os.path.abspath(db_path)
+        if db_path and os.path.exists(db_path):
+            logger.info("SQLite DB exists, skipping create_all: %s", db_path)
+            return
+        logger.info("SQLite DB missing, running create_all: %s", db_path or "<memory>")
+
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)

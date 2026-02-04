@@ -88,7 +88,7 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
     """WebSocket endpoint for game connections."""
     await websocket.accept()
 
-    # Get user from token
+    # Get user from token or anonymous query params
     token = websocket.query_params.get("token")
     user = None
     user_id = None
@@ -99,6 +99,12 @@ async def websocket_endpoint(websocket: WebSocket, game_id: str):
         if user:
             user_id = str(user.id)
             username = user.username
+    else:
+        anon_id = websocket.query_params.get("anon_id")
+        anon_name = websocket.query_params.get("anon_name")
+        if anon_id:
+            user_id = anon_id
+            username = anon_name or "Guest"
 
     if not user_id:
         await websocket.send_text(

@@ -3,11 +3,6 @@
  */
 
 /**
- * Email validation regex
- */
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-/**
  * Username validation regex (alphanumeric, underscore, dash, 3-20 chars)
  */
 const USERNAME_REGEX = /^[a-zA-Z0-9_-]{3,20}$/;
@@ -16,14 +11,6 @@ const USERNAME_REGEX = /^[a-zA-Z0-9_-]{3,20}$/;
  * Password validation regex (at least 8 chars, 1 uppercase, 1 lowercase, 1 number)
  */
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/;
-
-/**
- * Validate email address
- */
-export const isValidEmail = (email: unknown): boolean => {
-  if (typeof email !== "string") return false;
-  return EMAIL_REGEX.test(email.trim());
-};
 
 /**
  * Validate username
@@ -155,8 +142,6 @@ export const validationRules = {
   required: (value: any): string | true =>
     isRequired(value) || "This field is required",
 
-  email: (value: any): string | true =>
-    isValidEmail(value) || "Please enter a valid email address",
 
   username: (value: any): string | true =>
     isValidUsername(value) ||

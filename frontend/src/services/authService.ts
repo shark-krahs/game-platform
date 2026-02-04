@@ -11,12 +11,9 @@ interface LoginResponse {
 
 interface RegisterResponse {
   message: string;
-}
-
-interface MessageResponse {
-  message: string;
-  masked_email?: string;
-  seconds_remaining?: number;
+  recovery_codes?: string[];
+  recovery_setup_token?: string;
+  codes_available_until?: string;
 }
 
 class AuthService {
@@ -39,14 +36,12 @@ class AuthService {
   async register(
     username: string,
     password: string,
-    email: string,
     language: string,
   ): Promise<RegisterResponse> {
     try {
       const response = await api.post<RegisterResponse>("/auth/register", {
         username,
         password,
-        email,
         language,
       });
       return response;
@@ -55,55 +50,6 @@ class AuthService {
     }
   }
 
-  async confirmEmail(token: string): Promise<MessageResponse> {
-    return api.post<MessageResponse>("/auth/confirm-email", { token });
-  }
-
-  async resendConfirmation(username: string): Promise<MessageResponse> {
-    return api.post<MessageResponse>("/auth/resend-confirmation", { username });
-  }
-
-  async requestPasswordReset(username: string): Promise<MessageResponse> {
-    return api.post<MessageResponse>("/auth/request-password-reset", {
-      username,
-    });
-  }
-
-  async resendPasswordReset(username: string): Promise<MessageResponse> {
-    return api.post<MessageResponse>("/auth/resend-password-reset", {
-      username,
-    });
-  }
-
-  async resetPassword(
-    token: string,
-    newPassword: string,
-  ): Promise<MessageResponse> {
-    return api.post<MessageResponse>("/auth/reset-password", {
-      token,
-      new_password: newPassword,
-    });
-  }
-
-  async requestEmailChange(): Promise<MessageResponse> {
-    return api.post<MessageResponse>("/auth/request-email-change", {
-      confirm: true,
-    });
-  }
-
-  async confirmEmailChange(
-    token: string,
-    newEmail?: string,
-  ): Promise<MessageResponse> {
-    return api.post<MessageResponse>("/auth/confirm-email-change", {
-      token,
-      new_email: newEmail,
-    });
-  }
-
-  async resendEmailChange(token: string): Promise<MessageResponse> {
-    return api.post<MessageResponse>("/auth/resend-email-change", { token });
-  }
 
   async getCurrentUser(): Promise<User> {
     try {
@@ -136,6 +82,52 @@ class AuthService {
 
   getToken(): string | null {
     return localStorage.getItem("authToken");
+  }
+
+  async confirmRecoverySetup(setupToken: string): Promise<void> {
+    await api.post("/auth/recovery/confirm-setup", { setup_token: setupToken });
+  }
+
+  async verifyRecoveryCode(
+    username: string,
+    code: string,
+  ): Promise<{ reset_token: string | null }> {
+    return api.post("/auth/recovery/verify", { username, code });
+  }
+
+  async resetPasswordWithRecovery(
+    resetToken: string,
+    newPassword: string,
+  ): Promise<void> {
+    await api.post("/auth/recovery/reset-password", {
+      reset_token: resetToken,
+      new_password: newPassword,
+    });
+  }
+
+  async regenerateRecoveryCodes(password: string): Promise<{
+    generated_at?: string;
+    codes_available_until?: string;
+  }> {
+    return api.post("/me/security/recovery/regenerate", { password });
+  }
+
+  async fetchRecoveryCodes(): Promise<{ codes: string[] }> {
+    return api.get("/me/security/recovery/codes");
+  }
+
+  async confirmRecoveryViewed(): Promise<{ viewed_at: string }> {
+    return api.post("/me/security/recovery/confirm-viewed", {});
+  }
+
+  async getRecoveryStatus(): Promise<{
+    confirmed: boolean;
+    viewed_at: string | null;
+    generated_at: string | null;
+    last_used_at: string | null;
+    active_codes_count: number;
+  }> {
+    return api.get("/me/security/recovery/status");
   }
 }
 
