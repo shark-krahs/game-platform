@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, Any
 
 from pydantic import BaseModel
 
-from backend.app.services.bot_manager import BOT_WAIT_SECONDS, build_bot_profile
+from app.services.bot_manager import BOT_WAIT_SECONDS, build_bot_profile
 
 logger = logging.getLogger(__name__)
 
@@ -110,7 +110,7 @@ async def try_match_immediately(pool_key: str):
         logger.info(
             f"Match found: {pair[0].username} vs {pair[1].username} in {pool_key}"
         )
-        from backend.app.services.game_state import create_matched_game
+        from app.services.game_state import create_matched_game
 
         await create_matched_game(
             pair[0].game_type, pair[0].time_control, pair[0], pair[1]
@@ -128,7 +128,7 @@ async def matchmaking_loop():
         for pool_key in list(pools.keys()):
             pair = await try_match(pool_key)
             if pair:
-                from backend.app.services.game_state import create_matched_game
+                from app.services.game_state import create_matched_game
 
                 await create_matched_game(
                     pair[0].game_type, pair[0].time_control, pair[0], pair[1]
@@ -172,7 +172,7 @@ async def try_match_with_bot(pool_key: str):
         },
     )
 
-    from backend.app.services.game_state import create_matched_game
+    from app.services.game_state import create_matched_game
 
     await create_matched_game(
         waiting_player.game_type,

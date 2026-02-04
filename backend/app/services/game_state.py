@@ -8,8 +8,8 @@ import logging
 import uuid
 from typing import Dict, Any, Optional
 
-from backend.app.games.base import GameState, TimeControl
-from backend.app.services.bot_manager import is_bot_player, schedule_bot_move
+from app.games.base import GameState, TimeControl
+from app.services.bot_manager import is_bot_player, schedule_bot_move
 
 logger = logging.getLogger(__name__)
 
@@ -145,11 +145,11 @@ async def create_matched_game(
     """
     # Route to appropriate game engine based on game type
     if game_type == "tetris":
-        from backend.app.services.tetris_game_engine import tetris_game_engine
+        from app.services.tetris_game_engine import tetris_game_engine
 
         game_engine = tetris_game_engine
     else:
-        from backend.app.services.game_engine import game_engine
+        from app.services.game_engine import game_engine
 
     game_id = f"match_{uuid.uuid4().hex}"
     total_time = int(time_control.split("+")[0]) * 60 if "+" in time_control else 5 * 60
@@ -190,7 +190,7 @@ async def create_matched_game(
     )
 
     # Set active game for both players (skip bots and anonymous players)
-    from backend.app.repositories.user_active_game_repository import (
+    from app.repositories.user_active_game_repository import (
         UserActiveGameRepository,
     )
 
@@ -228,7 +228,7 @@ async def create_matched_game(
     if bot_difficulty is not None:
         selected_engine = game_engine
         if game_type == "tetris":
-            from backend.app.services.tetris_game_engine import tetris_game_engine
+            from app.services.tetris_game_engine import tetris_game_engine
 
             selected_engine = tetris_game_engine
 
@@ -260,14 +260,14 @@ async def handle_player_join(
     selected_engine = None
 
     # Try general game engine first
-    from backend.app.services.game_engine import game_engine
+    from app.services.game_engine import game_engine
 
     game_state = game_engine.get_game_state(game_id)
     if game_state:
         selected_engine = game_engine
     else:
         # Try Tetris game engine
-        from backend.app.services.tetris_game_engine import tetris_game_engine
+        from app.services.tetris_game_engine import tetris_game_engine
 
         game_state = tetris_game_engine.get_game_state(game_id)
         if game_state:
@@ -337,14 +337,14 @@ async def handle_player_leave(game_id: str, user_id: str):
     selected_engine = None
 
     # Try general game engine first
-    from backend.app.services.game_engine import game_engine
+    from app.services.game_engine import game_engine
 
     game_state = game_engine.get_game_state(game_id)
     if game_state:
         selected_engine = game_engine
     else:
         # Try Tetris game engine
-        from backend.app.services.tetris_game_engine import tetris_game_engine
+        from app.services.tetris_game_engine import tetris_game_engine
 
         game_state = tetris_game_engine.get_game_state(game_id)
         if game_state:
@@ -359,7 +359,7 @@ async def handle_player_leave(game_id: str, user_id: str):
             logger.info(f"Game {game_id} completely abandoned, ending game")
             await selected_engine.end_game(game_id)
             # Clear active games for all players
-            from backend.app.repositories.user_active_game_repository import (
+            from app.repositories.user_active_game_repository import (
                 UserActiveGameRepository,
             )
 
@@ -410,14 +410,14 @@ async def timeout_abandoned_game(game_id: str):
     selected_engine = None
 
     # Try general game engine first
-    from backend.app.services.game_engine import game_engine
+    from app.services.game_engine import game_engine
 
     game_state = game_engine.get_game_state(game_id)
     if game_state:
         selected_engine = game_engine
     else:
         # Try Tetris game engine
-        from backend.app.services.tetris_game_engine import tetris_game_engine
+        from app.services.tetris_game_engine import tetris_game_engine
 
         game_state = tetris_game_engine.get_game_state(game_id)
         if game_state:
@@ -425,7 +425,7 @@ async def timeout_abandoned_game(game_id: str):
 
     if game_state:
         # Clear active games for all players
-        from backend.app.repositories.user_active_game_repository import (
+        from app.repositories.user_active_game_repository import (
             UserActiveGameRepository,
         )
 

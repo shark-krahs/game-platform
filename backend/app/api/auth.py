@@ -7,15 +7,15 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from pydantic import BaseModel
 
-from backend.app.core.config import settings
-from backend.app.core.security import (
+from app.core.config import settings
+from app.core.security import (
     verify_password,
     get_password_hash,
     create_access_token,
 )
-from backend.app.db.models import User
-from backend.app.repositories.user_repository import UserRepository
-from backend.app.services.recovery_service import RecoveryService
+from app.db.models import User
+from app.repositories.user_repository import UserRepository
+from app.services.recovery_service import RecoveryService
 
 logger = logging.getLogger(__name__)
 
@@ -327,7 +327,7 @@ async def recovery_codes(current_user: User = Depends(get_current_user)):
 @router.get("/auth/me/active-game")
 async def get_active_game(current_user: User = Depends(get_current_user)):
     """Get user's active game ID if any."""
-    from backend.app.repositories.user_active_game_repository import (
+    from app.repositories.user_active_game_repository import (
         UserActiveGameRepository,
     )
 

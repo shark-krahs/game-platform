@@ -7,8 +7,8 @@ from typing import Optional
 from sqlalchemy.orm import selectinload
 from sqlmodel import select
 
-from backend.app.db.database import async_session
-from backend.app.db.models import User
+from app.db.database import async_session
+from app.db.models import User
 from .base import BaseRepository
 
 

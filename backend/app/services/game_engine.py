@@ -6,9 +6,9 @@ import asyncio
 import logging
 from typing import Dict, Any, Optional, List, Protocol
 
-from backend.app.games import GameFactory
-from backend.app.games.base import GameState, TimeControl
-from backend.app.services.bot_manager import is_bot_player, schedule_bot_move
+from app.games import GameFactory
+from app.games.base import GameState, TimeControl
+from app.services.bot_manager import is_bot_player, schedule_bot_move
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ async def broadcast_state(game_id: str, game_state: GameState):
         game_id: The game identifier
         game_state: GameState object
     """
-    from backend.app.services.game_state import broadcast_to_game
+    from app.services.game_state import broadcast_to_game
 
     state = {
         "type": "state",
@@ -124,7 +124,7 @@ class GameEngine:
         await self._auto_save_finished_game(game_id, game_state)
 
         # Clear active games for both players
-        from backend.app.repositories.user_active_game_repository import (
+        from app.repositories.user_active_game_repository import (
             UserActiveGameRepository,
         )
 
@@ -138,7 +138,7 @@ class GameEngine:
 
         # Update ratings if this was a rated game
         if game_state.rated and game_state.winner is not None:
-            from backend.app.ratings import RatingCalculator
+            from app.ratings import RatingCalculator
             from uuid import UUID
 
             player1_id_str = game_state.players[0]["user_id"]
@@ -202,7 +202,7 @@ class GameEngine:
 
     async def _auto_save_finished_game(self, game_id: str, game_state: GameState):
         """Auto-save finished game for all authenticated players."""
-        from backend.app.repositories.saved_game_repository import SavedGameRepository
+        from app.repositories.saved_game_repository import SavedGameRepository
         from uuid import UUID
         from datetime import datetime
 
@@ -372,7 +372,7 @@ class GameEngine:
                 and new_state.status != "first_move"
                 and len(new_state.moves_history) == old_moves_len
             ):
-                from backend.app.games.base import GameMove
+                from app.games.base import GameMove
                 from datetime import datetime
 
                 move = GameMove(
@@ -503,7 +503,7 @@ class GameEngine:
             elif game_state.game_type == "tetris" and game_state.status == "playing":
                 # Start falling piece if none exists (when player's turn begins)
                 if not game_state.board_state.get("falling_piece"):
-                    from backend.app.games.tetris.board import TetrisBoard
+                    from app.games.tetris.board import TetrisBoard
 
                     board = TetrisBoard()
                     game_state.board_state = board.start_falling_piece(
@@ -515,7 +515,7 @@ class GameEngine:
 
                 # Move falling piece down automatically
                 if game_state.board_state.get("falling_piece"):
-                    from backend.app.games.tetris.board import TetrisBoard
+                    from app.games.tetris.board import TetrisBoard
 
                     board = TetrisBoard()
                     old_board_state = game_state.board_state

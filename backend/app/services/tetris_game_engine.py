@@ -6,9 +6,9 @@ import asyncio
 import logging
 from typing import Dict, Any, Optional, List
 
-from backend.app.games import GameFactory
-from backend.app.games.base import GameState, TimeControl
-from backend.app.services.bot_manager import is_bot_player, schedule_bot_move
+from app.games import GameFactory
+from app.games.base import GameState, TimeControl
+from app.services.bot_manager import is_bot_player, schedule_bot_move
 from .game_engine import GameEngineInterface, broadcast_state
 
 logger = logging.getLogger(__name__)
@@ -36,7 +36,7 @@ class TetrisGameEngine(GameEngineInterface):
         await self._auto_save_finished_game(game_id, game_state)
 
         # Clear active games for both players
-        from backend.app.repositories.user_active_game_repository import (
+        from app.repositories.user_active_game_repository import (
             UserActiveGameRepository,
         )
 
@@ -46,7 +46,7 @@ class TetrisGameEngine(GameEngineInterface):
 
         # Update ratings if this was a rated game
         if game_state.rated and game_state.winner is not None:
-            from backend.app.ratings import RatingCalculator
+            from app.ratings import RatingCalculator
             from uuid import UUID
 
             player1_id_str = game_state.players[0]["user_id"]
@@ -110,7 +110,7 @@ class TetrisGameEngine(GameEngineInterface):
 
     async def _auto_save_finished_game(self, game_id: str, game_state: GameState):
         """Auto-save finished game for all authenticated players."""
-        from backend.app.repositories.saved_game_repository import SavedGameRepository
+        from app.repositories.saved_game_repository import SavedGameRepository
         from uuid import UUID
         from datetime import datetime
 
@@ -233,7 +233,7 @@ class TetrisGameEngine(GameEngineInterface):
         )
 
         # Create initial falling piece
-        from backend.app.games.tetris.board import TetrisBoard
+        from app.games.tetris.board import TetrisBoard
 
         board = TetrisBoard()
         game_state.board_state = board.start_falling_piece(game_state.board_state)
@@ -268,7 +268,7 @@ class TetrisGameEngine(GameEngineInterface):
             # Check if player changed (turn switched)
             if new_state.current_player != game_state.current_player:
                 # Record the move in history
-                from backend.app.games.base import GameMove
+                from app.games.base import GameMove
                 from datetime import datetime
 
                 move = GameMove(
@@ -324,7 +324,7 @@ class TetrisGameEngine(GameEngineInterface):
             if game_state.game_type == "tetris" and game_state.status == "playing":
                 # Start falling piece if none exists
                 if not game_state.board_state.get("falling_piece"):
-                    from backend.app.games.tetris.board import TetrisBoard
+                    from app.games.tetris.board import TetrisBoard
 
                     board = TetrisBoard()
                     game_state.board_state = board.start_falling_piece(
@@ -336,7 +336,7 @@ class TetrisGameEngine(GameEngineInterface):
 
                 # Move falling piece down automatically
                 if game_state.board_state.get("falling_piece"):
-                    from backend.app.games.tetris.board import TetrisBoard
+                    from app.games.tetris.board import TetrisBoard
 
                     board = TetrisBoard()
                     old_board_state = game_state.board_state
@@ -347,7 +347,7 @@ class TetrisGameEngine(GameEngineInterface):
                     # Check for top-out
                     if game_state.board_state.get("top_out"):
                         # Record the final placement leading to top-out for replay
-                        from backend.app.games.base import GameMove
+                        from app.games.base import GameMove
                         from datetime import datetime
 
                         final_move = GameMove(
@@ -380,7 +380,7 @@ class TetrisGameEngine(GameEngineInterface):
                         placing_player = game_state.current_player
 
                         # Record auto-fall placement for replay
-                        from backend.app.games.base import GameMove
+                        from app.games.base import GameMove
                         from datetime import datetime
 
                         auto_move = GameMove(

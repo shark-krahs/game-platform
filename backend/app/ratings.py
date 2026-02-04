@@ -4,8 +4,8 @@ from uuid import UUID
 
 import glicko2
 
-from backend.app.db.models import GameRating
-from backend.app.repositories.game_rating_repository import GameRatingRepository
+from app.db.models import GameRating
+from app.repositories.game_rating_repository import GameRatingRepository
 
 logger = logging.getLogger(__name__)
 

@@ -7,10 +7,10 @@ import logging
 import random
 from typing import Any, Dict, Optional
 
-from backend.app.games import GameFactory
-from backend.app.games.base import GameState
-from backend.app.games.pentago.board import PentagoBoard
-from backend.app.services.bot_names import generate_bot_name
+from app.games import GameFactory
+from app.games.base import GameState
+from app.games.pentago.board import PentagoBoard
+from app.services.bot_names import generate_bot_name
 
 logger = logging.getLogger(__name__)
 

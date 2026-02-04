@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from backend.app.core.config import settings
+from app.core.config import settings
 
 
 def _safe_url_for_logs(db_url: str) -> str:

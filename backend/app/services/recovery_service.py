@@ -9,10 +9,10 @@ from uuid import UUID, uuid4
 from jose import JWTError, jwt
 from sqlmodel import select
 
-from backend.app.core.config import settings
-from backend.app.core.security import get_password_hash, pwd_context
-from backend.app.db.database import async_session
-from backend.app.db.models import RecoveryCode, RecoveryIPAttempt, RecoveryResetToken, User
+from app.core.config import settings
+from app.core.security import get_password_hash, pwd_context
+from app.db.database import async_session
+from app.db.models import RecoveryCode, RecoveryIPAttempt, RecoveryResetToken, User
 
 
 @dataclass(frozen=True)

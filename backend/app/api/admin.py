@@ -20,8 +20,8 @@ from sqlalchemy import (
     update,
 )
 
-from backend.app.core.config import settings
-from backend.app.db.database import engine
+from app.core.config import settings
+from app.db.database import engine
 
 router = APIRouter()
 security = HTTPBasic()

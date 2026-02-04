@@ -6,7 +6,7 @@ from typing import Generic, TypeVar, List, Optional, Any
 
 from sqlmodel import select
 
-from backend.app.db.database import async_session
+from app.db.database import async_session
 
 T = TypeVar("T")
 

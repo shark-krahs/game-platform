@@ -8,9 +8,9 @@ from sqlalchemy.orm import sessionmaker
 from sqlmodel import SQLModel, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from backend.app.core.security import pwd_context
-from backend.app.db.models import RecoveryCode, RecoveryIPAttempt, RecoveryResetToken, User
-from backend.app.services.recovery_service import RecoveryService
+from app.core.security import pwd_context
+from app.db.models import RecoveryCode, RecoveryIPAttempt, RecoveryResetToken, User
+from app.services.recovery_service import RecoveryService
 
 
 async def _setup_db(tmp_path):

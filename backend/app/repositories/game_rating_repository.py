@@ -8,8 +8,8 @@ from uuid import UUID
 
 from sqlmodel import select
 
-from backend.app.db.database import async_session
-from backend.app.db.models import GameRating
+from app.db.database import async_session
+from app.db.models import GameRating
 from .base import BaseRepository
 
 
