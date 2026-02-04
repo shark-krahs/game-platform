@@ -11,3 +11,5 @@ bcrypt == 4.3.0
 python-jose[cryptography]
 aiosqlite
 glicko2
+pytest
+pytest-asyncio

@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import { User, Player } from '../types';
+import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Player, User } from "../types";
 
 interface CellPosition {
   x: number;
@@ -18,7 +18,7 @@ interface UseGameLogicReturn extends GameSelection {
     x: number,
     y: number,
     board: (number | null)[][],
-    status: string
+    status: string,
   ) => void;
   handleQuadrantSelect: (quadrant: number) => void;
   handleDirectionSelect: (direction: string) => void;
@@ -29,30 +29,37 @@ interface UseGameLogicReturn extends GameSelection {
   getQuadrantName: (quadrant: number) => string;
   getQuadrantColor: (quadrant: number) => string;
   formatTime: (seconds: number) => string;
-  getPlayers: (players: Player[]) => { me: Player | null; opponent: Player | null };
+  getPlayers: (players: Player[]) => {
+    me: Player | null;
+    opponent: Player | null;
+  };
   isResetPending: (resetVotes: (number | string)[]) => boolean;
 }
 
 export function useGameLogic(
   sendMessage: (message: any) => void,
-  user: User | null
+  user: User | null,
 ): UseGameLogicReturn {
-  const { t } = useTranslation('gameClient');
+  const { t } = useTranslation("gameClient");
 
   const [selectedCell, setSelectedCell] = useState<CellPosition | null>(null);
   const [selectedQuadrant, setSelectedQuadrant] = useState<number | null>(null);
-  const [selectedDirection, setSelectedDirection] = useState<string | null>(null);
+  const [selectedDirection, setSelectedDirection] = useState<string | null>(
+    null,
+  );
 
   const handleCell = useCallback(
     (x: number, y: number, board: (number | null)[][], status: string) => {
       if (
         !board[y]![x] &&
-        (status === 'playing' || status === 'first_move' || status === 'disconnect_wait')
+        (status === "playing" ||
+          status === "first_move" ||
+          status === "disconnect_wait")
       ) {
         setSelectedCell({ x, y });
       }
     },
-    []
+    [],
   );
 
   const handleQuadrantSelect = useCallback((quadrant: number) => {
@@ -73,7 +80,7 @@ export function useGameLogic(
     }
 
     sendMessage({
-      type: 'move',
+      type: "move",
       x: selectedCell.x,
       y: selectedCell.y,
       quadrant: selectedQuadrant,
@@ -93,26 +100,26 @@ export function useGameLogic(
   }, []);
 
   const resetGame = useCallback(() => {
-    sendMessage({ type: 'reset' });
+    sendMessage({ type: "reset" });
   }, [sendMessage]);
 
   const getQuadrantName = useCallback(
     (quadrant: number): string => {
-      const names = ['Red', 'Blue', 'Green', 'Yellow'];
-      return `${names[quadrant] || 'Unknown'} ${t('quadrant')}`;
+      const names = ["Red", "Blue", "Green", "Yellow"];
+      return `${names[quadrant] || "Unknown"} ${t("quadrant")}`;
     },
-    [t]
+    [t],
   );
 
   const getQuadrantColor = useCallback((quadrant: number): string => {
-    const colors = ['#dd1414', '#1414dd', '#14dd14', '#dddd14'];
-    return colors[quadrant] || '#888888';
+    const colors = ["#dd1414", "#1414dd", "#14dd14", "#dddd14"];
+    return colors[quadrant] || "#888888";
   }, []);
 
   const formatTime = useCallback((seconds: number): string => {
     const min = Math.floor(seconds / 60);
     const sec = Math.floor(seconds % 60);
-    return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+    return `${min.toString().padStart(2, "0")}:${sec.toString().padStart(2, "0")}`;
   }, []);
 
   const getPlayers = useCallback(
@@ -126,7 +133,7 @@ export function useGameLogic(
 
       return { me, opponent };
     },
-    [user?.username]
+    [user?.username],
   );
 
   const isResetPending = useCallback(
@@ -135,7 +142,7 @@ export function useGameLogic(
       const myUserId = user.id.toString();
       return resetVotes.includes(myUserId);
     },
-    [user?.id]
+    [user?.id],
   );
 
   return {

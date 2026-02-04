@@ -2,8 +2,7 @@
  * Styled components for MoveForm
  */
 
-import styled from 'styled-components';
-import { Theme } from '../../types'; // Твой тип Theme
+import styled from "styled-components";
 
 // Пропсы для компонентов
 interface QuadrantButtonProps {
@@ -35,6 +34,7 @@ export const FormTitle = styled.h4`
 
 export const QuadrantButtonsContainer = styled.div`
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 16px;
 `;
@@ -47,7 +47,7 @@ export const QuadrantButton = styled.button<QuadrantButtonProps>`
         ? props.theme.colors.black
         : props.theme.colors.quadrant[props.quadrant]};
   background-color: ${(props) =>
-    props.selected ? '#e6f7ff' : props.theme.colors.white};
+    props.selected ? "#e6f7ff" : props.theme.colors.white};
   color: ${(props) =>
     props.selected
       ? props.theme.colors.black
@@ -55,14 +55,20 @@ export const QuadrantButton = styled.button<QuadrantButtonProps>`
   font-weight: bold;
   cursor: pointer;
   border-radius: 4px;
+  min-width: 64px;
 
   &:hover {
     opacity: 0.8;
+  }
+
+  @media (max-width: ${(props) => props.theme.breakpoints.tablet}) {
+    flex: 1 1 calc(50% - 8px);
   }
 `;
 
 export const DirectionButtonsContainer = styled.div`
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 16px;
 `;
@@ -75,17 +81,22 @@ export const DirectionButton = styled.button<DirectionButtonProps>`
         ? props.theme.colors.status.success
         : props.theme.colors.border};
   background-color: ${(props) =>
-    props.selected ? '#f6ffed' : props.theme.colors.white};
+    props.selected ? "#f6ffed" : props.theme.colors.white};
   cursor: pointer;
   border-radius: 4px;
 
   &:hover {
     opacity: 0.8;
   }
+
+  @media (max-width: ${(props) => props.theme.breakpoints.tablet}) {
+    flex: 1 1 calc(50% - 8px);
+  }
 `;
 
 export const ActionButtonsContainer = styled.div`
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 `;
 
@@ -94,7 +105,7 @@ export const ConfirmButton = styled.button<ConfirmButtonProps>`
   background-color: ${(props) => props.theme.colors.status.info};
   color: ${(props) => props.theme.colors.white};
   border: none;
-  cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
   opacity: ${(props) => (props.disabled ? 0.5 : 1)};
   border-radius: 4px;
 

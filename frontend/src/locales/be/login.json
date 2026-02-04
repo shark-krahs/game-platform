@@ -1,0 +1,8 @@
+{
+  "login": "Увайсці",
+  "username": "Імя карыстальніка",
+  "password": "Пароль",
+  "usernameRequired": "Імя карыстальніка абавязкова",
+  "passwordRequired": "Пароль абавязковы",
+  "loginFailed": "Не ўдалося ўвайсці"
+}

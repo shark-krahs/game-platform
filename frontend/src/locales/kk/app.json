@@ -1,0 +1,101 @@
+{
+  "gamePlatform": "Ойын платформасы",
+  "welcome": "Қош келдіңіз",
+  "anonymous": "Аноним",
+  "loginOrRegister": "Кіру немесе тіркелу",
+  "profile": "Профиль",
+  "game": "Ойын",
+  "lobby": "Лобби",
+  "logout": "Шығу",
+  "darkMode": "Қараңғы тақырып",
+  "lightMode": "Жарық тақырып",
+  "menu": "Мәзір",
+  "loading": "Жүктелуде...",
+  "footer": "Ойын платформасы ©{{year}}",
+  "networkError": "Желі қатесі. Байланысты тексеріңіз.",
+  "errorBoundary": {
+    "title": "Ой! Бірдеңе дұрыс болмады",
+    "subtitle": "Қолайсыздық үшін кешірім сұраймыз. Қайта көріңіз немесе басты бетке оралыңыз.",
+    "retry": "Қайта көру",
+    "goHome": "Басты бетке"
+  },
+  "auth": {
+    "username_taken": "Пайдаланушы аты бұрын тіркелген.",
+    "invalid_credentials": "Пайдаланушы аты немесе құпиясөз қате.",
+    "old_password_required": "Құпиясөзді өзгерту үшін ескі құпиясөз қажет.",
+    "old_password_incorrect": "Ескі құпиясөз қате.",
+    "invalid_token": "Жарамсыз токен.",
+    "token_expired": "Токеннің мерзімі аяқталды.",
+    "user_not_found": "Пайдаланушы табылмады.",
+    "recovery_setup_required": "Алдымен қалпына келтіру кодтарын сақтаңыз."
+  },
+  "games": {
+    "auth_required": "Аутентификация қажет.",
+    "invalid_token": "Жарамсыз токен.",
+    "invalid_json": "Деректер пішімі қате.",
+    "not_playing_state": "Ойын қазір жүріс жасауға дайын емес.",
+    "player_not_found": "Ойыншы бұл ойында табылмады.",
+    "invalid_move": "Қате жүріс.",
+    "unknown_action": "Белгісіз әрекет.",
+    "game_id_required": "Ойын идентификаторы қажет.",
+    "game_not_found": "Ойын табылмады.",
+    "not_a_player": "Сіз бұл ойында ойыншы емессіз.",
+    "invalid_game_id": "Ойын идентификаторының пішімі қате.",
+    "saved_game_not_found": "Сақталған ойын табылмады.",
+    "saved_game_access_denied": "Бұл сақталған ойынға қолжетімділік жоқ."
+  },
+  "admin": {
+    "title": "Әкімші панелі",
+    "null": "null",
+    "login": {
+      "subtitle": "ДҚ суперпайдаланушысының логині мен құпиясөзін енгізіңіз. Сессия тек жадта сақталады.",
+      "username": "Логин",
+      "password": "Құпиясөз",
+      "enterUsername": "Логин енгізіңіз",
+      "signIn": "Кіру"
+    },
+    "tables": {
+      "select": "Кестені таңдаңыз",
+      "refreshTables": "Кестелерді жаңарту",
+      "refreshRows": "Жолдарды жаңарту",
+      "createRow": "Жазба құру",
+      "logOut": "Шығу",
+      "singlePkWarning": "Өңдеу тек бір негізгі кілт бағаны бар кестелер үшін қолжетімді."
+    },
+    "actions": {
+      "title": "Әрекеттер",
+      "edit": "Өңдеу",
+      "delete": "Жою",
+      "deleteConfirm": "Жазбаны жою керек пе?"
+    },
+    "sql": {
+      "title": "SQL консоль",
+      "subtitle": "Тек оқу (SELECT / WITH / EXPLAIN). LIMIT көрсетілмесе, ол қосылады.",
+      "placeholder": "SELECT * FROM user LIMIT 50",
+      "run": "Орындау",
+      "clear": "Тазалау",
+      "executed": "Орындалған сұрау",
+      "enterQuery": "SQL сұрауын енгізіңіз"
+    },
+    "modal": {
+      "createTitle": "Жазба құру",
+      "editTitle": "Жазбаны өңдеу",
+      "createOk": "Құру",
+      "saveOk": "Сақтау"
+    },
+    "messages": {
+      "accessGranted": "Әкімші панеліне қол жеткізілді",
+      "rowCreated": "Жазба құрылды",
+      "rowUpdated": "Жазба жаңартылды",
+      "rowDeleted": "Жазба жойылды"
+    },
+    "fields": {
+      "default": "Әдепкі: {{value}}"
+    },
+    "validation": {
+      "required": "Міндетті",
+      "invalidJson": "Жарамсыз JSON",
+      "invalidJsonField": "{{field}} өрісінде жарамсыз JSON"
+    }
+  }
+}

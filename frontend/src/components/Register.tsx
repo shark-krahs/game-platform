@@ -1,9 +1,9 @@
-import React from 'react';
-import { Form, Input, Button, Alert, type FormProps } from 'antd';
-import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import { useAuth } from '../AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import React, { useState } from "react";
+import { Alert, Button, Form, type FormProps, Input } from "antd";
+import { LockOutlined, UserOutlined } from "@ant-design/icons";
+import { useAuth } from "../AuthContext";
+import { useTranslation } from "react-i18next";
+import RecoveryCodesModal from "./RecoveryCodesModal";
 
 type RegisterFormValues = {
   username: string;
@@ -12,18 +12,45 @@ type RegisterFormValues = {
 };
 
 const Register: React.FC = () => {
-  const { register, loading, error } = useAuth();
-  const navigate = useNavigate();
-  const { t } = useTranslation('register');
+  const { register, confirmRecoverySetup, loading, error } = useAuth();
+  const { t, i18n } = useTranslation("register");
+  const [localMessage, setLocalMessage] = useState<string>("");
+  const [localMessageType, setLocalMessageType] = useState<"success" | "info">(
+    "info",
+  );
+  const [codes, setCodes] = useState<string[]>([]);
+  const [setupToken, setSetupToken] = useState<string>("");
+  const [showRecoveryModal, setShowRecoveryModal] = useState<boolean>(false);
 
-  const onFinish: FormProps<RegisterFormValues>['onFinish'] = async (values) => {
+  const showCodes = codes.length > 0;
+
+  const onFinish: FormProps<RegisterFormValues>["onFinish"] = async (
+    values,
+  ) => {
     try {
-      await register(values.username, values.password);
-      // Если register не бросил ошибку — регистрация успешна
-      navigate('/lobby'); // или '/game' — как у тебя принято после регистрации
+      const response = await register(
+        values.username,
+        values.password,
+        i18n.resolvedLanguage || i18n.language || "en",
+      );
+      setLocalMessage(t("registerSuccess" as any));
+      setLocalMessageType("success");
+      setCodes(response.recovery_codes || []);
+      setSetupToken(response.recovery_setup_token || "");
+      setShowRecoveryModal(true);
     } catch (err) {
       // Ошибка уже отображена через error из контекста
-      console.error('Registration failed:', err);
+      console.error("Registration failed:", err);
+    }
+  };
+
+  const handleConfirmSaved = async () => {
+    if (!setupToken) return;
+    try {
+      await confirmRecoverySetup(setupToken);
+      setShowRecoveryModal(false);
+    } catch (err) {
+      console.error("Confirm setup failed:", err);
     }
   };
 
@@ -33,18 +60,18 @@ const Register: React.FC = () => {
       layout="vertical"
       onFinish={onFinish}
       size="large"
-      style={{ maxWidth: 300, margin: '0 auto' }}
+      style={{ maxWidth: 300, margin: "0 auto" }}
     >
       <Form.Item<RegisterFormValues>
         name="username"
         rules={[
-          { required: true, message: t('usernameRequired') },
-          { min: 3, message: t('usernameMinLength') },
+          { required: true, message: t("usernameRequired") },
+          { min: 3, message: t("usernameMinLength") },
         ]}
       >
         <Input
           prefix={<UserOutlined />}
-          placeholder={t('username')}
+          placeholder={t("username")}
           autoComplete="username"
         />
       </Form.Item>
@@ -52,35 +79,35 @@ const Register: React.FC = () => {
       <Form.Item<RegisterFormValues>
         name="password"
         rules={[
-          { required: true, message: t('passwordRequired') },
-          { min: 6, message: t('passwordMinLength') },
+          { required: true, message: t("passwordRequired") },
+          { min: 6, message: t("passwordMinLength") },
         ]}
       >
         <Input.Password
           prefix={<LockOutlined />}
-          placeholder={t('password')}
+          placeholder={t("password")}
           autoComplete="new-password"
         />
       </Form.Item>
 
       <Form.Item<RegisterFormValues>
         name="confirmPassword"
-        dependencies={['password']}
+        dependencies={["password"]}
         rules={[
-          { required: true, message: t('confirmPasswordRequired') },
+          { required: true, message: t("confirmPasswordRequired") },
           ({ getFieldValue }) => ({
             validator(_, value) {
-              if (!value || getFieldValue('password') === value) {
+              if (!value || getFieldValue("password") === value) {
                 return Promise.resolve();
               }
-              return Promise.reject(new Error(t('passwordsDoNotMatch')));
+              return Promise.reject(new Error(t("passwordsDoNotMatch")));
             },
           }),
         ]}
       >
         <Input.Password
           prefix={<LockOutlined />}
-          placeholder={t('confirmPassword')}
+          placeholder={t("confirmPassword")}
           autoComplete="new-password"
         />
       </Form.Item>
@@ -93,17 +120,29 @@ const Register: React.FC = () => {
           block
           size="large"
         >
-          {t('register')}
+          {t("register")}
         </Button>
       </Form.Item>
 
-      {error && (
+      {localMessage && (
         <Alert
-          title={error}
-          type="error"
+          type={localMessageType}
+          title={localMessage}
           showIcon
           style={{ marginTop: 16 }}
         />
+      )}
+
+      {showCodes && (
+        <RecoveryCodesModal
+          open={showRecoveryModal}
+          codes={codes}
+          onAcknowledge={handleConfirmSaved}
+        />
+      )}
+
+      {error && (
+        <Alert title={error} type="error" showIcon style={{ marginTop: 16 }} />
       )}
     </Form>
   );

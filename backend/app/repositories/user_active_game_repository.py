@@ -1,12 +1,13 @@
 """
 Repository for managing user active games.
 """
+
 import logging
 from typing import Optional
 from uuid import UUID
 
-from app.db.database import async_session
-from app.db.models import User
+from backend.app.db.database import async_session
+from backend.app.db.models import User
 
 logger = logging.getLogger(__name__)
 

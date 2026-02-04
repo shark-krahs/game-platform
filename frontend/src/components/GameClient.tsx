@@ -1,32 +1,55 @@
-import React, { useState, useEffect } from 'react';
-import { Location, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useAuth } from '../AuthContext';
-import { useTranslation } from 'react-i18next';
-import { useWebSocket } from '../hooks/useWebSocket';
-import { Row, Col, Button, message } from 'antd';
-import GameBoard from './game/GameBoard';
-import GameTimers from './game/GameTimers';
-import MessageLog from './MessageLog';
-import { getGameEngine } from '../games/registry';
+import React, { useEffect, useState } from "react";
 import {
-  TIMERS_PANEL_WIDTH,
-} from '../constants';
-import { GameState, Player, GameStatus, Move, Position } from '../types';
+  Location,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
+import { useAuth } from "../AuthContext";
+import { useTranslation } from "react-i18next";
+import { useWebSocket } from "../hooks/useWebSocket";
+import { Button, Col, Row } from "antd";
+import GameBoard from "./game/GameBoard";
+import GameTimers from "./game/GameTimers";
+import MessageLog from "./MessageLog";
+import { getGameEngine } from "../games/registry";
+import { GameState, GameStatus, Move, Player, Position } from "../types";
 
 const GameClient: React.FC = () => {
   const { user, token: authToken } = useAuth();
-  const { t } = useTranslation('gameClient');
+  const { t } = useTranslation("gameClient");
   const navigate = useNavigate();
   const location: Location = useLocation();
   const { gameId: urlGameId } = useParams<{ gameId: string }>();
 
   const [playerColor, setPlayerColor] = useState<string>(
-    user?.preferred_color || '#ff0000'
+    user?.preferred_color || "#ff0000",
   );
 
   // Получаем gameId из URL параметров (надежнее чем location.state)
-  const gameId = urlGameId || (location.state as { gameId?: string } | null)?.gameId;
-  const initialGameType = (location.state as { gameType?: string } | null)?.gameType || 'pentago';
+  const gameId =
+    urlGameId || (location.state as { gameId?: string } | null)?.gameId;
+  const initialGameType =
+    (location.state as { gameType?: string } | null)?.gameType || "pentago";
+  const storedAnon = gameId
+    ? sessionStorage.getItem(`anon_game_${gameId}`)
+    : null;
+  let parsedAnon: { anonId?: string; anonName?: string } | null = null;
+  if (storedAnon) {
+    try {
+      parsedAnon = JSON.parse(storedAnon);
+    } catch {
+      parsedAnon = null;
+    }
+  }
+  const anonId =
+    (location.state as { anonId?: string } | null)?.anonId ||
+    parsedAnon?.anonId ||
+    null;
+  const anonName =
+    (location.state as { anonName?: string } | null)?.anonName ||
+    parsedAnon?.anonName ||
+    null;
 
   // Хуки игры
   const {
@@ -45,17 +68,19 @@ const GameClient: React.FC = () => {
     disconnectTimer,
     disconnectedPlayer,
     messages,
+    chatMessages,
     error,
     sendMessage,
-  } = useWebSocket(gameId, authToken, user, navigate, location);
+  } = useWebSocket(gameId, authToken, anonId, anonName, user, navigate, location);
 
   // State for dynamic engine selection
-  const [currentGameType, setCurrentGameType] = useState<string>(initialGameType);
+  const [currentGameType, setCurrentGameType] =
+    useState<string>(initialGameType);
 
   // Update game type when received from WebSocket
   useEffect(() => {
     if (game_type && game_type !== currentGameType) {
-      console.log('Updating game type from WebSocket:', game_type);
+      console.log("Updating game type from WebSocket:", game_type);
       setCurrentGameType(game_type);
     }
   }, [game_type, currentGameType]);
@@ -66,13 +91,23 @@ const GameClient: React.FC = () => {
   // Game-specific state management
   const [selectedCell, setSelectedCell] = useState<Position | null>(null);
   const [selectedQuadrant, setSelectedQuadrant] = useState<number | null>(null);
-  const [selectedDirection, setSelectedDirection] = useState<'clockwise' | 'counterclockwise' | null>(null);
-
-
+  const [selectedDirection, setSelectedDirection] = useState<
+    "clockwise" | "counterclockwise" | null
+  >(null);
 
   // Handlers using engine
-  const handleCell = (x: number, y: number, board: (number | null)[][], status: string) => {
-    if (!board[y]?.[x] && (status === 'playing' || status === 'first_move' || status === 'disconnect_wait')) {
+  const handleCell = (
+    x: number,
+    y: number,
+    board: (number | null)[][],
+    status: string,
+  ) => {
+    if (
+      !board[y]?.[x] &&
+      (status === "playing" ||
+        status === "first_move" ||
+        status === "disconnect_wait")
+    ) {
       setSelectedCell({ x, y });
     }
   };
@@ -81,7 +116,9 @@ const GameClient: React.FC = () => {
     setSelectedQuadrant(quadrant);
   };
 
-  const handleDirectionSelect = (direction: 'clockwise' | 'counterclockwise') => {
+  const handleDirectionSelect = (
+    direction: "clockwise" | "counterclockwise",
+  ) => {
     setSelectedDirection(direction);
   };
 
@@ -93,7 +130,7 @@ const GameClient: React.FC = () => {
 
     if (move && engine.moveValidator(move, gameState)) {
       sendMessage({
-        type: 'move',
+        type: "move",
         ...move.data,
       });
       // Reset selection
@@ -110,49 +147,63 @@ const GameClient: React.FC = () => {
   };
 
   const resetGame = () => {
-    sendMessage({ type: 'reset' });
+    sendMessage({ type: "reset" });
   };
 
-
+  const sendChatMessage = (message: string) => {
+    sendMessage({ type: "chat", message });
+  };
 
   // Utility functions
   const getQuadrantName = (quadrant: number): string => {
-    const names = ['Red', 'Blue', 'Green', 'Yellow'];
-    return names[quadrant] || 'Unknown';
+    const names = [
+      t("quadrantRed"),
+      t("quadrantBlue"),
+      t("quadrantGreen"),
+      t("quadrantYellow"),
+    ];
+    return names[quadrant] || t("unknownQuadrant");
   };
 
   const formatTime = (seconds: number): string => {
     const min = Math.floor(seconds / 60);
     const sec = Math.floor(seconds % 60);
-    return `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+    return `${min.toString().padStart(2, "0")}:${sec.toString().padStart(2, "0")}`;
   };
 
-  const getPlayers = (players: Player[]): { me: Player | null; opponent: Player | null } => {
+  const getPlayers = (
+    players: Player[],
+  ): { me: Player | null; opponent: Player | null } => {
     if (!Array.isArray(players)) {
       return { me: null, opponent: null };
     }
 
-    const me = players.find((p) => p?.name === user?.username) || null;
-    const opponent = players.find((p) => p?.name !== user?.username) || null;
+    const displayName = user?.username || anonName || null;
+    const me = displayName
+      ? players.find((p) => p?.name === displayName) || null
+      : null;
+    const opponent = displayName
+      ? players.find((p) => p?.name !== displayName) || null
+      : players[1] || null;
 
     return { me, opponent };
   };
 
   const isResetPending = (resetVotes: (number | string)[]): boolean => {
-    if (!user?.id) return false;
-    const myUserId = user.id.toString();
+    const myUserId = user?.id?.toString() || anonId;
+    if (!myUserId) return false;
     return resetVotes.includes(myUserId);
   };
 
   // Обновляем цвет игрока, если пришёл из matchmaking
   useEffect(() => {
-    if ((location.state as { color?: 'white' | 'black' } | null)?.color) {
-      const colorMap: Record<'white' | 'black', string> = {
-        white: '#ffffff',
-        black: '#000000',
+    if ((location.state as { color?: "white" | "black" } | null)?.color) {
+      const colorMap: Record<"white" | "black", string> = {
+        white: "#ffffff",
+        black: "#000000",
       };
       const newColor =
-        colorMap[(location.state as { color: 'white' | 'black' }).color];
+        colorMap[(location.state as { color: "white" | "black" }).color];
       setPlayerColor(newColor);
     }
   }, [location.state]);
@@ -160,36 +211,52 @@ const GameClient: React.FC = () => {
   // Загрузка / ожидание подключения
   if (!connected) {
     if (board === null || !Array.isArray(players)) {
-      return <div>Loading...</div>;
+      return <div>{t("loading")}</div>;
     }
     return (
-      <div style={{ textAlign: 'center', padding: '50px' }}>
-        <h2>{t('waitingForOpponent')}</h2>
-        <p>{t('matchmakingFound')}</p>
+      <div style={{ textAlign: "center", padding: "50px" }}>
+        <h2>{t("waitingForOpponent")}</h2>
+        <p>{t("matchmakingFound")}</p>
       </div>
     );
   }
 
   // Защита от undefined (на случай задержки данных)
-  if (!Array.isArray(board) || !Array.isArray(players) || board.length === 0 || players.length === 0) {
-    console.log('Waiting for board data:', { board: board?.length, players: players?.length, connected, status });
-    return <div style={{ textAlign: 'center', padding: '50px' }}>Loading game data...</div>;
+  if (
+    !Array.isArray(board) ||
+    !Array.isArray(players) ||
+    board.length === 0 ||
+    players.length === 0
+  ) {
+    console.log("Waiting for board data:", {
+      board: board?.length,
+      players: players?.length,
+      connected,
+      status,
+    });
+    return (
+      <div style={{ textAlign: "center", padding: "50px" }}>
+        {t("loadingGameData")}
+      </div>
+    );
   }
 
   // Проверка доступности движка игры
   if (!engine) {
     return (
-      <div style={{ textAlign: 'center', padding: '50px' }}>
-        <h2>{t('gameNotSupported')}</h2>
-        <p>{t('gameType')}: {currentGameType}</p>
-        <p>{t('availableGames')}: pentago, tetris</p>
+      <div style={{ textAlign: "center", padding: "50px" }}>
+        <h2>{t("gameNotSupported")}</h2>
+        <p>
+          {t("gameType")}: {currentGameType}
+        </p>
+        <p>{t("availableGamesList", { games: "pentago, tetris" })}</p>
       </div>
     );
   }
 
   // Создаем gameState из данных WebSocket
   const gameState: GameState = {
-    id: gameId || '',
+    id: gameId || "",
     status: status as GameStatus,
     board: board,
     board_state: board_state,
@@ -201,7 +268,7 @@ const GameClient: React.FC = () => {
     game_type: game_type,
   };
 
-  console.log('GameClient state:', {
+  console.log("GameClient state:", {
     connected,
     board: board?.length,
     players: players?.length,
@@ -209,7 +276,7 @@ const GameClient: React.FC = () => {
     currentGameType,
     game_type_from_ws: game_type,
     engine: engine?.id,
-    boardComponent: engine?.boardComponent?.name
+    boardComponent: engine?.boardComponent?.name,
   });
 
   const resetPending = isResetPending(resetVotes);
@@ -221,9 +288,9 @@ const GameClient: React.FC = () => {
 
   const handleMoveSubmit = (move: Move) => {
     // Handle Tetris moves directly
-    if (move.type === 'tetris_move') {
+    if (move.type === "tetris_move") {
       sendMessage({
-        type: 'move',
+        type: "move",
         ...move.data,
       });
       return;
@@ -265,41 +332,50 @@ const GameClient: React.FC = () => {
             onQuadrantSelect={handleQuadrantSelect}
             onDirectionSelect={handleDirectionSelect}
             onMoveCancel={cancelMove}
+            viewerName={user?.username || anonName || undefined}
           />
 
           {/* Action buttons */}
-          <div style={{ marginTop: 8, display: 'flex', gap: '8px' }}>
+          <div style={{ marginTop: 8, display: "flex", gap: "8px" }}>
             <Button onClick={resetGame} disabled={resetPending}>
-              {resetPending ? 'Reset Requested' : 'Request Reset'}
+              {resetPending ? t("resetRequested") : t("requestReset")}
             </Button>
           </div>
 
           {/* Статус игры */}
-          <div style={{ marginTop: 12, fontSize: '1.1em' }}>
-            <b>{t('status')}:</b> {status}
+          <div style={{ marginTop: 12, fontSize: "1.1em" }}>
+            <b>{t("status")}:</b> {t(`status.${status}` as any)}
           </div>
 
-          {status === 'finished' && (
-            <div style={{ marginTop: 8, fontSize: '1.2em', fontWeight: 'bold' }}>
-              <b>{t('result')}:</b>{' '}
-              {winner
-                ? `${t('winner')}: ${winner}`
-                : t('draw')}
+          {status === "finished" && (
+            <div
+              style={{ marginTop: 8, fontSize: "1.2em", fontWeight: "bold" }}
+            >
+              <b>{t("result")}:</b>{" "}
+              {winner ? `${t("winner")}: ${winner}` : t("draw")}
             </div>
           )}
 
           <div style={{ marginTop: 8 }}>
-            <b>{t('turn')}:</b>{' '}
-            {status === 'playing' ? (players[turn]?.name || 'Unknown') : '—'}
+            <b>{t("turn")}:</b>{" "}
+            {status === "playing"
+              ? players[turn]?.name || t("unknownPlayer")
+              : t("status.notPlaying" as any)}
           </div>
 
           {error && (
-            <div style={{ color: 'red', marginTop: 12 }}>
-              <b>{t('error')}:</b> {error}
+            <div style={{ color: "red", marginTop: 12 }}>
+              <b>{t("error")}:</b> {error}
             </div>
           )}
 
-          <MessageLog messages={messages} />
+          <MessageLog
+            messages={messages}
+            chatMessages={chatMessages}
+            onSendChat={sendChatMessage}
+            disabled={status === "finished"}
+            showSystemMessages={messages.length > 0}
+          />
         </Col>
       </Row>
     </div>

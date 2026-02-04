@@ -2,17 +2,10 @@
  * Custom Game Mode Selector component - allows custom time control configuration
  */
 
-import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import {
-  Button,
-  Typography,
-  Space,
-  InputNumber,
-} from 'antd';
-import {
-  ClockCircleOutlined,
-} from '@ant-design/icons';
+import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Button, InputNumber, Space, Typography } from "antd";
+import { ClockCircleOutlined } from "@ant-design/icons";
 
 interface CustomGameModeSelectorProps {
   gameType: string;
@@ -24,11 +17,7 @@ interface CustomGameModeSelectorProps {
   initialMax?: number;
   incrementMin?: number;
   incrementMax?: number;
-  onJoinQueue: (
-    gameType: string,
-    timeControl: string,
-    rated: boolean
-  ) => void;
+  onJoinQueue: (gameType: string, timeControl: string, rated: boolean) => void;
 }
 
 const CustomGameModeSelector: React.FC<CustomGameModeSelectorProps> = ({
@@ -43,7 +32,7 @@ const CustomGameModeSelector: React.FC<CustomGameModeSelectorProps> = ({
   incrementMax = 300,
   onJoinQueue,
 }) => {
-  const { t } = useTranslation('lobby');
+  const { t } = useTranslation("lobby");
 
   const [initial, setInitial] = useState<number>(defaultInitial);
   const [increment, setIncrement] = useState<number>(defaultIncrement);
@@ -57,7 +46,7 @@ const CustomGameModeSelector: React.FC<CustomGameModeSelectorProps> = ({
     } else if (showIncrement) {
       timeControl = `0+${increment}`;
     } else {
-      timeControl = '0+0'; // fallback
+      timeControl = "0+0"; // fallback
     }
     onJoinQueue(gameType, timeControl, true);
   };
@@ -66,7 +55,7 @@ const CustomGameModeSelector: React.FC<CustomGameModeSelectorProps> = ({
     <Space className="custom-game-mode" wrap>
       {showInitial && (
         <div>
-          <Typography.Text>{t('initialMin')}</Typography.Text>
+          <Typography.Text>{t("initialMin")}</Typography.Text>
           <InputNumber
             min={initialMin}
             max={initialMax}
@@ -77,7 +66,7 @@ const CustomGameModeSelector: React.FC<CustomGameModeSelectorProps> = ({
       )}
       {showIncrement && (
         <div>
-          <Typography.Text>{t('incrementSec')}</Typography.Text>
+          <Typography.Text>{t("incrementSec")}</Typography.Text>
           <InputNumber
             min={incrementMin}
             max={incrementMax}
@@ -91,7 +80,7 @@ const CustomGameModeSelector: React.FC<CustomGameModeSelectorProps> = ({
         onClick={handleJoin}
         className="custom-game-mode__join"
       >
-        <ClockCircleOutlined /> {t('joinCustomRated')}
+        <ClockCircleOutlined /> {t("joinCustomRated")}
       </Button>
     </Space>
   );

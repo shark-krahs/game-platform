@@ -1,11 +1,14 @@
 """
 User repository for database operations related to users.
 """
+
 from typing import Optional
-from sqlmodel import select
+
 from sqlalchemy.orm import selectinload
-from app.db.database import async_session
-from app.db.models import User
+from sqlmodel import select
+
+from backend.app.db.database import async_session
+from backend.app.db.models import User
 from .base import BaseRepository
 
 
@@ -19,19 +22,22 @@ class UserRepository(BaseRepository[User]):
         """Get user by username with game ratings loaded."""
         async with async_session() as session:
             result = await session.exec(
-                select(User).options(selectinload(User.game_ratings)).where(User.username == username)
+                select(User)
+                .options(selectinload(User.game_ratings))
+                .where(User.username == username)
             )
             return result.one_or_none()
 
     async def get_by_username_without_ratings(self, username: str) -> Optional[User]:
         """Get user by username without loading game ratings."""
         async with async_session() as session:
-            result = await session.exec(
-                select(User).where(User.username == username)
-            )
+            result = await session.exec(select(User).where(User.username == username))
             return result.one_or_none()
 
-    async def authenticate_user(self, username: str, password_hash: str) -> Optional[User]:
+
+    async def authenticate_user(
+        self, username: str, password_hash: str
+    ) -> Optional[User]:
         """Authenticate user by username and password hash."""
         user = await self.get_by_username(username)
         if not user or not user.password_hash:
@@ -40,9 +46,16 @@ class UserRepository(BaseRepository[User]):
             return None
         return user
 
-    async def create_user(self, username: str, password_hash: str) -> User:
+    async def create_user(
+        self,
+        username: str,
+        password_hash: str,
+        language: Optional[str] = None,
+    ) -> User:
         """Create new user."""
         user = User(username=username, password_hash=password_hash)
+        if language:
+            user.language = language
         return await self.create(user)
 
     async def update_user_profile(self, user: User, **updates) -> User:

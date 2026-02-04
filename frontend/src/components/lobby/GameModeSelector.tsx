@@ -2,31 +2,25 @@
  * Game Mode Selector component - flexible component for game mode selection
  */
 
-import React from 'react';
-import {
-  Button,
-} from 'antd';
+import React from "react";
+import { Button } from "antd";
 import {
   ClockCircleOutlined,
-  TrophyOutlined,
+  CrownOutlined,
   FireOutlined,
   PlayCircleOutlined,
-  CrownOutlined,
-} from '@ant-design/icons';
+  TrophyOutlined,
+} from "@ant-design/icons";
 
 interface GameModeSelectorProps {
   label: string;
-  iconStr?: 'play' | 'fire' | 'clock' | 'trophy' | 'crown';
+  iconStr?: "play" | "fire" | "clock" | "trophy" | "crown";
   gameType: string;
   initial: number;
   increment: number;
   rated: boolean;
   icon?: React.ReactNode;
-  onJoinQueue: (
-    gameType: string,
-    timeControl: string,
-    rated: boolean
-  ) => void;
+  onJoinQueue: (gameType: string, timeControl: string, rated: boolean) => void;
 }
 
 const GameModeSelector: React.FC<GameModeSelectorProps> = ({
@@ -44,14 +38,14 @@ const GameModeSelector: React.FC<GameModeSelectorProps> = ({
     onJoinQueue(gameType, timeControl, rated);
   };
 
-  const getIcon = (label?: 'play' | 'fire' | 'clock' | 'trophy' | 'crown') => {
+  const getIcon = (label?: "play" | "fire" | "clock" | "trophy" | "crown") => {
     if (icon || label === undefined) return icon;
 
     // Auto-select icon based on time control
-    if (label === 'play') return <PlayCircleOutlined />;
-    if (label === 'fire') return <FireOutlined />;
-    if (label === 'clock') return <ClockCircleOutlined />;
-    if (label === 'trophy') return <TrophyOutlined />;
+    if (label === "play") return <PlayCircleOutlined />;
+    if (label === "fire") return <FireOutlined />;
+    if (label === "clock") return <ClockCircleOutlined />;
+    if (label === "trophy") return <TrophyOutlined />;
     return <CrownOutlined />;
   };
 

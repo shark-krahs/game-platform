@@ -1,11 +1,14 @@
 from datetime import datetime, timedelta
 from typing import Optional
+
 import bcrypt
+
 bcrypt.__about__ = bcrypt
+
 from passlib.context import CryptContext
 from jose import jwt
 
-from app.core.config import settings
+from backend.app.core.config import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -21,9 +24,11 @@ def get_password_hash(password: str) -> str:
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+        expire = datetime.now() + timedelta(minutes=15)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+    encoded_jwt = jwt.encode(
+        to_encode, settings.jwt_secret, algorithm=settings.jwt_algorithm
+    )
     return encoded_jwt

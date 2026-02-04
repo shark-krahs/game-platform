@@ -1,8 +1,8 @@
 {
-    "login": "Войти",
-    "username": "Имя пользователя",
-    "password": "Пароль",
-    "loggingIn": "Вход...",
-    "usernameRequired": "Требуется имя пользователя",
-    "passwordRequired": "Требуется пароль"
+  "login": "Войти",
+  "username": "Имя пользователя",
+  "password": "Пароль",
+  "usernameRequired": "Имя пользователя обязательно",
+  "passwordRequired": "Пароль обязателен",
+  "loginFailed": "Не удалось войти"
 }

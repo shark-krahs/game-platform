@@ -1,21 +1,67 @@
-from sqlmodel import SQLModel, Field, Relationship
-from typing import Optional, List
-from datetime import datetime
-from uuid import UUID, uuid4
 import json
+from datetime import datetime
+from typing import Optional, List
+from uuid import UUID, uuid4
+
+from sqlmodel import SQLModel, Field, Relationship
+from sqlalchemy import Index
 
 
 class User(SQLModel, table=True):
     id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
     username: str
     password_hash: Optional[str] = None
+    recovery_codes_generated_at: Optional[datetime] = None
+    recovery_codes_viewed_at: Optional[datetime] = None
+    recovery_last_used_at: Optional[datetime] = None
+    recovery_lock_until: Optional[datetime] = None
+    recovery_failed_attempts: int = 0
+    recovery_last_attempt_at: Optional[datetime] = None
     stars: int = 0
-    preferred_color: str = '#4287f5'
-    language: str = 'en'
+    preferred_color: str = "#4287f5"
+    language: str = "en"
     active_game_id: Optional[str] = None  # ID of currently active game
     # Relationship to game ratings
     game_ratings: List["GameRating"] = Relationship(back_populates="user")
     saved_games: List["SavedGame"] = Relationship(back_populates="user")
+
+
+class RecoveryCode(SQLModel, table=True):
+    __table_args__ = (
+        Index("ix_recovery_codes_user_batch", "user_id", "batch_id"),
+        Index("ix_recovery_codes_user_used", "user_id", "used_at"),
+    )
+
+    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    user_id: UUID = Field(foreign_key="user.id", index=True)
+    batch_id: UUID = Field(index=True)
+    code_hash: str
+    used_at: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
+
+
+class RecoveryIPAttempt(SQLModel, table=True):
+    __table_args__ = (Index("ix_recovery_ip_attempts_ip_time", "ip", "attempted_at"),)
+
+    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    ip: str = Field(index=True)
+    attempted_at: datetime = Field(default_factory=datetime.utcnow, index=True)
+    username_hint: Optional[str] = None
+    success: bool = False
+    attempt_count: int = 0
+    lock_until: Optional[datetime] = None
+    last_attempt_at: Optional[datetime] = None
+
+
+class RecoveryResetToken(SQLModel, table=True):
+    __table_args__ = (Index("ix_recovery_reset_tokens_jti", "jti"),)
+
+    id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
+    user_id: UUID = Field(foreign_key="user.id", index=True)
+    jti: str
+    created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
+    expires_at: datetime
+    used_at: Optional[datetime] = None
 
 
 class Game(SQLModel, table=True):
@@ -39,6 +85,7 @@ class GameRating(SQLModel, table=True):
 
 class SavedGame(SQLModel, table=True):
     """Model for saving game states for later analysis or continuation."""
+
     id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
     user_id: UUID = Field(foreign_key="user.id")
     game_id: str  # Original game ID
@@ -52,6 +99,7 @@ class SavedGame(SQLModel, table=True):
     time_remaining: str  # JSON string of time remaining dict
     winner: Optional[int] = None
     moves_history: str  # JSON string of moves history
+    chat_history: Optional[str] = None  # JSON string of chat messages
     time_control: str  # JSON string of time control
     rated: bool = False
     created_at: datetime = Field(default_factory=datetime.now)
@@ -85,6 +133,12 @@ class SavedGame(SQLModel, table=True):
     def get_moves_history(self) -> list:
         return json.loads(self.moves_history) if self.moves_history else []
 
+    def set_chat_history(self, chat_history: list):
+        self.chat_history = json.dumps(chat_history)
+
+    def get_chat_history(self) -> list:
+        return json.loads(self.chat_history) if self.chat_history else []
+
     def set_time_control(self, time_control: dict):
         self.time_control = json.dumps(time_control)
 
@@ -94,12 +148,16 @@ class SavedGame(SQLModel, table=True):
 
 class GameHistory(SQLModel, table=True):
     """Model for storing individual moves for game analysis."""
+
     id: Optional[UUID] = Field(default_factory=uuid4, primary_key=True)
     saved_game_id: UUID = Field(foreign_key="savedgame.id")
     move_number: int
     player_id: int
     move_data: str  # JSON string of move data
     board_state_after: str  # JSON string of board state after move
+    time_remaining_after: Optional[str] = (
+        None  # JSON string of time remaining after move
+    )
     timestamp: datetime
     time_spent: float  # Time spent on this move in seconds
     # Back relationship to saved game

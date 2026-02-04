@@ -2,9 +2,9 @@
 Base classes and interfaces for game implementations.
 """
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Dict, Any, List, Optional, Tuple
 
 
 @dataclass
@@ -49,6 +49,7 @@ class GameState:
     time_remaining: Dict[int, float]
     winner: Optional[int]
     moves_history: List[GameMove]
+    chat_history: List[Dict[str, Any]]
     created_at: datetime
     config: GameConfig
     time_control: TimeControl

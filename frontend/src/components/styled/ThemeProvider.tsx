@@ -2,12 +2,12 @@
  * Theme Provider for styled-components
  */
 
-import React, { useMemo } from 'react';
-import { ThemeProvider as StyledThemeProvider } from 'styled-components';
-import { createTheme } from '../../theme';
-import { useTheme } from '../../hooks/useTheme';
+import React, { useMemo } from "react";
+import { ThemeProvider as StyledThemeProvider } from "styled-components";
+import { createTheme } from "../../theme";
+import { useTheme } from "../../hooks/useTheme";
 
-import { Theme } from '../../types'; // Твой тип Theme из src/types/index.ts
+import { Theme } from "../../types"; // Твой тип Theme из src/types/index.ts
 
 // Создаём контекст для темы (можно использовать и напрямую styled-components, но контекст полезен для хуков)
 export const ThemeContext = React.createContext<Theme | undefined>(undefined);
@@ -24,9 +24,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
   return (
     <ThemeContext.Provider value={dynamicTheme}>
-      <StyledThemeProvider theme={dynamicTheme}>
-        {children}
-      </StyledThemeProvider>
+      <StyledThemeProvider theme={dynamicTheme}>{children}</StyledThemeProvider>
     </ThemeContext.Provider>
   );
 };

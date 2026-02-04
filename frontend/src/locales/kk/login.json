@@ -1,0 +1,8 @@
+{
+  "login": "Кіру",
+  "username": "Пайдаланушы аты",
+  "password": "Құпиясөз",
+  "usernameRequired": "Пайдаланушы аты қажет",
+  "passwordRequired": "Құпиясөз қажет",
+  "loginFailed": "Кіру мүмкін болмады"
+}

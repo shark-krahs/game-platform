@@ -1,0 +1,101 @@
+{
+  "gamePlatform": "Гульнявая платформа",
+  "welcome": "Сардэчна запрашаем",
+  "anonymous": "Ананім",
+  "loginOrRegister": "Увайсці або зарэгістравацца",
+  "profile": "Профіль",
+  "game": "Гульня",
+  "lobby": "Лобі",
+  "logout": "Выйсці",
+  "darkMode": "Цёмная тэма",
+  "lightMode": "Светлая тэма",
+  "menu": "Меню",
+  "loading": "Загрузка...",
+  "footer": "Гульнявая платформа ©{{year}}",
+  "networkError": "Сеткавая памылка. Праверце падключэнне.",
+  "errorBoundary": {
+    "title": "Ой! Нешта пайшло не так",
+    "subtitle": "Прабачце за нязручнасці. Паспрабуйце яшчэ раз або вярніцеся на галоўную.",
+    "retry": "Паспрабаваць яшчэ раз",
+    "goHome": "На галоўную"
+  },
+  "auth": {
+    "username_taken": "Імя карыстальніка ўжо зарэгістравана.",
+    "invalid_credentials": "Няправільнае імя карыстальніка або пароль.",
+    "old_password_required": "Для змены пароля патрэбны стары пароль.",
+    "old_password_incorrect": "Стары пароль няправільны.",
+    "invalid_token": "Няправільны токен.",
+    "token_expired": "Тэрмін дзеяння токена скончыўся.",
+    "user_not_found": "Карыстальнік не знойдзены.",
+    "recovery_setup_required": "Спачатку захавайце коды аднаўлення."
+  },
+  "games": {
+    "auth_required": "Патрэбна аўтэнтыфікацыя.",
+    "invalid_token": "Няправільны токен.",
+    "invalid_json": "Няправільны фармат дадзеных.",
+    "not_playing_state": "Гульня зараз не ў стане для ходу.",
+    "player_not_found": "Гулец не знойдзены ў гэтай гульні.",
+    "invalid_move": "Няправільны ход.",
+    "unknown_action": "Невядомае дзеянне.",
+    "game_id_required": "Патрэбны ідэнтыфікатар гульні.",
+    "game_not_found": "Гульня не знойдзена.",
+    "not_a_player": "Вы не з'яўляецеся гульцом у гэтай гульні.",
+    "invalid_game_id": "Няправільны фармат ідэнтыфікатара гульні.",
+    "saved_game_not_found": "Захаваная гульня не знойдзена.",
+    "saved_game_access_denied": "У вас няма доступу да гэтай захаванай гульні."
+  },
+  "admin": {
+    "title": "Панэль адміністратара",
+    "null": "null",
+    "login": {
+      "subtitle": "Увядзіце лагін і пароль суперкарыстальніка БД. Сесія захоўваецца толькі ў памяці.",
+      "username": "Лагін",
+      "password": "Пароль",
+      "enterUsername": "Увядзіце лагін",
+      "signIn": "Увайсці"
+    },
+    "tables": {
+      "select": "Выберыце табліцу",
+      "refreshTables": "Абнавіць табліцы",
+      "refreshRows": "Абнавіць радкі",
+      "createRow": "Стварыць запіс",
+      "logOut": "Выйсці",
+      "singlePkWarning": "Рэдагаванне даступна толькі для табліц з адным слупком першаснага ключа."
+    },
+    "actions": {
+      "title": "Дзеянні",
+      "edit": "Рэдагаваць",
+      "delete": "Выдаліць",
+      "deleteConfirm": "Выдаліць запіс?"
+    },
+    "sql": {
+      "title": "SQL кансоль",
+      "subtitle": "Толькі чытанне (SELECT / WITH / EXPLAIN). Калі LIMIT не ўказаны, ён будзе дададзены.",
+      "placeholder": "SELECT * FROM user LIMIT 50",
+      "run": "Выканаць",
+      "clear": "Ачысціць",
+      "executed": "Выкананы запыт",
+      "enterQuery": "Увядзіце SQL-запыт"
+    },
+    "modal": {
+      "createTitle": "Стварэнне запісу",
+      "editTitle": "Рэдагаванне запісу",
+      "createOk": "Стварыць",
+      "saveOk": "Захаваць"
+    },
+    "messages": {
+      "accessGranted": "Доступ да адмін-панэлі атрыманы",
+      "rowCreated": "Запіс створаны",
+      "rowUpdated": "Запіс абноўлены",
+      "rowDeleted": "Запіс выдалены"
+    },
+    "fields": {
+      "default": "Па змаўчанні: {{value}}"
+    },
+    "validation": {
+      "required": "Абавязкова",
+      "invalidJson": "Некарэктны JSON",
+      "invalidJsonField": "Некарэктны JSON у полі {{field}}"
+    }
+  }
+}

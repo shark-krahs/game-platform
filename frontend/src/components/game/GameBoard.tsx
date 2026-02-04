@@ -1,9 +1,9 @@
-import React from 'react';
-import { GameBoardProps, GameEngine, MoveFormProps } from '../../types';
+import React from "react";
+import { GameBoardProps, GameEngine } from "../../types";
 
-interface GameBoardPropsInternal extends Omit<GameBoardProps, 'onMoveSubmit'> {
+interface GameBoardPropsInternal extends Omit<GameBoardProps, "onMoveSubmit"> {
   engine: GameEngine;
-  onMoveSubmit?: GameBoardProps['onMoveSubmit'];
+  onMoveSubmit?: GameBoardProps["onMoveSubmit"];
 }
 
 const GameBoard: React.FC<GameBoardPropsInternal> = ({
@@ -18,16 +18,17 @@ const GameBoard: React.FC<GameBoardPropsInternal> = ({
   onDirectionSelect,
   onMoveCancel,
   readOnly = false,
+  viewerName,
 }) => {
   const BoardComponent = engine.boardComponent;
   const MoveFormComponent = engine.moveFormComponent;
 
-  console.log('GameBoard rendering:', {
+  console.log("GameBoard rendering:", {
     engineId: engine.id,
     boardComponent: BoardComponent.name,
     gameType: gameState.game_type,
     boardLength: gameState.board?.length,
-    boardStateKeys: Object.keys(gameState.board_state || {})
+    boardStateKeys: Object.keys(gameState.board_state || {}),
   });
 
   const selectedData = { selectedCell, selectedQuadrant, selectedDirection };
@@ -38,7 +39,11 @@ const GameBoard: React.FC<GameBoardPropsInternal> = ({
     onMoveCancel,
   };
 
-  const moveFormProps = engine.getMoveFormProps(gameState, selectedData, handlers);
+  const moveFormProps = engine.getMoveFormProps(
+    gameState,
+    selectedData,
+    handlers,
+  );
 
   return (
     <div>
@@ -53,6 +58,7 @@ const GameBoard: React.FC<GameBoardPropsInternal> = ({
         onDirectionSelect={onDirectionSelect}
         onMoveCancel={onMoveCancel}
         readOnly={readOnly}
+        viewerName={viewerName}
       />
 
       {!readOnly && MoveFormComponent && selectedCell && (

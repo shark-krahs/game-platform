@@ -1,13 +1,101 @@
 {
-    "gamePlatform": "Игровая Платформа",
-    "welcome": "Добро пожаловать",
-    "anonymous": "Аноним",
-    "loginOrRegister": "Войти или зарегистрироваться",
-    "profile": "Профиль",
-    "game": "Игра",
-    "lobby": "Лобби",
-    "logout": "Выйти",
-    "darkMode": "Темная тема",
-    "lightMode": "Светлая тема",
-    "menu": "Меню"
+  "gamePlatform": "Игровая Платформа",
+  "welcome": "Добро пожаловать",
+  "anonymous": "Аноним",
+  "loginOrRegister": "Войти или зарегистрироваться",
+  "profile": "Профиль",
+  "game": "Игра",
+  "lobby": "Лобби",
+  "logout": "Выйти",
+  "darkMode": "Темная тема",
+  "lightMode": "Светлая тема",
+  "menu": "Меню",
+  "loading": "Загрузка...",
+  "footer": "Игровая платформа ©{{year}}",
+  "networkError": "Сетевая ошибка. Проверьте подключение.",
+  "errorBoundary": {
+    "title": "Упс! Что-то пошло не так",
+    "subtitle": "Извините за неудобства. Попробуйте еще раз или вернитесь на главную.",
+    "retry": "Попробовать снова",
+    "goHome": "На главную"
+  },
+  "auth": {
+    "username_taken": "Имя пользователя уже зарегистрировано.",
+    "invalid_credentials": "Неверное имя пользователя или пароль.",
+    "old_password_required": "Для смены пароля требуется старый пароль.",
+    "old_password_incorrect": "Старый пароль неверный.",
+    "invalid_token": "Неверный токен.",
+    "token_expired": "Срок действия токена истёк.",
+    "user_not_found": "Пользователь не найден.",
+    "recovery_setup_required": "Сначала сохраните recovery-коды."
+  },
+  "games": {
+    "auth_required": "Требуется аутентификация.",
+    "invalid_token": "Неверный токен.",
+    "invalid_json": "Неверный формат данных.",
+    "not_playing_state": "Игра сейчас не в состоянии для хода.",
+    "player_not_found": "Игрок не найден в этой игре.",
+    "invalid_move": "Недопустимый ход.",
+    "unknown_action": "Неизвестное действие.",
+    "game_id_required": "Требуется идентификатор игры.",
+    "game_not_found": "Игра не найдена.",
+    "not_a_player": "Вы не являетесь игроком в этой игре.",
+    "invalid_game_id": "Неверный формат идентификатора игры.",
+    "saved_game_not_found": "Сохраненная игра не найдена.",
+    "saved_game_access_denied": "У вас нет доступа к этой сохраненной игре."
+  },
+  "admin": {
+    "title": "Админ-панель",
+    "null": "null",
+    "login": {
+      "subtitle": "Введите логин и пароль суперпользователя БД. Сессия хранится только в памяти.",
+      "username": "Логин",
+      "password": "Пароль",
+      "enterUsername": "Введите логин",
+      "signIn": "Войти"
+    },
+    "tables": {
+      "select": "Выберите таблицу",
+      "refreshTables": "Обновить таблицы",
+      "refreshRows": "Обновить строки",
+      "createRow": "Создать запись",
+      "logOut": "Выйти",
+      "singlePkWarning": "Редактирование доступно только для таблиц с одним столбцом первичного ключа."
+    },
+    "actions": {
+      "title": "Действия",
+      "edit": "Редактировать",
+      "delete": "Удалить",
+      "deleteConfirm": "Удалить запись?"
+    },
+    "sql": {
+      "title": "SQL консоль",
+      "subtitle": "Только чтение (SELECT / WITH / EXPLAIN). Если LIMIT не указан, он будет добавлен.",
+      "placeholder": "SELECT * FROM user LIMIT 50",
+      "run": "Выполнить",
+      "clear": "Очистить",
+      "executed": "Выполненный запрос",
+      "enterQuery": "Введите SQL-запрос"
+    },
+    "modal": {
+      "createTitle": "Создание записи",
+      "editTitle": "Редактирование записи",
+      "createOk": "Создать",
+      "saveOk": "Сохранить"
+    },
+    "messages": {
+      "accessGranted": "Доступ к админ-панели получен",
+      "rowCreated": "Запись создана",
+      "rowUpdated": "Запись обновлена",
+      "rowDeleted": "Запись удалена"
+    },
+    "fields": {
+      "default": "По умолчанию: {{value}}"
+    },
+    "validation": {
+      "required": "Обязательно",
+      "invalidJson": "Некорректный JSON",
+      "invalidJsonField": "Некорректный JSON в поле {{field}}"
+    }
+  }
 }

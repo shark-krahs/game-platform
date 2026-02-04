@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Location, NavigateFunction } from 'react-router-dom';
-import { User, GameStatus, Player } from '../types';
-import { buildWsApiBaseUrl } from '../utils/url';
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Location, NavigateFunction } from "react-router-dom";
+import { ChatMessage, GameStatus, Player, User } from "../types";
+import { buildWsApiBaseUrl } from "../utils/url";
 
 interface TetrisBoardState {
   grid: number[][];
@@ -14,7 +14,7 @@ interface TetrisBoardState {
 
 interface UseWebSocketReturn {
   connected: boolean;
-  status: GameStatus | 'disconnected';
+  status: GameStatus | "disconnected";
   error: string | null;
 
   board: (number | null)[][] | null;
@@ -31,6 +31,7 @@ interface UseWebSocketReturn {
   disconnectedPlayer: number | null;
 
   messages: string[];
+  chatMessages: ChatMessage[];
 
   sendMessage: (message: any) => void;
   disconnect: () => void;
@@ -39,21 +40,26 @@ interface UseWebSocketReturn {
 export function useWebSocket(
   gameId: string | undefined,
   authToken: string | null,
+  anonId: string | null,
+  anonName: string | null,
   user: User | null,
   navigate: NavigateFunction,
-  location: Location
+  location: Location,
 ): UseWebSocketReturn {
-  const { t } = useTranslation('gameClient');
+  const { t } = useTranslation("gameClient");
 
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [connected, setConnected] = useState(false);
   const [messages, setMessages] = useState<string[]>([]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
 
   const [board, setBoard] = useState<(number | null)[][] | null>(null);
   const [board_state, setBoardState] = useState<TetrisBoardState | null>(null);
-  const [game_type, setGameType] = useState<string>('pentago');
+  const [game_type, setGameType] = useState<string>("pentago");
   const [players, setPlayers] = useState<Player[]>([]);
-  const [status, setStatus] = useState<GameStatus | 'disconnected'>('disconnected');
+  const [status, setStatus] = useState<GameStatus | "disconnected">(
+    "disconnected",
+  );
   const [turn, setTurn] = useState(0);
   const [current_player, setCurrentPlayer] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -62,76 +68,97 @@ export function useWebSocket(
   const [firstMoveTimer, setFirstMoveTimer] = useState(0);
   const [firstMovePlayer, setFirstMovePlayer] = useState<number | null>(null);
   const [disconnectTimer, setDisconnectTimer] = useState(0);
-  const [disconnectedPlayer, setDisconnectedPlayer] = useState<number | null>(null);
+  const [disconnectedPlayer, setDisconnectedPlayer] = useState<number | null>(
+    null,
+  );
 
   const connectedRef = useRef(false);
 
   const connectToGame = useCallback(
     (game_id: string) => {
       if (connectedRef.current) {
-        console.log('Already connected, skipping reconnect');
+        console.log("Already connected, skipping reconnect");
         return;
       }
       connectedRef.current = true;
 
       const wsBaseUrl = buildWsApiBaseUrl();
-      const wsUrl = `${wsBaseUrl}/ws/game/${game_id}${authToken ? `?token=${authToken}` : ''}`;
+      const params = new URLSearchParams();
+      if (authToken) {
+        params.set("token", authToken);
+      } else if (anonId) {
+        params.set("anon_id", anonId);
+        if (anonName) {
+          params.set("anon_name", anonName);
+        }
+      }
+      const qs = params.toString();
+      const wsUrl = `${wsBaseUrl}/ws/game/${game_id}${qs ? `?${qs}` : ""}`;
 
       const socket = new WebSocket(wsUrl);
 
       socket.onopen = () => {
-        console.log('GameClient WS connected');
+        console.log("GameClient WS connected");
         setConnected(true);
-        setStatus('playing');
+        setStatus("playing");
         setError(null);
-        socket.send(
-          JSON.stringify({
-            type: 'join',
-            name: user?.username || 'Guest',
-          })
-        );
-        setMessages((m) => [...m, t('connected')]);
+        setMessages((m) => [...m, t("connected")]);
       };
 
       socket.onmessage = (ev: MessageEvent) => {
-        console.log('GameClient WS message:', ev.data);
+        console.log("GameClient WS message:", ev.data);
         try {
           const msg = JSON.parse(ev.data) as any;
 
-          if (msg.type === 'state') {
+          if (msg.type === "state") {
             setBoard(msg.board || null);
             setBoardState(msg.board_state || null);
-            setGameType(msg.game_type || 'pentago');
+            setGameType(msg.game_type || "pentago");
             setPlayers(msg.players || []);
-            setStatus(msg.status || 'playing');
+            setStatus(msg.status || "playing");
             setTurn(msg.current_player ?? 0);
             setCurrentPlayer(msg.current_player ?? 0);
             setResetVotes(msg.reset_votes || []);
             setWinner(msg.winner ?? null);
             setFirstMoveTimer(msg.first_move_timer ?? 0);
             setFirstMovePlayer(
-              msg.first_move_player !== undefined ? msg.first_move_player : null
+              msg.first_move_player !== undefined
+                ? msg.first_move_player
+                : null,
             );
             setDisconnectTimer(msg.disconnect_timer ?? 0);
             setDisconnectedPlayer(
-              msg.disconnected_player !== undefined ? msg.disconnected_player : null
+              msg.disconnected_player !== undefined
+                ? msg.disconnected_player
+                : null,
             );
+            if (Array.isArray(msg.chat)) {
+              setChatMessages(msg.chat);
+            }
             setError(null);
-          } else if (msg.type === 'error') {
-            console.warn('Game error:', msg.message);
-            if (msg.message === 'room full') {
-              alert(t('roomFull'));
-              navigate('/lobby');
+          } else if (msg.type === "chat") {
+            if (msg.chat) {
+              setChatMessages((prev) => [...prev, msg.chat]);
+            }
+          } else if (msg.type === "error") {
+            console.warn("Game error:", msg.message);
+            const localizedError = msg.code
+              ? t(msg.code, { defaultValue: "" })
+              : "";
+            const errorMessage = localizedError || msg.message;
+            if (msg.code === "games.room_full" || msg.message === "room full") {
+              alert(t("roomFull"));
+              navigate("/lobby");
               return;
             }
-            setError(msg.message);
-            setMessages((m) => [...m, `${t('error')}: ${msg.message}`]);
+            setError(errorMessage);
+            setMessages((m) => [...m, `${t("error")}: ${errorMessage}`]);
           } else {
-            console.log('Unhandled message type:', msg.type);
+            console.log("Unhandled message type:", msg.type);
             setMessages((m) => [...m, ev.data]);
           }
         } catch (e) {
-          console.error('Failed to parse WS message:', ev.data, e);
+          console.error("Failed to parse WS message:", ev.data, e);
           setMessages((m) => [...m, ev.data]);
         }
       };
@@ -139,19 +166,19 @@ export function useWebSocket(
       socket.onclose = () => {
         connectedRef.current = false;
         setConnected(false);
-        setStatus('disconnected');
-        setMessages((m) => [...m, t('disconnected')]);
+        setStatus("disconnected");
+        setMessages((m) => [...m, t("disconnected")]);
       };
 
       socket.onerror = () => {
         connectedRef.current = false;
-        setError(t('connectionError'));
-        setTimeout(() => navigate('/lobby'), 3000);
+        setError(t("connectionError"));
+        setTimeout(() => navigate("/lobby"), 3000);
       };
 
       setWs(socket);
     },
-    [authToken, user, navigate, t]
+    [authToken, anonId, anonName, user, navigate, t],
   );
 
   const sendMessage = useCallback(
@@ -159,10 +186,10 @@ export function useWebSocket(
       if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify(message));
       } else {
-        console.warn('Cannot send message: WebSocket not open');
+        console.warn("Cannot send message: WebSocket not open");
       }
     },
-    [ws]
+    [ws],
   );
 
   const disconnect = useCallback(() => {
@@ -184,7 +211,7 @@ export function useWebSocket(
       connectToGame(gameId);
     } else if (!gameId && connected) {
       disconnect();
-      navigate('/lobby');
+      navigate("/lobby");
     }
   }, [gameId, ws, connectToGame, navigate, connected, disconnect]);
 
@@ -207,6 +234,7 @@ export function useWebSocket(
     disconnectedPlayer,
 
     messages,
+    chatMessages,
 
     sendMessage,
     disconnect,

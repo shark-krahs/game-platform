@@ -2,7 +2,7 @@
  * API-related utility functions
  */
 
-import { HTTP_STATUS, REQUEST_TIMEOUT } from '../constants/api';
+import {HTTP_STATUS, REQUEST_TIMEOUT} from "../constants/api";
 
 /**
  * Check if HTTP status is successful (2xx)
@@ -33,30 +33,34 @@ export const isServerErrorStatus = (status: number | undefined): boolean => {
  */
 export const getErrorMessageFromStatus = (
   status: number | undefined,
-  defaultMessage: string = 'Unknown error'
+  defaultMessage: string = "Unknown error",
 ): string => {
   const statusMessages: Record<number, string> = {
-    [HTTP_STATUS.BAD_REQUEST]: 'Bad request - please check your input',
-    [HTTP_STATUS.UNAUTHORIZED]: 'Unauthorized - please log in',
-    [HTTP_STATUS.FORBIDDEN]: 'Access forbidden',
-    [HTTP_STATUS.NOT_FOUND]: 'Resource not found',
+    [HTTP_STATUS.BAD_REQUEST]: "Bad request - please check your input",
+    [HTTP_STATUS.UNAUTHORIZED]: "Unauthorized - please log in",
+    [HTTP_STATUS.FORBIDDEN]: "Access forbidden",
+    [HTTP_STATUS.NOT_FOUND]: "Resource not found",
     [HTTP_STATUS.INTERNAL_SERVER_ERROR]:
-      'Internal server error - please try again later',
+      "Internal server error - please try again later",
   };
 
-  return statusMessages[status as keyof typeof statusMessages] || defaultMessage;
+  return (
+    statusMessages[status as keyof typeof statusMessages] || defaultMessage
+  );
 };
 
 /**
  * Create AbortController with timeout
  */
-export const createTimeoutController = (timeout: number = REQUEST_TIMEOUT): AbortController => {
+export const createTimeoutController = (
+  timeout: number = REQUEST_TIMEOUT,
+): AbortController => {
   const controller = new AbortController();
 
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   // Очистка таймаута при abort
-  controller.signal.addEventListener('abort', () => clearTimeout(timeoutId));
+  controller.signal.addEventListener("abort", () => clearTimeout(timeoutId));
 
   return controller;
 };
@@ -67,7 +71,7 @@ export const createTimeoutController = (timeout: number = REQUEST_TIMEOUT): Abor
 export const isNetworkError = (error: any): boolean => {
   return (
     !error.response &&
-    (error.code === 'NETWORK_ERROR' || error.message?.includes('Network Error'))
+    (error.code === "NETWORK_ERROR" || error.message?.includes("Network Error"))
   );
 };
 
@@ -76,9 +80,9 @@ export const isNetworkError = (error: any): boolean => {
  */
 export const isTimeoutError = (error: any): boolean => {
   return (
-    error.code === 'ECONNABORTED' ||
-    error.message?.includes('timeout') ||
-    error.name === 'AbortError'
+    error.code === "ECONNABORTED" ||
+    error.message?.includes("timeout") ||
+    error.name === "AbortError"
   );
 };
 
@@ -86,7 +90,7 @@ export const isTimeoutError = (error: any): boolean => {
  * Check if error is cancellation error
  */
 export const isCancelError = (error: any): boolean => {
-  return error.name === 'AbortError' || error.message?.includes('canceled');
+  return error.name === "AbortError" || error.message?.includes("canceled");
 };
 
 /**
@@ -95,7 +99,7 @@ export const isCancelError = (error: any): boolean => {
 export const retryWithBackoff = async <T>(
   fn: () => Promise<T>,
   maxRetries: number = 3,
-  baseDelay: number = 1000
+  baseDelay: number = 1000,
 ): Promise<T> => {
   let lastError: any;
 
@@ -127,8 +131,10 @@ export const retryWithBackoff = async <T>(
 /**
  * Build query string from object
  */
-export const buildQueryString = (params: Record<string, any> | null | undefined): string => {
-  if (!params || Object.keys(params).length === 0) return '';
+export const buildQueryString = (
+  params: Record<string, any> | null | undefined,
+): string => {
+  if (!params || Object.keys(params).length === 0) return "";
 
   const queryParams = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
@@ -138,16 +144,20 @@ export const buildQueryString = (params: Record<string, any> | null | undefined)
   });
 
   const queryString = queryParams.toString();
-  return queryString ? `?${queryString}` : '';
+  return queryString ? `?${queryString}` : "";
 };
 
 /**
  * Parse query string to object
  */
-export const parseQueryString = (queryString: string | null | undefined): Record<string, string> => {
+export const parseQueryString = (
+  queryString: string | null | undefined,
+): Record<string, string> => {
   if (!queryString) return {};
 
-  const cleanQuery = queryString.startsWith('?') ? queryString.slice(1) : queryString;
+  const cleanQuery = queryString.startsWith("?")
+    ? queryString.slice(1)
+    : queryString;
   const params: Record<string, string> = {};
 
   new URLSearchParams(cleanQuery).forEach((value, key) => {
@@ -160,7 +170,9 @@ export const parseQueryString = (queryString: string | null | undefined): Record
 /**
  * Create FormData from object
  */
-export const createFormData = (data: Record<string, any> | null | undefined): FormData => {
+export const createFormData = (
+  data: Record<string, any> | null | undefined,
+): FormData => {
   const formData = new FormData();
 
   if (!data) return formData;
@@ -185,10 +197,10 @@ export const getContentType = (data: any): string | undefined => {
   if (data instanceof FormData) {
     return undefined; // Браузер сам установит с boundary
   }
-  if (typeof data === 'object' && data !== null) {
-    return 'application/json';
+  if (typeof data === "object" && data !== null) {
+    return "application/json";
   }
-  return 'text/plain';
+  return "text/plain";
 };
 
 /**
@@ -198,7 +210,7 @@ export const prepareRequestBody = (data: any): BodyInit | null => {
   if (data instanceof FormData) {
     return data;
   }
-  if (typeof data === 'object' && data !== null) {
+  if (typeof data === "object" && data !== null) {
     return JSON.stringify(data);
   }
   return data ?? null;
