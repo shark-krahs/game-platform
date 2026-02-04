@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button, Dropdown, type MenuProps, Switch, Typography } from "antd";
 import {
   DashboardOutlined,
@@ -68,6 +68,15 @@ const LogoContainer = styled.div<AppHeaderProps>`
   display: flex;
   align-items: center;
   gap: 12px;
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
 
   h2 {
     margin: 0;
@@ -225,9 +234,11 @@ const AppHeader: React.FC<AppHeaderProps> = ({
         $hasBackgroundImage={$hasBackgroundImage}
         $isDark={$isDark}
       >
-        <Title level={2} style={{ margin: 0 }}>
-          {t("gamePlatform")}
-        </Title>
+        <Link to="/lobby" aria-label={t("lobby")}>
+          <Title level={2} style={{ margin: 0 }}>
+            {t("gamePlatform")}
+          </Title>
+        </Link>
       </LogoContainer>
 
       <ControlsContainer
