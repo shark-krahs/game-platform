@@ -57,7 +57,9 @@ async def test_generate_codes_hashing(tmp_path):
     assert all(code not in hashes for code in codes)
 
     async with session_factory() as session:
-        result = await session.exec(select(RecoveryCode).where(RecoveryCode.user_id == user.id))
+        result = await session.exec(
+            select(RecoveryCode).where(RecoveryCode.user_id == user.id)
+        )
         stored = result.all()
 
     assert len(stored) == service.DEFAULT_CODES_COUNT
@@ -80,7 +82,9 @@ async def test_verify_code_sets_used_at(tmp_path):
     assert result.reset_token is not None
 
     async with session_factory() as session:
-        result_db = await session.exec(select(RecoveryCode).where(RecoveryCode.user_id == user.id))
+        result_db = await session.exec(
+            select(RecoveryCode).where(RecoveryCode.user_id == user.id)
+        )
         stored = result_db.all()
     assert sum(1 for record in stored if record.used_at is not None) == 1
 
@@ -129,7 +133,9 @@ async def test_reset_token_one_time(tmp_path):
     assert ok_second is False
 
     async with session_factory() as session:
-        result_db = await session.exec(select(RecoveryResetToken).where(RecoveryResetToken.user_id == user.id))
+        result_db = await session.exec(
+            select(RecoveryResetToken).where(RecoveryResetToken.user_id == user.id)
+        )
         token_row = result_db.one()
         assert token_row.used_at is not None
 

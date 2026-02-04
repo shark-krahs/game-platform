@@ -98,6 +98,7 @@ def _serialize_value(value: Any) -> Any:
 
 async def _load_table(table_name: str) -> Table:
     async with engine.connect() as conn:
+
         def _get_table(sync_conn):
             inspector = inspect(sync_conn)
             tables = inspector.get_table_names()
@@ -128,9 +129,11 @@ def _build_columns_metadata(table: Table) -> List[Dict[str, Any]]:
                 "type": str(column.type),
                 "nullable": bool(column.nullable),
                 "primary_key": bool(column.primary_key),
-                "default": str(column.default.arg)
-                if column.default is not None and column.default.arg is not None
-                else None,
+                "default": (
+                    str(column.default.arg)
+                    if column.default is not None and column.default.arg is not None
+                    else None
+                ),
             }
         )
     return columns
@@ -179,6 +182,7 @@ async def run_sql_query(
 @router.get("/admin/tables")
 async def list_tables(_: None = Depends(_verify_admin)):
     async with engine.connect() as conn:
+
         def _get_tables(sync_conn):
             inspector = inspect(sync_conn)
             return inspector.get_table_names()

@@ -56,10 +56,14 @@ class RecoveryService:
         await self._sleep_fn(seconds)
 
     def _generate_plain_code(self) -> str:
-        raw = "".join(secrets.choice(self.CODE_ALPHABET) for _ in range(self.CODE_LENGTH))
+        raw = "".join(
+            secrets.choice(self.CODE_ALPHABET) for _ in range(self.CODE_LENGTH)
+        )
         return f"{raw[:5]}-{raw[5:]}"
 
-    def _create_reset_token(self, username: str, batch_id: UUID, code_id: UUID, jti: str) -> str:
+    def _create_reset_token(
+        self, username: str, batch_id: UUID, code_id: UUID, jti: str
+    ) -> str:
         now = self._now()
         payload = {
             "sub": username,
@@ -69,7 +73,9 @@ class RecoveryService:
             "exp": now + timedelta(seconds=self.RESET_TOKEN_TTL_SECONDS),
             "jti": jti,
         }
-        return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+        return jwt.encode(
+            payload, settings.jwt_secret, algorithm=settings.jwt_algorithm
+        )
 
     def create_setup_token(self, username: str) -> str:
         now = self._now()
@@ -79,7 +85,9 @@ class RecoveryService:
             "exp": now + timedelta(seconds=self.SETUP_TOKEN_TTL_SECONDS),
             "jti": secrets.token_urlsafe(16),
         }
-        return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+        return jwt.encode(
+            payload, settings.jwt_secret, algorithm=settings.jwt_algorithm
+        )
 
     async def generate_codes(self, user_id: UUID, count: int | None = None):
         count = count or self.DEFAULT_CODES_COUNT
@@ -133,7 +141,9 @@ class RecoveryService:
 
     async def _get_ip_state(self, ip: str) -> RecoveryIPAttempt:
         async with self._session_factory() as session:
-            result = await session.exec(select(RecoveryIPAttempt).where(RecoveryIPAttempt.ip == ip))
+            result = await session.exec(
+                select(RecoveryIPAttempt).where(RecoveryIPAttempt.ip == ip)
+            )
             ip_state = result.one_or_none()
             if not ip_state:
                 ip_state = RecoveryIPAttempt(
@@ -148,10 +158,14 @@ class RecoveryService:
                 await session.refresh(ip_state)
             return ip_state
 
-    async def _update_ip_attempt(self, ip: str, username: str | None, success: bool) -> RecoveryIPAttempt:
+    async def _update_ip_attempt(
+        self, ip: str, username: str | None, success: bool
+    ) -> RecoveryIPAttempt:
         now = self._now()
         async with self._session_factory() as session:
-            result = await session.exec(select(RecoveryIPAttempt).where(RecoveryIPAttempt.ip == ip))
+            result = await session.exec(
+                select(RecoveryIPAttempt).where(RecoveryIPAttempt.ip == ip)
+            )
             ip_state = result.one_or_none()
             if not ip_state:
                 ip_state = RecoveryIPAttempt(
@@ -175,7 +189,11 @@ class RecoveryService:
                 await session.commit()
                 return ip_state
 
-            if ip_state.last_attempt_at and (now - ip_state.last_attempt_at).total_seconds() > self.IP_WINDOW_SECONDS:
+            if (
+                ip_state.last_attempt_at
+                and (now - ip_state.last_attempt_at).total_seconds()
+                > self.IP_WINDOW_SECONDS
+            ):
                 ip_state.attempt_count = 0
 
             if success:
@@ -211,7 +229,9 @@ class RecoveryService:
             latest = result.first()
             return latest.batch_id if latest else None
 
-    async def verify_code(self, username: str, code: str, ip: str) -> RecoveryVerifyResult:
+    async def verify_code(
+        self, username: str, code: str, ip: str
+    ) -> RecoveryVerifyResult:
         now = self._now()
 
         ip_state = await self._get_ip_state(ip)
@@ -253,7 +273,11 @@ class RecoveryService:
                     message=self.ERROR_MESSAGE,
                 )
 
-            if user.recovery_last_attempt_at and (now - user.recovery_last_attempt_at).total_seconds() > self.USER_WINDOW_SECONDS:
+            if (
+                user.recovery_last_attempt_at
+                and (now - user.recovery_last_attempt_at).total_seconds()
+                > self.USER_WINDOW_SECONDS
+            ):
                 user.recovery_failed_attempts = 0
 
             latest_batch_id = await self._get_latest_batch_id(user.id)
@@ -261,7 +285,9 @@ class RecoveryService:
                 user.recovery_failed_attempts += 1
                 user.recovery_last_attempt_at = now
                 if user.recovery_failed_attempts >= self.USER_MAX_ATTEMPTS:
-                    user.recovery_lock_until = now + timedelta(seconds=self.USER_LOCK_SECONDS)
+                    user.recovery_lock_until = now + timedelta(
+                        seconds=self.USER_LOCK_SECONDS
+                    )
                 await session.commit()
                 ip_state = await self._update_ip_attempt(ip, username, False)
                 delay = self._get_backoff_seconds(user.recovery_failed_attempts)
@@ -274,8 +300,7 @@ class RecoveryService:
                 )
 
             result = await session.exec(
-                select(RecoveryCode)
-                .where(
+                select(RecoveryCode).where(
                     RecoveryCode.user_id == user.id,
                     RecoveryCode.batch_id == latest_batch_id,
                     RecoveryCode.used_at.is_(None),
@@ -293,7 +318,9 @@ class RecoveryService:
                 user.recovery_failed_attempts += 1
                 user.recovery_last_attempt_at = now
                 if user.recovery_failed_attempts >= self.USER_MAX_ATTEMPTS:
-                    user.recovery_lock_until = now + timedelta(seconds=self.USER_LOCK_SECONDS)
+                    user.recovery_lock_until = now + timedelta(
+                        seconds=self.USER_LOCK_SECONDS
+                    )
                 await session.commit()
                 ip_state = await self._update_ip_attempt(ip, username, False)
                 delay = self._get_backoff_seconds(user.recovery_failed_attempts)
@@ -395,8 +422,7 @@ class RecoveryService:
             active_count = 0
             if latest_batch_id:
                 result = await session.exec(
-                    select(RecoveryCode)
-                    .where(
+                    select(RecoveryCode).where(
                         RecoveryCode.user_id == user_id,
                         RecoveryCode.batch_id == latest_batch_id,
                         RecoveryCode.used_at.is_(None),

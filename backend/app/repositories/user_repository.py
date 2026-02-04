@@ -34,7 +34,6 @@ class UserRepository(BaseRepository[User]):
             result = await session.exec(select(User).where(User.username == username))
             return result.one_or_none()
 
-
     async def authenticate_user(
         self, username: str, password_hash: str
     ) -> Optional[User]:
