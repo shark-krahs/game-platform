@@ -245,6 +245,7 @@ export interface GameBoardProps {
   onDirectionSelect?: (direction: "clockwise" | "counterclockwise") => void;
   onMoveCancel?: () => void;
   readOnly?: boolean;
+  viewerName?: string;
 }
 
 export interface MoveFormProps {

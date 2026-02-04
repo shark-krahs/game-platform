@@ -332,6 +332,7 @@ const GameClient: React.FC = () => {
             onQuadrantSelect={handleQuadrantSelect}
             onDirectionSelect={handleDirectionSelect}
             onMoveCancel={cancelMove}
+            viewerName={user?.username || anonName || undefined}
           />
 
           {/* Action buttons */}

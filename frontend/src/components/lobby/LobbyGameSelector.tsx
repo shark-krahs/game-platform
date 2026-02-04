@@ -224,10 +224,10 @@ const LobbyGameSelector: React.FC<LobbyGameSelectorProps> = ({
               onJoinQueue={onJoinQueue}
             />
             <GameModeSelector
-              label={`${t("gameTetris")} ${t("bullet")}`}
+              label={`${t("gameTetris")} ${t("rapid")}`}
               gameType="tetris"
-              initial={2}
-              increment={0}
+              initial={0}
+              increment={11}
               rated={false}
               onJoinQueue={onJoinQueue}
             />

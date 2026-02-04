@@ -18,6 +18,7 @@ const GameBoard: React.FC<GameBoardPropsInternal> = ({
   onDirectionSelect,
   onMoveCancel,
   readOnly = false,
+  viewerName,
 }) => {
   const BoardComponent = engine.boardComponent;
   const MoveFormComponent = engine.moveFormComponent;
@@ -57,6 +58,7 @@ const GameBoard: React.FC<GameBoardPropsInternal> = ({
         onDirectionSelect={onDirectionSelect}
         onMoveCancel={onMoveCancel}
         readOnly={readOnly}
+        viewerName={viewerName}
       />
 
       {!readOnly && MoveFormComponent && selectedCell && (

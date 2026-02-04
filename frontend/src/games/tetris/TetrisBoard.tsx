@@ -12,6 +12,7 @@ const TetrisBoard: React.FC<GameBoardProps> = ({
   gameState,
   onMoveSubmit,
   readOnly = false,
+  viewerName,
 }) => {
   const { user } = useAuth();
 
@@ -29,10 +30,11 @@ const TetrisBoard: React.FC<GameBoardProps> = ({
   }
 
   // Determine if it's the current player's turn
+  const displayName = viewerName || user?.username || null;
   const isPlayerTurn =
     !readOnly &&
     gameState.players.length > 0 &&
-    gameState.players[gameState.currentPlayer]?.name === user?.username;
+    gameState.players[gameState.currentPlayer]?.name === displayName;
 
   const currentPlayerName =
     gameState.players[gameState.currentPlayer]?.name ||
